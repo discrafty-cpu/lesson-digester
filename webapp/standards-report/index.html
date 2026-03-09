@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standards Report - The Lesson Digester</title>
+    <link rel="stylesheet" href="../css/digester-theme.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #0f1729;
+            color: #e8eaf0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #e8eaf0;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #8892a8;
+        }
+
+        /* Report Header */
+        .report-header {
+            background-color: #1a2340;
+            border: 1px solid #2d3a5c;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #e8eaf0;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .report-tag {
+            background-color: #0f1729;
+            border: 1px solid #2d3a5c;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #e8eaf0;
+        }
+
+        .report-tag.success {
+            border-color: #34d399;
+            color: #34d399;
+        }
+
+        .report-tag.warning {
+            border-color: #f87171;
+            color: #f87171;
+        }
+
+        /* Strand Section */
+        .strand-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .strand-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #D4870F;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #D4870F;
+        }
+
+        .benchmark-row {
+            background-color: #1a2340;
+            border: 1px solid #2d3a5c;
+            border-radius: 6px;
+            padding: 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .benchmark-id {
+            background-color: #D4870F;
+            color: #0f1729;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            min-width: fit-content;
+            white-space: nowrap;
+        }
+
+        .benchmark-content {
+            flex: 1;
+        }
+
+        .benchmark-content p {
+            margin-bottom: 0.5rem;
+            color: #e8eaf0;
+        }
+
+        .benchmark-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .benchmark-status.covered {
+            background-color: rgba(52, 211, 153, 0.1);
+            color: #34d399;
+            border: 1px solid #34d399;
+        }
+
+        .benchmark-status.gap {
+            background-color: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid #f87171;
+        }
+
+        /* Vocabulary Section */
+        .vocab-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .vocab-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0D9488;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #0D9488;
+        }
+
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .vocab-card {
+            background-color: #1a2340;
+            border: 1px solid #2d3a5c;
+            border-left: 4px solid #0D9488;
+            border-radius: 6px;
+            padding: 1.5rem;
+        }
+
+        .vocab-card h3 {
+            color: #0D9488;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .vocab-card p {
+            color: #8892a8;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Quiz Items Section */
+        .quiz-section {
+            background-color: #1a2340;
+            border: 1px solid #2d3a5c;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .quiz-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #e8eaf0;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-section p {
+            color: #8892a8;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid #2d3a5c;
+            padding-top: 2rem;
+            margin-top: 3rem;
+            text-align: center;
+            color: #8892a8;
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .benchmark-row {
+                flex-direction: column;
+            }
+
+            .benchmark-status {
+                align-self: flex-start;
+            }
+
+            .vocab-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Standards Report</h1>
+            <p>MCA-III alignment analysis for your lesson</p>
+        </div>
+
+        <!-- Report Header -->
+        <div class="report-header">
+            <h2>Lesson: Elementary Mathematics - Fractions Unit</h2>
+            <div class="report-meta">
+                <div class="report-tag success">6 Benchmarks Aligned</div>
+                <div class="report-tag warning">2 Gaps Found</div>
+            </div>
+        </div>
+
+        <!-- Number & Operation Strand -->
+        <div class="strand-section">
+            <h3 class="strand-title">Number & Operation</h3>
+            <div class="benchmark-row">
+                <div class="benchmark-id">4.1.1</div>
+                <div class="benchmark-content">
+                    <p>Demonstrate fluency with multiplication and division facts within 12 × 12.</p>
+                </div>
+                <div class="benchmark-status covered">Covered</div>
+            </div>
+            <div class="benchmark-row">
+                <div class="benchmark-id">4.1.2</div>
+                <div class="benchmark-content">
+                    <p>Solve multi-digit multiplication and division problems using strategies and algorithms.</p>
+                </div>
+                <div class="benchmark-status covered">Covered</div>
+            </div>
+        </div>
+
+        <!-- Algebra Strand -->
+        <div class="strand-section">
+            <h3 class="strand-title">Algebra</h3>
+            <div class="benchmark-row">
+                <div class="benchmark-id">4.2.1</div>
+                <div class="benchmark-content">
+                    <p>Use variables to represent unknown quantities in mathematical situations.</p>
+                </div>
+                <div class="benchmark-status gap">Gap</div>
+            </div>
+            <div class="benchmark-row">
+                <div class="benchmark-id">4.2.2</div>
+                <div class="benchmark-content">
+                    <p>Write and solve equations to represent real-world situations.</p>
+                </div>
+                <div class="benchmark-status covered">Covered</div>
+            </div>
+        </div>
+
+        <!-- Geometry & Measurement Strand -->
+        <div class="strand-section">
+            <h3 class="strand-title">Geometry & Measurement</h3>
+            <div class="benchmark-row">
+                <div class="benchmark-id">4.3.1</div>
+                <div class="benchmark-content">
+                    <p>Classify quadrilaterals by properties including parallel sides and angles.</p>
+                </div>
+                <div class="benchmark-status covered">Covered</div>
+            </div>
+            <div class="benchmark-row">
+                <div class="benchmark-id">4.3.2</div>
+                <div class="benchmark-content">
+                    <p>Measure angles and understand angle relationships in geometric figures.</p>
+                </div>
+                <div class="benchmark-status gap">Gap</div>
+            </div>
+        </div>
+
+        <!-- Vocabulary Section -->
+        <div class="vocab-section">
+            <h2>Vocabulary</h2>
+            <div class="vocab-grid">
+                <div class="vocab-card">
+                    <h3>Numerator</h3>
+                    <p>The top number in a fraction that indicates how many parts are being considered.</p>
+                </div>
+                <div class="vocab-card">
+                    <h3>Denominator</h3>
+                    <p>The bottom number in a fraction that indicates the total number of equal parts.</p>
+                </div>
+                <div class="vocab-card">
+                    <h3>Equivalent Fractions</h3>
+                    <p>Fractions that represent the same value but have different numerators and denominators.</p>
+                </div>
+                <div class="vocab-card">
+                    <h3>Improper Fraction</h3>
+                    <p>A fraction where the numerator is greater than or equal to the denominator.</p>
+                </div>
+                <div class="vocab-card">
+                    <h3>Mixed Number</h3>
+                    <p>A number that combines a whole number and a proper fraction.</p>
+                </div>
+                <div class="vocab-card">
+                    <h3>Common Denominator</h3>
+                    <p>A denominator that is common to two or more fractions, used when adding or subtracting.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Items Section -->
+        <div class="quiz-section">
+            <h2>Quiz Items</h2>
+            <p>Assessment items aligned with benchmarks coming soon...</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 The Lesson Digester. Align lessons with standards and close achievement gaps.</p>
+    </footer>
+
+    <script src="../js/digester-core.js"></script>
+</body>
+</html>

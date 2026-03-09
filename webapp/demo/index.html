@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - The Lesson Digester</title>
+    <link rel="stylesheet" href="../css/digester-theme.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #0f1729;
+            color: #e8eaf0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #e8eaf0;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #8892a8;
+        }
+
+        /* Demo Grid */
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .demo-card {
+            background-color: #1a2340;
+            border: 1px solid #2d3a5c;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .demo-card:hover {
+            border-color: #3B82F6;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
+        }
+
+        .demo-card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .demo-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #e8eaf0;
+        }
+
+        .demo-card p {
+            color: #8892a8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* CTA Box */
+        .cta-box {
+            background: linear-gradient(135deg, #1E2761 0%, #2d3a5c 50%, #1a2340 100%);
+            border: 1px solid #2d3a5c;
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .cta-box h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #D4870F 0%, #E8436D 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-box p {
+            font-size: 1.1rem;
+            color: #8892a8;
+            margin-bottom: 1.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #D4870F 0%, #E8436D 100%);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(212, 135, 15, 0.3);
+        }
+
+        .cta-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid #2d3a5c;
+            padding-top: 2rem;
+            margin-top: 3rem;
+            text-align: center;
+            color: #8892a8;
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .cta-box {
+                padding: 2rem;
+            }
+
+            .cta-box h2 {
+                font-size: 1.5rem;
+            }
+
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>The Lesson Digester</h1>
+            <p>See what it can do</p>
+        </div>
+
+        <!-- Demo Feature Grid -->
+        <div class="demo-grid">
+            <!-- Drop In Feature -->
+            <div class="demo-card">
+                <div class="demo-card-icon">📥</div>
+                <h3>Drop In</h3>
+                <p>Upload your lesson materials in any format. The Digester handles PDFs, presentations, and documents seamlessly.</p>
+            </div>
+
+            <!-- Analyze Feature -->
+            <div class="demo-card">
+                <div class="demo-card-icon">🔬</div>
+                <h3>Analyze</h3>
+                <p>Get deep insights into your lesson structure, pacing, rigor, and learning objectives automatically.</p>
+            </div>
+
+            <!-- Align Feature -->
+            <div class="demo-card">
+                <div class="demo-card-icon">🎯</div>
+                <h3>Align</h3>
+                <p>Match your lesson to state standards and benchmarks. Identify gaps and see exactly what's covered.</p>
+            </div>
+
+            <!-- Story Feature -->
+            <div class="demo-card">
+                <div class="demo-card-icon">📖</div>
+                <h3>Story</h3>
+                <p>Understand the narrative arc of your lesson. See how concepts connect and build throughout.</p>
+            </div>
+
+            <!-- Design Feature -->
+            <div class="demo-card">
+                <div class="demo-card-icon">🎨</div>
+                <h3>Design</h3>
+                <p>Get actionable recommendations to improve clarity, engagement, and instructional effectiveness.</p>
+            </div>
+
+            <!-- QA Feature -->
+            <div class="demo-card">
+                <div class="demo-card-icon">✅</div>
+                <h3>QA</h3>
+                <p>Quality assurance checks ensure your lesson meets best practices and learning design standards.</p>
+            </div>
+        </div>
+
+        <!-- CTA Box -->
+        <div class="cta-box">
+            <h2>Ready to Digest?</h2>
+            <p>Transform your lesson design with AI-powered analysis, standards alignment, and actionable insights in seconds.</p>
+            <button class="cta-button">Try It Now</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 The Lesson Digester. Analyze. Align. Improve.</p>
+    </footer>
+
+    <script src="../js/digester-core.js"></script>
+</body>
+</html>
