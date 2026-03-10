@@ -101,6 +101,22 @@ const Digester = {
     QUIZ_GENERATOR: {
       icon: '📊',
       label: 'Quiz Generator'
+    },
+    LEVELED_PROBLEMS: {
+      icon: '📶',
+      label: 'Leveled Problems'
+    },
+    LEVELED_ANSWER_KEY: {
+      icon: '🔑',
+      label: 'Leveled Answer Key'
+    },
+    MISCONCEPTIONS: {
+      icon: '⚠️',
+      label: 'Misconceptions'
+    },
+    DIFFERENTIATION: {
+      icon: '🎚️',
+      label: 'Differentiation'
     }
   },
 

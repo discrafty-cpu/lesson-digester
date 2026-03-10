@@ -1552,6 +1552,547 @@ LEVELED_PROBLEM_BANK = {
 }
 
 
+# ─── TEACHING INSIGHTS DATABASE (StemTC Framework Integration) ────
+# Sourced from Minnesota STEM Teacher Center framework pages
+# Each topic maps to teaching wisdom: misconceptions, differentiation,
+# essential understandings, instructional notes, and vocabulary context.
+
+TEACHING_INSIGHTS = {
+    "circumference and area": {
+        "standard_codes": ["7.3.1.1"],
+        "essential_understandings": [
+            "Pi (π) is the constant of proportionality between circumference and diameter — C/d = π for ALL circles",
+            "Area formula A = πr² can be understood by 'unwrapping' a circle into triangular sectors",
+            "Circumference is a linear measure (units), area is a square measure (square units)",
+            "The relationship between radius and diameter (d = 2r) is foundational — students must internalize this before formulas",
+        ],
+        "misconceptions": [
+            {
+                "error": "Confusing r² with r×2",
+                "why": "Students read 'r squared' but compute 'r times 2' — the notation is unfamiliar",
+                "address": "Use physical squares: draw a square with side r and show it has area r×r, not r+r",
+            },
+            {
+                "error": "Interchanging circumference and area formulas",
+                "why": "Both use π and r, so students mix them up",
+                "address": "Anchor to meaning: circumference = distance AROUND (like a fence), area = space INSIDE (like carpet)",
+            },
+            {
+                "error": "Treating π = 3.14 as exact",
+                "why": "Students see 3.14 so often they think it's the true value",
+                "address": "Show π on a number line, discuss that 3.14 is an approximation, compare 22/7 and 3.14159...",
+            },
+            {
+                "error": "Forgetting to label units vs square units",
+                "why": "Students don't connect units to the type of measurement",
+                "address": "Consistently ask: are we measuring distance or space? Distance = units, space = square units",
+            },
+            {
+                "error": "Using diameter in area formula instead of radius",
+                "why": "Problems often give diameter, students plug it straight into πr²",
+                "address": "Train the habit: circle the given info, convert to radius FIRST",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Provide formula reference cards. Use physical circles (paper plates, jar lids) for measuring. Start with friendly numbers where π×r² comes out to whole numbers (r=1, r=10). Allow calculators for computation.",
+            "ell": "Post visual vocabulary wall with circle parts labeled in both languages. Use the 'measurement discovery' activity — physical measuring of real circles with string. Key cognates: circle/círculo, radius/radio, diameter/diámetro.",
+            "extending": "Explore sectors (fractional parts of circles). Challenge: if you double the radius, what happens to circumference? To area? Why are the answers different? Connect to optimization problems (max area for given perimeter).",
+        },
+        "instructional_notes": [
+            "Have students discover π by measuring real circular objects — divide circumference by diameter for each",
+            "Calculators may give different decimal places for π — discuss why and use this to reinforce approximation",
+            "Working backwards from circumference to find diameter is a critical skill that reinforces algebraic thinking",
+            "Connect circumference to proportional relationships (C = πd is y = kx where k = π)",
+        ],
+        "vocabulary_context": {
+            "radius": "Half the diameter. Show students measuring from center to edge of a real circle.",
+            "diameter": "Distance across through the center. Emphasize THROUGH THE CENTER — not just any line across.",
+            "circumference": "The perimeter of a circle. Have students walk the edge of a circle taped on the floor.",
+            "pi": "The ratio C/d. NOT just 3.14. It's the number of times the diameter fits around the circumference.",
+            "sector": "A 'pizza slice' of a circle. Fraction of the whole circle.",
+        },
+        "vignette_summary": "Ms. R has students measure circular objects (plates, lids) with string and rulers, recording C and d in a table. Students discover C/d ≈ 3.14 for every object. This leads to defining π as the constant ratio, then building formulas.",
+    },
+
+    "proportional relationships": {
+        "standard_codes": ["7.2.1.1", "7.2.1.2", "7.2.2.1"],
+        "essential_understandings": [
+            "A proportional relationship is y = kx where k is constant — the graph passes through the origin",
+            "The constant k (constant of proportionality) IS the slope and IS the unit rate",
+            "Not all linear relationships are proportional — only those passing through (0,0)",
+            "Proportional thinking is multiplicative, not additive — students must shift from adding to multiplying",
+            "If y/x gives the same value for all pairs in a table, the relationship is proportional",
+        ],
+        "misconceptions": [
+            {
+                "error": "Using additive instead of multiplicative reasoning for scaling",
+                "why": "Students add to scale up instead of multiplying by the scale factor",
+                "address": "Compare: does adding 3 to every recipe measurement give the same result as tripling? Physical demonstrations.",
+            },
+            {
+                "error": "Thinking slope is x/y instead of y/x",
+                "why": "Students reverse the ratio when computing",
+                "address": "Anchor to unit rate language — 'miles PER hour' means miles÷hours = y÷x",
+            },
+            {
+                "error": "Believing slope only exists on graphs",
+                "why": "Slope is taught graphically first, so students don't see it in tables or equations",
+                "address": "Show the SAME constant appearing in table (y/x), graph (rise/run), and equation (k in y=kx)",
+            },
+            {
+                "error": "Thinking all relationships that increase by a constant amount are proportional",
+                "why": "Constant additive change (like y = 2x + 5) looks proportional in a table if you don't check y/x",
+                "address": "Always check: does it pass through (0,0)? Is y/x the same for ALL rows?",
+            },
+            {
+                "error": "Confusing proportional with inversely proportional",
+                "why": "Both involve constant products/ratios",
+                "address": "Proportional: y goes UP as x goes UP (y=kx). Inversely proportional: y goes DOWN as x goes UP (xy=k)",
+            },
+            {
+                "error": "Fractional avoidance when scale factor is non-integer",
+                "why": "Students avoid fractional multipliers and default to additive strategies",
+                "address": "Practice with non-integer unit rates early (like 2.5 mph, $3.75 per pound)",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Provide step-by-step procedure cards. Use calculators. Start with whole-number unit rates. Use physical proportional situations (stacking books, measuring shadows). Provide tables with some cells pre-filled.",
+            "ell": "Confusion between mathematical 'table' and furniture 'table' — clarify upfront. Pair with bilingual peer tutors. Use visual ratio tables. Key vocabulary: proportional/proporcional, rate/tasa, constant/constante.",
+            "extending": "Compare direct vs inverse proportionality (y=kx vs xy=k). Cell phone plan comparison problem (one proportional, one not). Explore how changing k affects the slope of the graph using graphing technology.",
+        },
+        "instructional_notes": [
+            "Proportionality is THE unifying theme across 7th grade — it appears in ratios, geometry, probability, and data analysis",
+            "Use equivalent fractions as a bridge to proportional thinking — fractions on a number line develop slope intuition",
+            "Real-world examples: unit cost/total cost, speed/distance, radius/circumference, gas tank size/cost to fill",
+            "Inverse proportion examples: speed/time, workers/days to finish, hammer length/effort needed",
+            "Always require multiple representations: show the SAME relationship as a table, graph, equation, AND verbal description",
+        ],
+        "vocabulary_context": {
+            "proportional": "Two quantities where doubling one ALWAYS doubles the other. The ratio y/x never changes.",
+            "constant of proportionality": "The 'k' in y=kx. It's the unit rate, the slope, and the multiplier all in one.",
+            "unit rate": "The rate per ONE. Miles per ONE hour. Cost per ONE item. Find it by dividing y by x.",
+            "slope": "Rate of change. Rise over run. How steep the line is. In proportional relationships, slope = k.",
+            "origin": "The point (0,0). If the graph goes through the origin, the relationship MIGHT be proportional.",
+        },
+        "vignette_summary": "Teacher gives groups 10 identical books. Students measure height of stacks (1 book, 2 books... up to 10). They discover height/books is constant. This leads to h=kn equation, where k is one book's thickness. Discussion of measurement error, proportional properties, and undoing the relationship.",
+    },
+
+    "integer operations": {
+        "standard_codes": ["7.1.2.1", "7.1.2.2"],
+        "essential_understandings": [
+            "Adding a negative is the same as subtracting a positive — operations with negatives extend the number line",
+            "Multiplying two negatives gives a positive because of the pattern: 3×(-2)=-6, 2×(-2)=-4, 1×(-2)=-2, 0×(-2)=0, (-1)×(-2)=+2",
+            "Real-world contexts (debt, temperature, elevation) give meaning to negative number operations",
+        ],
+        "misconceptions": [
+            {
+                "error": "Thinking subtraction of a negative means the answer is negative",
+                "why": "Students see two negatives and assume negative result",
+                "address": "Use number line: subtracting negative = moving RIGHT. Also use debt analogy: removing a $5 debt is like gaining $5",
+            },
+            {
+                "error": "Applying whole number rules to all operations (product is always bigger)",
+                "why": "Experience with positives only",
+                "address": "Counter-examples: ½ × ½ = ¼ (smaller), (-3) × 2 = -6 (negative)",
+            },
+            {
+                "error": "Confusing the rules for multiplying vs adding negatives",
+                "why": "Multiple sign rules are hard to keep straight",
+                "address": "Separate the rules: ADDING — same signs add and keep sign, different signs subtract and keep larger. MULTIPLYING — same signs positive, different signs negative.",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Use two-color counters (positive/negative chips). Number line walks. Vertical number lines (thermometer). Keep problems within small integers first (-10 to 10).",
+            "ell": "Visual representations essential. Connect to real contexts they know: temperature in winter, money (debt). Number lines with bilingual labels.",
+            "extending": "Order of operations with integers. Multi-step problems. Financial literacy: profit/loss scenarios with multiple transactions.",
+        },
+        "instructional_notes": [
+            "Use real-world contexts consistently: bank accounts, temperature changes, elevation above/below sea level",
+            "Pattern-based discovery of negative × negative = positive is more convincing than rules",
+            "Calculators handle negatives differently — discuss the difference between the negative sign and subtraction key",
+        ],
+        "vocabulary_context": {
+            "integer": "Whole numbers and their negatives: ...-3, -2, -1, 0, 1, 2, 3...",
+            "absolute value": "Distance from zero. Always positive. |−5| = 5 because −5 is 5 units from zero.",
+            "opposite": "Same distance from zero, different side. The opposite of 3 is −3.",
+            "inverse": "The operation that undoes another. Addition undoes subtraction. Used to solve equations.",
+        },
+        "vignette_summary": "Students track a fictional bank account over a week with deposits (positive) and withdrawals (negative), building intuition for adding and subtracting integers through a familiar context.",
+    },
+
+    "linear functions": {
+        "standard_codes": ["8.2.1.1", "8.2.1.2", "8.2.1.3", "8.2.2.2"],
+        "essential_understandings": [
+            "A linear function has a CONSTANT rate of change — the slope is the same between any two points",
+            "y = mx + b: m tells you how steep (rate of change), b tells you where it starts (initial value)",
+            "Proportional relationships are a SPECIAL CASE of linear functions where b = 0",
+            "Every linear function can be represented four ways: equation, table, graph, verbal description",
+        ],
+        "misconceptions": [
+            {
+                "error": "Thinking slope = rise/run only works on graphs",
+                "why": "Students learn slope graphically and don't transfer",
+                "address": "Calculate slope from tables (change in y / change in x) and equations (coefficient of x)",
+            },
+            {
+                "error": "Confusing slope with y-intercept",
+                "why": "Both are numbers in y=mx+b",
+                "address": "Tell the story: b is where you START, m is how fast you GO",
+            },
+            {
+                "error": "Believing steeper lines always have positive slope",
+                "why": "Visual association of 'steep' with 'big number'",
+                "address": "Show steep negative slopes. A slope of -10 is steeper than +2 but goes downhill.",
+            },
+            {
+                "error": "Plotting (x,y) as (y,x)",
+                "why": "Alphabetical order confusion or inconsistent practice",
+                "address": "Mnemonic: 'x comes before y just like in the alphabet — x goes across (horizontal) first'",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Graphing on pre-labeled coordinate grids. Slope triangles drawn physically on the graph. Start with positive whole-number slopes. Use tables before graphs.",
+            "ell": "Visual vocabulary cards for slope, intercept, linear, function. Physical demonstrations: walk up/down ramps at different steepnesses = different slopes.",
+            "extending": "Compare linear and nonlinear functions (quadratic, exponential). Find equations from two points. Parallel and perpendicular line relationships.",
+        },
+        "instructional_notes": [
+            "Connect to proportional relationships from 7th grade — linear is the natural extension",
+            "Use graphing technology (Desmos) to let students explore how changing m and b affects the line",
+            "Real-world: cell phone plans, taxi fares, gym memberships — anything with a starting fee plus a rate",
+        ],
+        "vocabulary_context": {
+            "slope": "Rate of change. Rise over run. How much y changes for every 1 unit change in x.",
+            "y-intercept": "Where the line crosses the y-axis. The value when x = 0. The starting point.",
+            "linear": "Makes a straight line. Has a constant rate of change.",
+            "function": "Every input (x) gives exactly ONE output (y). Pass the vertical line test.",
+        },
+        "vignette_summary": "Students compare two gym memberships: one with monthly fee + per-visit cost (linear, not proportional), one with just per-visit cost (proportional). They build tables, graph both, and identify slope and y-intercept in context.",
+    },
+
+    "pythagorean theorem": {
+        "standard_codes": ["8.3.1.1", "8.3.1.2", "8.3.1.3"],
+        "essential_understandings": [
+            "a² + b² = c² ONLY works for right triangles — the right angle is essential",
+            "c is ALWAYS the hypotenuse (longest side, across from the right angle)",
+            "The theorem relates AREAS of squares built on each side — it's about area, not just side lengths",
+            "The converse: if a² + b² = c², then the triangle IS a right triangle — useful for checking",
+            "Distance formula on coordinate plane is just Pythagorean theorem in disguise",
+        ],
+        "misconceptions": [
+            {
+                "error": "Using a² + b² = c² for non-right triangles",
+                "why": "Students apply the formula to every triangle",
+                "address": "Always check: IS there a right angle? If not, Pythagorean theorem doesn't apply.",
+            },
+            {
+                "error": "Not identifying the hypotenuse correctly",
+                "why": "Students assume c is always a specific side regardless of position",
+                "address": "Hypotenuse = longest side = across from the right angle. Label it FIRST before writing the equation.",
+            },
+            {
+                "error": "Computing a + b = c instead of a² + b² = c²",
+                "why": "Skipping the squaring step",
+                "address": "Emphasize: SQUARE each leg, ADD the squares, then SQUARE ROOT the sum. Use area squares visually.",
+            },
+            {
+                "error": "Forgetting to take the square root at the end",
+                "why": "Students find a² + b² and stop",
+                "address": "Final step: you found c², not c. Always ask: did I find the SIDE or the SQUARE of the side?",
+            },
+            {
+                "error": "Confusing which values to subtract when solving for a leg",
+                "why": "When solving for a: a² = c² - b², students may compute c - b first",
+                "address": "Write: a² = c² - b². Square first, THEN subtract. Order matters.",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Use physical square tiles to build squares on each side of a right triangle. Start with Pythagorean triples (3-4-5, 5-12-13) so answers are whole numbers. Provide formula cards.",
+            "ell": "Visual diagrams essential. Label hypotenuse and legs clearly. Use construction/real-world images (ladders, ramps). Cognates: hypotenuse/hipotenusa, triangle/triángulo.",
+            "extending": "3D Pythagorean theorem (space diagonal of a box). Pythagorean triples patterns. Non-right triangle: when does a² + b² > c²? < c²? What does that mean geometrically?",
+        },
+        "instructional_notes": [
+            "Start with the visual proof — squares built on each side, cutting and rearranging — before the formula",
+            "Use real-world applications: ladders against walls, TV screen diagonals, walking diagonally across a field",
+            "Connect to the distance formula early so students see it's the same concept on a coordinate grid",
+            "Common Pythagorean triples to memorize: 3-4-5, 5-12-13, 8-15-17, 7-24-25 and their multiples",
+        ],
+        "vocabulary_context": {
+            "hypotenuse": "Longest side of a right triangle. Always across from the right angle. Always c in a² + b² = c².",
+            "leg": "Either of the two shorter sides that form the right angle.",
+            "right triangle": "A triangle with one 90° angle. The ONLY type where Pythagorean theorem works.",
+            "converse": "The reverse statement. If a² + b² = c², then the triangle is a right triangle.",
+        },
+        "vignette_summary": "Students use grid paper to draw right triangles and physically construct squares on each side by cutting and placing square tiles. They count tiles to verify a² + b² = c² visually before moving to computation.",
+    },
+
+    "equations": {
+        "standard_codes": ["7.2.4.1", "7.2.4.2", "8.2.4.2"],
+        "essential_understandings": [
+            "An equation is a BALANCE — what you do to one side, you must do to the other",
+            "Solving means isolating the variable using inverse operations",
+            "Solutions should always be checked by substituting back into the original equation",
+            "Equations model real-world situations — the variable represents an unknown quantity in context",
+        ],
+        "misconceptions": [
+            {
+                "error": "Performing different operations on each side of the equation",
+                "why": "Students don't fully grasp the balance metaphor",
+                "address": "Use a physical balance scale or visual representation. Whatever you do to one side, do to the other.",
+            },
+            {
+                "error": "Losing negative signs during multi-step solving",
+                "why": "Carelessness with sign tracking through multiple steps",
+                "address": "Require showing every step. Use color-coding for negative signs.",
+            },
+            {
+                "error": "Not distributing correctly with negative multipliers",
+                "why": "Distributing -2(x + 3) as -2x + 3 instead of -2x - 6",
+                "address": "Circle the sign that's being distributed. Multiply by EVERY term inside parentheses.",
+            },
+            {
+                "error": "Thinking the variable must always be positive",
+                "why": "Limited experience with negative solutions",
+                "address": "Normalize negative solutions. Check by substituting back.",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Start with one-step equations. Use algebra tiles or virtual manipulatives. Provide step-by-step templates. Color-code: blue for variables, red for constants.",
+            "ell": "Visual equation solving (balance images). Translated key terms: equation/ecuación, solve/resolver, variable/variable.",
+            "extending": "Equations with variables on both sides. Create word problems that require specific equation types. Connect to inequalities.",
+        },
+        "instructional_notes": [
+            "The balance metaphor is the single most powerful teaching tool for equations",
+            "Have students write equations FROM word problems, not just solve given equations",
+            "Always verify: substitute your answer back into the original equation",
+            "Build complexity gradually: one-step → two-step → multi-step → variables on both sides",
+        ],
+        "vocabulary_context": {
+            "equation": "A mathematical sentence with an equals sign. Both sides have the same value.",
+            "variable": "A letter that represents an unknown number we're solving for.",
+            "inverse operation": "The operation that undoes another: addition ↔ subtraction, multiplication ↔ division.",
+            "solution": "The value of the variable that makes the equation TRUE.",
+        },
+        "vignette_summary": "Teacher uses a balance scale with bags (variables) and unit cubes. Students physically remove cubes from both sides to isolate the bag, discovering that solving = undoing operations.",
+    },
+
+    "percent": {
+        "standard_codes": ["7.2.2.2"],
+        "essential_understandings": [
+            "Percent means 'per hundred' — it's a ratio out of 100",
+            "Three types of percent problems: find the part, find the whole, find the percent",
+            "Percent of change = (new - original) / original × 100",
+            "Discount + tax are sequential operations, not combined on the original",
+        ],
+        "misconceptions": [
+            {
+                "error": "Adding discount and tax percentages together",
+                "why": "Students think 20% off + 8% tax = 12% off",
+                "address": "$100 - 20% = $80, then $80 + 8% = $86.40. NOT $100 - 12% = $88.",
+            },
+            {
+                "error": "Computing percent of change by dividing by the new amount instead of original",
+                "why": "Not sure which number is the denominator",
+                "address": "Percent of CHANGE: change goes on top, ORIGINAL goes on bottom. You're comparing to where you STARTED.",
+            },
+            {
+                "error": "Thinking 50% increase followed by 50% decrease returns to original",
+                "why": "Intuitive but wrong — the base changes",
+                "address": "$100 + 50% = $150. Then $150 - 50% = $75. NOT $100. Why? Because 50% of 150 ≠ 50% of 100.",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Use hundred grids for visualizing percents. Friendly percents first (10%, 25%, 50%). Provide percent-decimal-fraction conversion chart.",
+            "ell": "Visual hundred grids. Real-world ads and receipts. Key terms: percent/por ciento, discount/descuento, tax/impuesto.",
+            "extending": "Compound percent changes. Markup and markdown chains. Compare simple vs compound interest.",
+        },
+        "instructional_notes": [
+            "Use real receipts, ads, and sales flyers — students engage more with authentic percent problems",
+            "Always require: identify the original, identify the change, then compute the percent",
+            "Connect to proportional reasoning: percent problems ARE proportion problems (part/whole = percent/100)",
+        ],
+        "vocabulary_context": {
+            "percent": "Per hundred. 25% means 25 out of every 100.",
+            "discount": "Amount subtracted from the original price. Apply BEFORE tax.",
+            "tax": "Amount added to the price. Apply AFTER discount.",
+            "percent of change": "How much something changed relative to where it started. (change ÷ original) × 100.",
+        },
+        "vignette_summary": "Students analyze real store ads and calculate actual savings. They discover that '50% off then additional 20% off' is NOT 70% off, leading to discussion of sequential percent operations.",
+    },
+
+    "similarity": {
+        "standard_codes": ["7.3.2.1", "7.3.2.2", "7.3.2.3"],
+        "essential_understandings": [
+            "Similar figures have the same SHAPE but not necessarily the same SIZE",
+            "All corresponding angles are equal, all corresponding sides are in the same RATIO",
+            "Scale factor is multiplicative — multiply ALL sides by the same factor",
+            "Area scales by the SQUARE of the scale factor; perimeter scales by the scale factor",
+        ],
+        "misconceptions": [
+            {
+                "error": "Using additive reasoning for similarity (adding to side lengths instead of multiplying)",
+                "why": "Students think 'make it bigger by 3' means add 3 to each side",
+                "address": "Counter-example: 3×4 rectangle. Add 3: 6×7 (not similar). Multiply by 2: 6×8 (similar). Check ratios.",
+            },
+            {
+                "error": "Not matching corresponding sides correctly",
+                "why": "Students compare sides by size, not by position",
+                "address": "Label corresponding vertices. The side between A and B in the original corresponds to the side between A' and B'.",
+            },
+            {
+                "error": "Assuming congruent means similar",
+                "why": "Confusion between the two terms",
+                "address": "Congruent = same shape AND size. Similar = same shape, possibly different size. All congruent figures are similar, but not all similar figures are congruent.",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Use physical cutouts. Enlarge figures on grid paper. Start with simple shapes (rectangles, triangles). Provide ratio tables.",
+            "ell": "Visual comparisons essential. Physical manipulatives. Cognates: similar/similar, scale/escala.",
+            "extending": "Indirect measurement (shadow problems). Area and volume scaling. Fractals as self-similarity.",
+        },
+        "instructional_notes": [
+            "Similarity is fundamentally about proportional reasoning applied to geometry",
+            "Use the overhead projector analogy: the image gets bigger but the shape doesn't change",
+            "Connect to scale drawings and maps for real-world applications",
+        ],
+        "vocabulary_context": {
+            "similar": "Same shape, proportional sides, equal angles. Like a photo and its enlargement.",
+            "scale factor": "The multiplier between corresponding sides of similar figures.",
+            "corresponding": "Matching parts. Corresponding sides are in the same position in similar figures.",
+        },
+        "vignette_summary": "Students use overhead projectors to project shapes at different distances, measuring the original and projected images to discover scale factor relationships.",
+    },
+
+    "scatterplot": {
+        "standard_codes": ["8.4.1.1", "8.4.1.2", "8.4.1.3"],
+        "essential_understandings": [
+            "Scatterplots show the RELATIONSHIP between two variables — each point is one data pair",
+            "Line of best fit approximates the overall TREND, not connecting every dot",
+            "Correlation does not mean causation — related doesn't mean one CAUSES the other",
+            "The slope of the line of best fit represents the rate of change in context",
+        ],
+        "misconceptions": [
+            {
+                "error": "Connecting all the dots instead of drawing a line of best fit",
+                "why": "Students are used to connect-the-dots from earlier graphing",
+                "address": "The line of best fit is a TREND line — it shows the general direction. Some points are above, some below.",
+            },
+            {
+                "error": "Believing the line must pass through every point",
+                "why": "Exact matching expectation",
+                "address": "The line should have roughly equal points above and below it. It's an APPROXIMATION.",
+            },
+            {
+                "error": "Confusing correlation with causation",
+                "why": "Natural human tendency to see causation in patterns",
+                "address": "Ice cream sales and drowning rates both go up in summer. Does ice cream cause drowning? No — both are caused by warm weather.",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Pre-labeled axes. Start with strong correlations. Use physical graphing on large paper. Provide data in organized tables.",
+            "ell": "Visual representations are naturally accessible. Real data from student interests (sports stats). Key terms: scatter/dispersión, trend/tendencia.",
+            "extending": "Multiple regression concepts. Residual plots. Compare linear and non-linear models for the same data.",
+        },
+        "instructional_notes": [
+            "Use real data that students care about: sports statistics, social media trends, height vs shoe size",
+            "Have students collect their OWN data — engagement dramatically increases",
+            "The estimation of line of best fit prepares students for formal regression in high school",
+        ],
+        "vocabulary_context": {
+            "scatterplot": "A graph where each point represents one data pair (x,y). Shows patterns in data.",
+            "line of best fit": "The line that best represents the trend in the data. Minimizes distance from points.",
+            "correlation": "A pattern of association. Positive: both increase. Negative: one up, other down. None: no pattern.",
+        },
+        "vignette_summary": "Students collect data on arm span vs height for everyone in class, plot the scatterplot, estimate a line of best fit, and use it to predict the height of a student who's absent.",
+    },
+
+    "exponents and scientific notation": {
+        "standard_codes": ["8.1.1.4", "8.1.1.5"],
+        "essential_understandings": [
+            "Exponents are repeated multiplication: 2⁵ = 2×2×2×2×2, NOT 2×5",
+            "Negative exponents mean reciprocals: 2⁻³ = 1/2³ = 1/8",
+            "Scientific notation is a way to write very large or very small numbers compactly",
+            "Properties of exponents follow logically from the definition of repeated multiplication",
+        ],
+        "misconceptions": [
+            {
+                "error": "Computing 2⁵ as 2×5=10 instead of 2×2×2×2×2=32",
+                "why": "Confusing exponentiation with multiplication",
+                "address": "Expand EVERY TIME until the pattern is automatic. Write out 2⁵ = 2×2×2×2×2.",
+            },
+            {
+                "error": "Thinking negative exponents make negative numbers",
+                "why": "Conflating 'negative' with 'less than zero'",
+                "address": "2⁻³ = 1/8, which is POSITIVE and small, not negative. Negative exponent = fraction, not negative value.",
+            },
+            {
+                "error": "Adding exponents when multiplying bases instead of multiplying exponents",
+                "why": "Rule confusion: aⁿ × aᵐ = aⁿ⁺ᵐ but (aⁿ)ᵐ = aⁿˣᵐ",
+                "address": "Use the 'expand and count' method: 2³ × 2² = (2×2×2)(2×2) = 2⁵. You're just counting how many 2s.",
+            },
+        ],
+        "differentiation": {
+            "emergent": "Expansion tables (write out the repeated multiplication). Start with base 2 and 10. Use calculators to verify.",
+            "ell": "Visual representations of exponents as stacking/repeated groups. Powers of 10 connect to place value (already familiar).",
+            "extending": "Fractional exponents (preview). Exponential growth/decay. Connection between geometric sequences and exponents.",
+        },
+        "instructional_notes": [
+            "Powers of 10 are the gateway — students already know the pattern from place value",
+            "Scientific notation should be taught AFTER exponent properties are solid",
+            "Real-world contexts: distance to stars (very large), size of atoms (very small)",
+        ],
+        "vocabulary_context": {
+            "exponent": "The small raised number telling you HOW MANY times to multiply the base by itself.",
+            "base": "The number being multiplied by itself repeatedly.",
+            "scientific notation": "A number written as a × 10ⁿ where 1 ≤ a < 10. Compact way to write huge or tiny numbers.",
+        },
+        "vignette_summary": "Students fold a piece of paper repeatedly, predicting thickness. After 42 folds (theoretical), it would reach the moon. This demonstrates exponential growth and motivates scientific notation.",
+    },
+}
+
+
+def get_teaching_insights(topic_keywords):
+    """
+    Match topic keywords against TEACHING_INSIGHTS and return matched insights.
+
+    Args:
+        topic_keywords: list of topic strings to search for (e.g., ["area of circle"])
+
+    Returns:
+        dict with matched insights, or empty dict if no match found
+    """
+    if not topic_keywords:
+        return {}
+
+    # Strategy 1: Try exact match with lower case
+    for kw in topic_keywords:
+        kw_lower = kw.lower().strip()
+        if kw_lower in TEACHING_INSIGHTS:
+            return TEACHING_INSIGHTS[kw_lower]
+
+    # Strategy 2: Partial match with key words
+    for kw in topic_keywords:
+        kw_lower = kw.lower().strip()
+        for insight_key in TEACHING_INSIGHTS:
+            if kw_lower in insight_key or insight_key in kw_lower:
+                return TEACHING_INSIGHTS[insight_key]
+
+    # Strategy 3: Return empty dict if no match
+    return {}
+
+
+def get_misconceptions_for_topic(topic_keywords):
+    """
+    Get just the misconceptions list for a given topic.
+
+    Args:
+        topic_keywords: list of topic strings to search for
+
+    Returns:
+        list of misconception dicts, or empty list if no match
+    """
+    insights = get_teaching_insights(topic_keywords)
+    return insights.get("misconceptions", []) if insights else []
+
 
 def generate_leveled_problems(topic_keywords, grade=None, num_per_level=3):
     """

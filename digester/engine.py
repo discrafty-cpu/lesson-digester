@@ -1354,6 +1354,159 @@ def build_leveled_answer_key(prs, data):
     return slides
 
 
+# ─── TEACHING INSIGHTS SLIDES ─────────────────────────────────
+
+def build_misconceptions_slide(prs, data):
+    """MISCONCEPTIONS: Teacher-facing 'Watch Out!' slide showing common student errors.
+    Pulls from StemTC framework research.
+
+    data keys:
+        topic (str): lesson topic for the header
+        misconceptions (list of dicts): each with error, why, address
+        benchmarks (list of str, optional): MCA-III benchmark IDs
+
+    Font sizes optimized for smartboard/projector visibility.
+    """
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_bg(slide, C.surface)
+
+    misconceptions = data.get("misconceptions", [])
+    topic = data.get("topic", "This Topic")
+    benchmarks = data.get("benchmarks", [])
+
+    # Header banner
+    add_shape(slide, 0, 0, 10, 0.75, fill_color=C.red)
+    add_textbox(slide, 0.4, 0.1, 9, 0.55,
+                text=f"WATCH OUT — Common Misconceptions: {topic.title()}",
+                font_size=22, font_name=FONT_TITLE, color=C.white, bold=True)
+
+    # Misconception cards (up to 3)
+    card_y = 0.95
+    card_h = 1.4
+    card_gap = 0.12
+
+    for i, misc in enumerate(misconceptions[:3]):
+        cy = card_y + i * (card_h + card_gap)
+        error = misc.get("error", "")
+        why = misc.get("why", "")
+        address = misc.get("address", "")
+
+        # Card background
+        add_shape(slide, 0.3, cy, 9.4, card_h, fill_color=C.white)
+        # Red accent bar
+        add_shape(slide, 0.3, cy, 0.08, card_h, fill_color=C.red)
+
+        # Error number badge
+        add_shape(slide, 0.55, cy + 0.12, 0.45, 0.45, fill_color=C.red)
+        add_textbox(slide, 0.55, cy + 0.14, 0.45, 0.4,
+                    text=str(i + 1), font_size=20,
+                    font_name=FONT_TITLE, color=C.white,
+                    bold=True, align=PP_ALIGN.CENTER,
+                    valign=MSO_ANCHOR.MIDDLE)
+
+        # Error text (what students get wrong)
+        add_rich_textbox(slide, 1.2, cy + 0.08, 8.3, 0.4, [
+            {"text": "Students: ", "bold": True, "font_size": 16, "color": C.red},
+            {"text": error, "font_size": 16, "color": C.charcoal},
+        ])
+
+        # Why + How to address (two-column)
+        add_rich_textbox(slide, 1.2, cy + 0.55, 4.0, 0.75, [
+            {"text": "Why: ", "bold": True, "font_size": 14, "color": C.slate},
+            {"text": why, "font_size": 14, "color": C.slate, "italic": True},
+        ])
+        add_rich_textbox(slide, 5.4, cy + 0.55, 4.3, 0.75, [
+            {"text": "Address: ", "bold": True, "font_size": 14, "color": C.teal},
+            {"text": address, "font_size": 14, "color": C.charcoal},
+        ])
+
+    # Standards footer
+    if benchmarks:
+        tag_text = " | ".join(benchmarks[:3])
+        add_shape(slide, 0, 5.25, 10, 0.375, fill_color=C.navy)
+        add_textbox(slide, 0.3, 5.28, 9.4, 0.32,
+                    text=f"MCA-III: {tag_text} — Source: MN StemTC Frameworks",
+                    font_size=12, color=C.white, bold=True)
+
+    return slide
+
+
+def build_differentiation_slide(prs, data):
+    """DIFFERENTIATION: Teaching strategies for emergent, ELL, and extending learners.
+    Pulls from StemTC framework research.
+
+    data keys:
+        topic (str): lesson topic
+        differentiation (dict): emergent, ell, extending strings
+        essential_understandings (list of str, optional)
+        benchmarks (list of str, optional)
+
+    Font sizes optimized for smartboard/projector visibility.
+    """
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_bg(slide, C.surface)
+
+    topic = data.get("topic", "This Topic")
+    diff = data.get("differentiation", {})
+    understandings = data.get("essential_understandings", [])
+    benchmarks = data.get("benchmarks", [])
+
+    # Header
+    add_shape(slide, 0, 0, 10, 0.75, fill_color=C.teal)
+    add_textbox(slide, 0.4, 0.1, 9, 0.55,
+                text=f"Differentiation Strategies: {topic.title()}",
+                font_size=22, font_name=FONT_TITLE, color=C.white, bold=True)
+
+    # Three strategy cards (side by side)
+    strategies = [
+        ("Emergent Learners", diff.get("emergent", ""), C.amber, RGBColor(0xFF, 0xF8, 0xE1)),
+        ("English Language Learners", diff.get("ell", ""), C.blue, RGBColor(0xEB, 0xF5, 0xFF)),
+        ("Extending the Learning", diff.get("extending", ""), C.teal, RGBColor(0xE0, 0xF7, 0xF5)),
+    ]
+
+    card_w = 3.0
+    card_gap = 0.2
+    start_x = 0.3
+    card_y = 0.95
+    card_h = 2.8
+
+    for i, (title, text, accent, bg) in enumerate(strategies):
+        cx = start_x + i * (card_w + card_gap)
+        # Card
+        add_shape(slide, cx, card_y, card_w, card_h, fill_color=bg)
+        # Top accent
+        add_shape(slide, cx, card_y, card_w, 0.06, fill_color=accent)
+        # Title
+        add_textbox(slide, cx + 0.15, card_y + 0.15, card_w - 0.3, 0.35,
+                    text=title, font_size=14,
+                    font_name=FONT_HEADING, bold=True, color=accent)
+        # Strategy text
+        add_textbox(slide, cx + 0.15, card_y + 0.55, card_w - 0.3, card_h - 0.7,
+                    text=text, font_size=14, color=C.charcoal)
+
+    # Essential understandings (bottom)
+    if understandings:
+        eu_y = 4.0
+        add_shape(slide, 0.3, eu_y, 9.4, 1.1, fill_color=C.white)
+        add_accent_bar(slide, 0.3, eu_y + 0.1, 0.3, C.navy)
+        add_textbox(slide, 0.5, eu_y + 0.05, 2.5, 0.3,
+                    text="Essential Understandings:", font_size=14,
+                    font_name=FONT_HEADING, bold=True, color=C.navy)
+        eu_text = " | ".join(understandings[:3])
+        add_textbox(slide, 0.5, eu_y + 0.38, 9, 0.65,
+                    text=eu_text, font_size=12, color=C.charcoal, italic=True)
+
+    # Standards footer
+    if benchmarks:
+        tag_text = " | ".join(benchmarks[:3])
+        add_shape(slide, 0, 5.25, 10, 0.375, fill_color=C.navy)
+        add_textbox(slide, 0.3, 5.28, 9.4, 0.32,
+                    text=f"MCA-III: {tag_text} — Source: MN StemTC Frameworks",
+                    font_size=12, color=C.white, bold=True)
+
+    return slide
+
+
 # ─── MAIN: BUILD DEMO DECK ──────────────────────────────────
 
 def build_demo():
