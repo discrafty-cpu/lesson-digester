@@ -174,7 +174,7 @@ def build_intro_agenda(prs, data):
                     color=C.amber, bold=True)
         # Body
         add_textbox(slide, x + 0.15, card_y + 0.45, card_w - 0.3, card_h - 0.55,
-                    text=body, font_size=11, color=C.charcoal)
+                    text=body, font_size=18, color=C.charcoal)
         # Arrow between cards
         if i < 2:
             arrow = add_shape(slide, x + card_w + 0.02, card_y + card_h / 2 - 0.03,
@@ -207,7 +207,7 @@ def build_intro_agenda(prs, data):
     if instructions:
         inst_text = "\n".join(f"{i+1}. {inst}" for i, inst in enumerate(instructions))
         add_textbox(slide, 2.5, fs_y + 3.1, 5, 0.45,
-                    text=inst_text, font_size=11, color=C.slate)
+                    text=inst_text, font_size=16, color=C.slate)
 
     return slide
 
@@ -247,7 +247,7 @@ def build_checkin(prs, data):
             cell.fill.solid()
             cell.fill.fore_color.rgb = RGBColor.from_string(bg)
             for p in cell.text_frame.paragraphs:
-                p.font.size = Pt(11)
+                p.font.size = Pt(14)
                 p.font.bold = True
                 p.font.color.rgb = C.charcoal
                 p.alignment = PP_ALIGN.CENTER
@@ -297,9 +297,9 @@ def build_learning_target(prs, data):
     for i, t in enumerate(targets):
         if i > 0:
             runs.append({"text": "", "breakLine": True, "font_size": 6, "color": C.charcoal})
-        runs.append({"text": "I will ", "font_size": 15, "color": C.charcoal, "breakLine": i > 0})
-        runs.append({"text": t.get("verb", ""), "font_size": 15, "color": C.navy, "bold": True})
-        runs.append({"text": f" {t.get('rest', '')}", "font_size": 15, "color": C.charcoal})
+        runs.append({"text": "I will ", "font_size": 18, "color": C.charcoal, "breakLine": i > 0})
+        runs.append({"text": t.get("verb", ""), "font_size": 18, "color": C.navy, "bold": True})
+        runs.append({"text": f" {t.get('rest', '')}", "font_size": 18, "color": C.charcoal})
     if runs:
         add_rich_textbox(slide, 0.4, 0.8, 5.5, 1.8, runs)
 
@@ -308,13 +308,13 @@ def build_learning_target(prs, data):
     if discuss:
         add_shape(slide, 0.4, 2.8, 5.5, 1.4, fill_color=C.lightBlue)
         add_rich_textbox(slide, 0.6, 2.85, 5.1, 0.6, [
-            {"text": "Discuss:\n", "bold": True, "font_size": 14, "color": C.navy},
-            {"text": discuss, "font_size": 13, "color": C.charcoal},
+            {"text": "Discuss:\n", "bold": True, "font_size": 16, "color": C.navy},
+            {"text": discuss, "font_size": 16, "color": C.charcoal},
         ])
         frame = data.get("discuss_frame")
         if frame:
             add_textbox(slide, 0.6, 3.6, 5.1, 0.4,
-                        text=f'"{frame}"', font_size=12, color=C.teal, italic=True)
+                        text=f'"{frame}"', font_size=14, color=C.teal, italic=True)
 
     # Success Criteria card (right)
     add_shape(slide, 6.2, 0.2, 3.5, 3.2, fill_color=C.white, line_color=C.blue, line_width=2)
@@ -322,12 +322,12 @@ def build_learning_target(prs, data):
                 text="Success Criteria:", font_size=16,
                 font_name=FONT_HEADING, bold=True, color=C.navy)
     add_textbox(slide, 6.35, 0.65, 3.2, 0.25,
-                text="I'll know if I've got it when:", font_size=10, bold=True, color=C.slate)
+                text="I'll know if I've got it when:", font_size=14, bold=True, color=C.slate)
 
     criteria = data.get("success_criteria", [])
     crit_text = "\n".join(f"  {sc}" for sc in criteria)
     add_textbox(slide, 6.35, 1.0, 3.2, 2.2,
-                text=crit_text, font_size=10, color=C.charcoal)
+                text=crit_text, font_size=14, color=C.charcoal)
 
     return slide
 
@@ -352,8 +352,8 @@ def build_story_narrative(prs, data):
     if discuss:
         add_shape(slide, 5.5, 3.5, 4.2, 1.8, fill_color=C.lightBlue)
         add_rich_textbox(slide, 5.7, 3.6, 3.8, 1.5, [
-            {"text": "Discuss: ", "bold": True, "font_size": 13, "color": C.navy},
-            {"text": discuss, "font_size": 13, "color": C.red},
+            {"text": "Discuss: ", "bold": True, "font_size": 16, "color": C.navy},
+            {"text": discuss, "font_size": 16, "color": C.red},
         ])
 
     # Image
@@ -388,7 +388,7 @@ def build_story_dramatic(prs, data):
     detail_start_y = 3.2
     if role_prompt:
         add_textbox(slide, 5.2, 3.2, 4.6, 0.4,
-                    text=role_prompt, font_size=11,
+                    text=role_prompt, font_size=14,
                     color=C.amber, bold=True, italic=True)
         detail_start_y = 3.65
 
@@ -423,8 +423,8 @@ def build_story_mission(prs, data):
     if tm_prompt:
         add_shape(slide, 0.4, 3.5, 4.2, 0.8, fill_color=RGBColor(0x2D, 0x37, 0x48))
         add_rich_textbox(slide, 0.55, 3.55, 3.9, 0.7, [
-            {"text": "Task Manager: ", "bold": True, "italic": True, "font_size": 11, "color": C.task_mgr},
-            {"text": tm_prompt, "italic": True, "font_size": 11, "color": RGBColor(0xCB, 0xD5, 0xE0)},
+            {"text": "Task Manager: ", "bold": True, "italic": True, "font_size": 14, "color": C.task_mgr},
+            {"text": tm_prompt, "italic": True, "font_size": 14, "color": RGBColor(0xCB, 0xD5, 0xE0)},
         ])
 
     # Right: role-specific discussion prompts
@@ -440,8 +440,8 @@ def build_story_mission(prs, data):
         role_name = rp.get("role", "")
         role_color = role_colors.get(role_name, C.charcoal)
         add_rich_textbox(slide, 5.2, ry, 4.5, 0.9, [
-            {"text": f"{role_name}: ", "bold": True, "italic": True, "font_size": 12, "color": role_color},
-            {"text": f'"{rp.get("prompt", "")}"', "italic": True, "font_size": 12, "color": C.charcoal},
+            {"text": f"{role_name}: ", "bold": True, "italic": True, "font_size": 14, "color": role_color},
+            {"text": f'"{rp.get("prompt", "")}"', "italic": True, "font_size": 14, "color": C.charcoal},
         ])
 
     return slide
@@ -487,7 +487,7 @@ def build_group_discussion(prs, data):
                     bold=True, color=color)
         # Prompt
         add_textbox(slide, cx + 0.15, cy + 0.5, 4.2, 0.9,
-                    text=f'"{rc["prompt"]}"', font_size=12,
+                    text=f'"{rc["prompt"]}"', font_size=14,
                     color=C.charcoal, italic=True)
 
     # Sentence frame at bottom
@@ -495,7 +495,7 @@ def build_group_discussion(prs, data):
     if frame:
         add_shape(slide, 0.3, 5.0, 9.4, 0.45, fill_color=C.lightAmber)
         add_textbox(slide, 0.5, 5.02, 9, 0.4,
-                    text=f'"{frame}"', font_size=12, color=C.amber,
+                    text=f'"{frame}"', font_size=14, color=C.amber,
                     italic=True, align=PP_ALIGN.CENTER)
 
     return slide
@@ -526,7 +526,7 @@ def build_activity_launch(prs, data):
             cell = tbl.cell(r, c_)
             cell.text = val
             for p in cell.text_frame.paragraphs:
-                p.font.size = Pt(10)
+                p.font.size = Pt(14)
                 p.font.bold = True
                 p.font.color.rgb = C.charcoal
                 p.alignment = PP_ALIGN.CENTER
@@ -569,9 +569,9 @@ def build_problem(prs, data):
             # Color dot
             add_shape(slide, rx, strip_y + 0.1, 0.12, 0.12, fill_color=role_colors[i])
             add_textbox(slide, rx + 0.18, strip_y + 0.05, 2.0, 0.2,
-                        text=role, font_size=8, bold=True, color=role_colors[i])
+                        text=role, font_size=14, bold=True, color=role_colors[i])
             add_textbox(slide, rx + 0.18, strip_y + 0.25, 2.0, 0.7,
-                        text=prompt, font_size=8, color=C.slate, italic=True)
+                        text=prompt, font_size=14, color=C.slate, italic=True)
 
     # Image
     img = data.get("image")
@@ -675,18 +675,18 @@ def build_team_roles(prs, data):
                     text=role["name"], font_size=15, font_name=FONT_HEADING,
                     bold=True, color=C.white)
         add_textbox(slide, x + 0.15, y + 0.45, card_w - 0.3, 0.2,
-                    text=role.get("name_es", ""), font_size=10, color=C.slate, italic=True)
+                    text=role.get("name_es", ""), font_size=12, color=C.slate, italic=True)
         # "Your Job"
         add_textbox(slide, x + 0.15, y + 0.7, card_w - 0.3, 0.2,
-                    text="Your Job / Tu Trabajo", font_size=9, color=C.amber, bold=True)
+                    text="Your Job / Tu Trabajo", font_size=14, color=C.amber, bold=True)
         # Jobs (bilingual)
         jobs = role.get("jobs", [])
         jobs_es = role.get("jobs_es", [])
         runs = []
         for j, job in enumerate(jobs):
-            runs.append({"text": job, "breakLine": j > 0, "font_size": 9, "color": C.white})
+            runs.append({"text": job, "breakLine": j > 0, "font_size": 14, "color": C.white})
             if j < len(jobs_es):
-                runs.append({"text": jobs_es[j], "breakLine": True, "font_size": 8, "color": C.slate, "italic": True})
+                runs.append({"text": jobs_es[j], "breakLine": True, "font_size": 14, "color": C.slate, "italic": True})
         add_rich_textbox(slide, x + 0.15, y + 0.95, card_w - 0.3, card_h - 1.1, runs)
 
     return slide
@@ -707,7 +707,7 @@ def build_vocabulary_cards(prs, data):
     standard_tag = data.get("standard_tag", "")
     if standard_tag:
         add_textbox(slide, 6.5, 0.25, 3.2, 0.35,
-                    text=f"MCA-III: {standard_tag}", font_size=10,
+                    text=f"MCA-III: {standard_tag}", font_size=12,
                     color=C.slate, italic=True, align=PP_ALIGN.RIGHT)
 
     terms = data.get("terms", [])
@@ -739,7 +739,7 @@ def build_vocabulary_cards(prs, data):
         # Definition
         add_textbox(slide, x + 0.2, y + 0.4, card_w - 0.4, 0.6,
                     text=term_data.get("definition", ""),
-                    font_size=10, color=C.charcoal)
+                    font_size=14, color=C.charcoal)
 
     return slide
 
@@ -761,7 +761,7 @@ def build_standards_tag(prs, data):
         tag_text = "MCA-III: " + " | ".join(benchmarks[:4])
         add_shape(slide, 0, 5.25, 10, 0.375, fill_color=C.navy)
         add_textbox(slide, 0.3, 5.27, 9.4, 0.3,
-                    text=tag_text, font_size=8,
+                    text=tag_text, font_size=12,
                     color=C.amber, italic=True)
 
     return slide
@@ -775,7 +775,7 @@ def add_standards_footer(slide, benchmarks):
     tag_text = "MCA-III: " + " | ".join(benchmarks[:4])
     add_shape(slide, 0, 5.25, 10, 0.375, fill_color=C.navy)
     add_textbox(slide, 0.3, 5.27, 9.4, 0.3,
-                text=tag_text, font_size=8,
+                text=tag_text, font_size=12,
                 color=C.amber, italic=True)
 
 
@@ -822,21 +822,21 @@ def build_exit_ticket(prs, data):
                     color=C.white, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
         # Problem text
         add_textbox(slide, x + 0.15, card_y + 0.7, card_w - 0.3, card_h - 0.9,
-                    text=prob, font_size=13, color=RGBColor(0xCB, 0xD5, 0xE0))
+                    text=prob, font_size=16, color=RGBColor(0xCB, 0xD5, 0xE0))
 
     # Sentence frame at bottom (optional)
     frame = data.get("sentence_frame")
     if frame:
         add_shape(slide, 0.3, 4.5, 9.4, 0.5, fill_color=RGBColor(0x2D, 0x37, 0x48))
         add_textbox(slide, 0.5, 4.52, 9, 0.45,
-                    text=f'"{frame}"', font_size=11,
+                    text=f'"{frame}"', font_size=14,
                     color=C.amber, italic=True, align=PP_ALIGN.CENTER)
 
     # Standards tag
     tag = data.get("standard_tag", "")
     if tag:
         add_textbox(slide, 6, 5.15, 3.7, 0.3,
-                    text=f"MCA-III: {tag}", font_size=8,
+                    text=f"MCA-III: {tag}", font_size=12,
                     color=C.slate, italic=True, align=PP_ALIGN.RIGHT)
 
     return slide
@@ -902,8 +902,8 @@ def build_warmup_review(prs, data):
     if prompt:
         add_shape(slide, 0.3, 4.5, 9.4, 0.8, fill_color=C.lightBlue)
         add_rich_textbox(slide, 0.5, 4.55, 9, 0.7, [
-            {"text": "Discuss: ", "bold": True, "font_size": 13, "color": C.navy},
-            {"text": prompt, "font_size": 13, "color": C.charcoal},
+            {"text": "Discuss: ", "bold": True, "font_size": 16, "color": C.navy},
+            {"text": prompt, "font_size": 16, "color": C.charcoal},
         ])
 
     return slide
@@ -930,7 +930,7 @@ def build_would_you_rather(prs, data):
                 text=a.get("label", "Option A"), font_size=16,
                 font_name=FONT_HEADING, bold=True, color=C.navy, align=PP_ALIGN.CENTER)
     add_textbox(slide, 0.6, 1.4, 3.9, 0.25,
-                text=a.get("detail", ""), font_size=11,
+                text=a.get("detail", ""), font_size=14,
                 color=C.slate, align=PP_ALIGN.CENTER)
     add_textbox(slide, 0.6, 1.8, 3.9, 1.8,
                 text=a.get("math", ""), font_size=14,
@@ -956,7 +956,7 @@ def build_would_you_rather(prs, data):
                 text=b.get("label", "Option B"), font_size=16,
                 font_name=FONT_HEADING, bold=True, color=C.navy, align=PP_ALIGN.CENTER)
     add_textbox(slide, 5.5, 1.4, 3.9, 0.25,
-                text=b.get("detail", ""), font_size=11,
+                text=b.get("detail", ""), font_size=14,
                 color=C.slate, align=PP_ALIGN.CENTER)
     add_textbox(slide, 5.5, 1.8, 3.9, 1.8,
                 text=b.get("math", ""), font_size=14,
@@ -973,7 +973,7 @@ def build_would_you_rather(prs, data):
     if reveal:
         add_shape(slide, 0.5, 4.5, 9, 0.6, fill_color=C.lightBlue)
         add_textbox(slide, 0.7, 4.52, 8.6, 0.55,
-                    text=reveal, font_size=12,
+                    text=reveal, font_size=14,
                     color=C.navy, italic=True, align=PP_ALIGN.CENTER)
 
     return slide
@@ -1020,7 +1020,7 @@ def build_notice_wonder(prs, data):
                 font_name=FONT_HEADING, bold=True, color=C.teal)
     notice_starter = data.get("notice_starter", "I notice that _____ because _____.")
     add_textbox(slide, prompt_x + 0.15, 1.4, prompt_w - 0.3, 0.8,
-                text=f'"{notice_starter}"', font_size=12,
+                text=f'"{notice_starter}"', font_size=14,
                 color=C.charcoal, italic=True)
 
     # WONDER card
@@ -1031,7 +1031,7 @@ def build_notice_wonder(prs, data):
                 font_name=FONT_HEADING, bold=True, color=C.amber)
     wonder_starter = data.get("wonder_starter", "I wonder if/why/how _____?")
     add_textbox(slide, prompt_x + 0.15, 3.1, prompt_w - 0.3, 0.8,
-                text=f'"{wonder_starter}"', font_size=12,
+                text=f'"{wonder_starter}"', font_size=14,
                 color=C.charcoal, italic=True)
 
     # Role prompts at bottom (optional)
@@ -1044,9 +1044,9 @@ def build_notice_wonder(prs, data):
             rx = 0.4 + i * 2.35
             add_shape(slide, rx, strip_y + 0.08, 0.1, 0.1, fill_color=role_colors[i])
             add_textbox(slide, rx + 0.15, strip_y + 0.03, 2.0, 0.18,
-                        text=role, font_size=7, bold=True, color=role_colors[i])
+                        text=role, font_size=14, bold=True, color=role_colors[i])
             add_textbox(slide, rx + 0.15, strip_y + 0.22, 2.0, 0.4,
-                        text=prompt, font_size=7, color=C.slate, italic=True)
+                        text=prompt, font_size=14, color=C.slate, italic=True)
 
     return slide
 
@@ -1093,7 +1093,7 @@ def build_learning_log(prs, data):
                     font_name=FONT_HEADING, bold=True, color=C.amber)
         add_textbox(slide, 6.25, 1.55, 3.3, 1.0,
                     text="Can you use these words in a sentence?\n" + ", ".join(vocab[:6]),
-                    font_size=11, color=C.charcoal)
+                    font_size=14, color=C.charcoal)
 
     # Metacognitive self-rating (right bottom, optional)
     meta = data.get("metacognitive")
@@ -1114,8 +1114,8 @@ def build_learning_log(prs, data):
         level_runs = []
         for lbl, desc in levels:
             level_runs.append({"text": f"{lbl}: ", "breakLine": len(level_runs) > 0,
-                               "font_size": 10, "color": C.navy, "bold": True})
-            level_runs.append({"text": desc, "font_size": 10, "color": C.charcoal})
+                               "font_size": 12, "color": C.navy, "bold": True})
+            level_runs.append({"text": desc, "font_size": 12, "color": C.charcoal})
         add_rich_textbox(slide, 6.25, meta_y + 0.5, 3.3, meta_h - 0.7, level_runs)
     elif not vocab:
         # If neither vocab nor metacognitive, fill right side with a tip
@@ -1176,11 +1176,182 @@ def build_timer(prs, data):
             add_shape(slide, rx, strip_y, 2.15, 0.9, fill_color=RGBColor(0x2D, 0x37, 0x48))
             add_shape(slide, rx, strip_y, 2.15, 0.04, fill_color=role_colors[i])
             add_textbox(slide, rx + 0.1, strip_y + 0.1, 1.95, 0.2,
-                        text=role, font_size=9, bold=True, color=role_colors[i])
+                        text=role, font_size=12, bold=True, color=role_colors[i])
             add_textbox(slide, rx + 0.1, strip_y + 0.35, 1.95, 0.45,
-                        text=reminder, font_size=8, color=RGBColor(0xCB, 0xD5, 0xE0), italic=True)
+                        text=reminder, font_size=12, color=RGBColor(0xCB, 0xD5, 0xE0), italic=True)
 
     return slide
+
+
+# ─── LEVELED PROBLEMS (4 proficiency levels × 3 problems each) ──
+
+def build_leveled_problems(prs, data):
+    """LEVELED PROBLEMS: 4 slides — Beginning, Partial, Proficient, Exemplary.
+    Each slide has 3 differentiated problems for that level.
+
+    data keys:
+        topic (str): lesson topic for the header
+        levels (list of 4 dicts): each with:
+            label (str), color_hex (str), description (str),
+            problems (list of dicts with stem, answer, hint)
+        benchmarks (list of str, optional): MCA-III benchmark IDs
+
+    Font sizes optimized for smartboard/projector visibility:
+        - Level label: 28pt (visible from back of room)
+        - Problem numbers: 24pt
+        - Problem stems: 20pt (minimum for rear-row readability on projector)
+        - Hints: 16pt
+        - Description/scaffolding: 16pt
+    """
+    topic = data.get("topic", "Practice Problems")
+    levels = data.get("levels", [])
+    benchmarks = data.get("benchmarks", [])
+    slides = []
+
+    # Level colors mapped from hex strings
+    level_colors = {
+        "EF4444": RGBColor(0xEF, 0x44, 0x44),  # red - beginning
+        "D4870F": RGBColor(0xD4, 0x87, 0x0F),  # amber - partial
+        "3B82F6": RGBColor(0x3B, 0x82, 0xF6),  # blue - proficient
+        "0D9488": RGBColor(0x0D, 0x94, 0x88),  # teal - exemplary
+    }
+
+    for level in levels:
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
+        set_slide_bg(slide, C.surface)
+
+        label = level.get("label", "")
+        color_hex = level.get("color_hex", "3B82F6")
+        description = level.get("description", "")
+        scaffolding = level.get("scaffolding", "")
+        problems = level.get("problems", [])
+        level_color = level_colors.get(color_hex, C.blue)
+
+        # ── Top banner with level name
+        add_shape(slide, 0, 0, 10, 0.85, fill_color=level_color)
+        add_textbox(slide, 0.4, 0.1, 6, 0.65,
+                    text=label.upper(), font_size=28,
+                    font_name=FONT_TITLE, color=C.white, bold=True)
+
+        # Topic + description on the right of banner
+        add_textbox(slide, 6.5, 0.12, 3.3, 0.3,
+                    text=topic.title(), font_size=14,
+                    font_name=FONT_HEADING, color=C.white,
+                    bold=True, align=PP_ALIGN.RIGHT)
+        add_textbox(slide, 6.5, 0.42, 3.3, 0.35,
+                    text=description, font_size=14,
+                    color=RGBColor(0xFF, 0xFF, 0xFF), italic=True,
+                    align=PP_ALIGN.RIGHT)
+
+        # ── Scaffolding note (small bar under banner)
+        if scaffolding:
+            add_shape(slide, 0, 0.85, 10, 0.35, fill_color=C.white)
+            add_shape(slide, 0, 0.85, 0.08, 0.35, fill_color=level_color)
+            add_textbox(slide, 0.2, 0.88, 9.5, 0.3,
+                        text=f"Scaffolding: {scaffolding}", font_size=14,
+                        color=C.slate, italic=True)
+
+        # ── Three problem cards
+        card_y = 1.35
+        card_h = 1.3
+        card_gap = 0.15
+
+        for i, prob in enumerate(problems[:3]):
+            cy = card_y + i * (card_h + card_gap)
+
+            # Problem card background
+            add_shape(slide, 0.3, cy, 9.4, card_h, fill_color=C.white)
+            # Left accent bar
+            add_shape(slide, 0.3, cy, 0.08, card_h, fill_color=level_color)
+
+            # Problem number circle
+            num_shape = add_shape(slide, 0.55, cy + 0.15, 0.55, 0.55, fill_color=level_color)
+            add_textbox(slide, 0.55, cy + 0.18, 0.55, 0.5,
+                        text=str(i + 1), font_size=22,
+                        font_name=FONT_TITLE, color=C.white,
+                        bold=True, align=PP_ALIGN.CENTER,
+                        valign=MSO_ANCHOR.MIDDLE)
+
+            # Problem stem — 20pt for projector readability
+            stem_text = prob.get("stem", "")
+            add_textbox(slide, 1.3, cy + 0.1, 8.2, card_h - 0.25,
+                        text=stem_text, font_size=20,
+                        font_name=FONT_BODY, color=C.charcoal)
+
+            # Hint (if present, smaller text at bottom of card)
+            hint = prob.get("hint", "")
+            if hint:
+                add_textbox(slide, 1.3, cy + card_h - 0.35, 8.2, 0.3,
+                            text=f"Hint: {hint}", font_size=14,
+                            color=C.slate, italic=True)
+
+        # ── Standards footer
+        if benchmarks:
+            tag_text = " | ".join(benchmarks[:3])
+            add_shape(slide, 0, 5.25, 10, 0.375, fill_color=C.navy)
+            add_textbox(slide, 0.3, 5.28, 9.4, 0.32,
+                        text=f"MCA-III: {tag_text}", font_size=12,
+                        color=C.white, bold=True)
+
+        slides.append(slide)
+
+    return slides
+
+
+def build_leveled_answer_key(prs, data):
+    """ANSWER KEY: Companion slide set for leveled problems.
+    Same data format as build_leveled_problems — generates answer slides.
+
+    Font sizes maintained at 20pt for projector use.
+    """
+    topic = data.get("topic", "Practice Problems")
+    levels = data.get("levels", [])
+    slides = []
+
+    level_colors = {
+        "EF4444": RGBColor(0xEF, 0x44, 0x44),
+        "D4870F": RGBColor(0xD4, 0x87, 0x0F),
+        "3B82F6": RGBColor(0x3B, 0x82, 0xF6),
+        "0D9488": RGBColor(0x0D, 0x94, 0x88),
+    }
+
+    for level in levels:
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
+        set_slide_bg(slide, C.darkBg)
+
+        label = level.get("label", "")
+        color_hex = level.get("color_hex", "3B82F6")
+        problems = level.get("problems", [])
+        level_color = level_colors.get(color_hex, C.blue)
+
+        # Header
+        add_shape(slide, 0, 0, 10, 0.7, fill_color=level_color)
+        add_textbox(slide, 0.4, 0.1, 9, 0.5,
+                    text=f"ANSWER KEY — {label.upper()}", font_size=24,
+                    font_name=FONT_TITLE, color=C.white, bold=True)
+
+        # Answers
+        card_y = 0.9
+        card_h = 1.45
+        for i, prob in enumerate(problems[:3]):
+            cy = card_y + i * (card_h + 0.1)
+            add_shape(slide, 0.3, cy, 9.4, card_h, fill_color=RGBColor(0x2D, 0x37, 0x48))
+            add_shape(slide, 0.3, cy, 0.06, card_h, fill_color=level_color)
+
+            # Problem number
+            add_textbox(slide, 0.5, cy + 0.08, 0.5, 0.35,
+                        text=f"#{i+1}", font_size=18,
+                        font_name=FONT_TITLE, color=level_color, bold=True)
+
+            # Answer text — 18pt for projector
+            answer = prob.get("answer", "")
+            add_textbox(slide, 1.1, cy + 0.08, 8.4, card_h - 0.15,
+                        text=answer, font_size=18,
+                        font_name=FONT_BODY, color=C.white)
+
+        slides.append(slide)
+
+    return slides
 
 
 # ─── MAIN: BUILD DEMO DECK ──────────────────────────────────

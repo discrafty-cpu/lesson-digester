@@ -97,6 +97,10 @@ const Digester = {
     HOMEWORK: {
       icon: '📖',
       label: 'Homework'
+    },
+    QUIZ_GENERATOR: {
+      icon: '📊',
+      label: 'Quiz Generator'
     }
   },
 
