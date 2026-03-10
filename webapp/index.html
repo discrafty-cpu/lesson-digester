@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lesson Digester - CPM Lesson Deck Optimizer</title>
-    <link rel="stylesheet" href="css/digester-theme.css">
+    <title>The Lesson Digester - PPTX Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         /* ==================== ROOT & UTILITIES ==================== */
         :root {
@@ -73,10 +73,15 @@
             to { opacity: 1; }
         }
 
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* ==================== HEADER & HERO ==================== */
         header {
             background: linear-gradient(135deg, rgba(30, 39, 97, 0.9) 0%, rgba(26, 35, 64, 0.95) 100%);
-            padding: 60px 20px;
+            padding: 40px 20px;
             position: relative;
             overflow: hidden;
             border-bottom: 1px solid var(--border);
@@ -104,7 +109,7 @@
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
             letter-spacing: -1px;
@@ -115,9 +120,9 @@
         }
 
         .hero-subtitle {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: var(--text-dim);
-            margin-bottom: 25px;
+            margin-bottom: 10px;
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
@@ -134,544 +139,589 @@
             font-weight: 500;
         }
 
-        /* ==================== PIPELINE SECTION ==================== */
-        .pipeline-section {
+        /* ==================== MAIN CONTAINER ==================== */
+        main {
             max-width: 1200px;
-            margin: 80px auto;
-            padding: 0 20px;
+            margin: 0 auto;
+            padding: 60px 20px;
         }
 
-        .section-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 50px;
-            text-align: center;
-        }
-
-        .pipeline-container {
-            display: flex;
-            align-items: stretch;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 60px;
-            overflow-x: auto;
-            padding: 20px 0;
-        }
-
-        .pipeline-step {
-            flex: 1;
-            min-width: 180px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px 16px;
+        /* ==================== DROP ZONE ==================== */
+        .drop-zone {
+            border: 3px dashed var(--border);
+            border-radius: 16px;
+            padding: 60px 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
-            animation: slide-in-up 0.6s ease forwards;
+            background: rgba(212, 135, 15, 0.02);
+            margin-bottom: 40px;
         }
 
-        .pipeline-step:nth-child(1) { animation-delay: 0.1s; }
-        .pipeline-step:nth-child(2) { animation-delay: 0.2s; }
-        .pipeline-step:nth-child(3) { animation-delay: 0.3s; }
-        .pipeline-step:nth-child(4) { animation-delay: 0.4s; }
-        .pipeline-step:nth-child(5) { animation-delay: 0.5s; }
-
-        .pipeline-step:hover {
-            background: rgba(212, 135, 15, 0.1);
+        .drop-zone:hover {
             border-color: var(--amber);
-            transform: translateY(-4px);
+            background: rgba(212, 135, 15, 0.08);
         }
 
-        .pipeline-step.active {
-            background: rgba(212, 135, 15, 0.2);
+        .drop-zone.drag-over {
             border-color: var(--amber);
-            box-shadow: 0 0 20px rgba(212, 135, 15, 0.3);
+            background: rgba(212, 135, 15, 0.15);
+            box-shadow: 0 0 30px rgba(212, 135, 15, 0.3);
+            transform: scale(1.02);
         }
 
-        .step-number {
-            width: 50px;
-            height: 50px;
-            border: 2px solid var(--amber);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin: 0 auto 16px;
-            color: var(--amber);
-            background: var(--navy);
+        .drop-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.8;
         }
 
-        .step-title {
-            font-size: 1rem;
+        .drop-text {
+            font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 8px;
-        }
-
-        .step-description {
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            line-height: 1.4;
-        }
-
-        .pipeline-arrow {
-            display: none;
-            width: 40px;
-            height: 3px;
-            background: var(--border);
-            position: relative;
-        }
-
-        .pipeline-arrow::after {
-            content: '';
-            position: absolute;
-            right: -8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid var(--border);
-            border-top: 5px solid transparent;
-            border-bottom: 5px solid transparent;
-        }
-
-        /* Show arrows on desktop */
-        @media (min-width: 769px) {
-            .pipeline-arrow {
-                display: block;
-            }
-        }
-
-        /* ==================== DETAIL PANEL ==================== */
-        .detail-panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            min-height: 400px;
-            animation: fade-in 0.4s ease;
-        }
-
-        .detail-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 24px;
-            border-bottom: 1px solid var(--border);
-            border-left: 4px solid var(--amber);
-        }
-
-        .detail-icon {
-            font-size: 2rem;
-        }
-
-        .detail-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .detail-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            padding: 32px;
-            min-height: 350px;
-        }
-
-        .detail-text h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 16px;
             color: var(--text);
         }
 
-        .detail-text p {
+        .drop-hint {
             font-size: 0.95rem;
             color: var(--text-dim);
-            line-height: 1.7;
             margin-bottom: 20px;
         }
 
-        .tag-list {
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: var(--amber);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #f0a030;
+            transform: translateY(-2px);
+        }
+
+        /* ==================== PROGRESS BAR ==================== */
+        .progress-container {
+            display: none;
+            margin-bottom: 40px;
+            animation: slide-in-up 0.4s ease;
+        }
+
+        .progress-container.visible {
+            display: block;
+        }
+
+        .progress-label {
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            color: var(--text-dim);
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--amber), var(--teal));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* ==================== RESULTS PANEL ==================== */
+        .results-panel {
+            display: none;
+            animation: fade-in 0.4s ease;
+        }
+
+        .results-panel.visible {
+            display: block;
+        }
+
+        .results-section {
+            margin-bottom: 50px;
+            animation: slide-in-up 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .results-section.delay-1 { animation-delay: 0.1s; }
+        .results-section.delay-2 { animation-delay: 0.2s; }
+        .results-section.delay-3 { animation-delay: 0.3s; }
+        .results-section.delay-4 { animation-delay: 0.4s; }
+        .results-section.delay-5 { animation-delay: 0.5s; }
+        .results-section.delay-6 { animation-delay: 0.6s; }
+
+        .section-heading {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        /* ==================== FILE INFO ==================== */
+        .file-info {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--amber);
+            border-radius: 8px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .file-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--amber);
+        }
+
+        /* ==================== SLIDE MAP ==================== */
+        .slide-map {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .slide-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .slide-card:hover {
+            border-color: var(--amber);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(212, 135, 15, 0.2);
+        }
+
+        .slide-number {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .slide-icon {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+        }
+
+        .slide-type {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            line-height: 1.3;
+        }
+
+        /* ==================== TAGS & BADGES ==================== */
+        .tags-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .tag {
             background: rgba(212, 135, 15, 0.15);
             border: 1px solid rgba(212, 135, 15, 0.3);
             border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 0.8rem;
+            padding: 6px 14px;
+            font-size: 0.85rem;
             color: var(--amber);
             font-weight: 500;
+            transition: all 0.3s ease;
         }
 
-        .code-panel {
+        .tag:hover {
+            background: rgba(212, 135, 15, 0.25);
+            border-color: var(--amber);
+        }
+
+        .tag-teal {
+            background: rgba(13, 148, 136, 0.15);
+            border-color: rgba(13, 148, 136, 0.3);
+            color: var(--teal);
+        }
+
+        .tag-teal:hover {
+            background: rgba(13, 148, 136, 0.25);
+            border-color: var(--teal);
+        }
+
+        .tag-blue {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: var(--blue);
+        }
+
+        .tag-blue:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: var(--blue);
+        }
+
+        .tag-pink {
+            background: rgba(232, 67, 109, 0.15);
+            border-color: rgba(232, 67, 109, 0.3);
+            color: var(--pink);
+        }
+
+        .tag-pink:hover {
+            background: rgba(232, 67, 109, 0.25);
+            border-color: var(--pink);
+        }
+
+        /* ==================== TEACHING INSIGHTS ==================== */
+        .misconceptions-list {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .misconception-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--pink);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .misconception-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--pink);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .misconception-item {
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .misconception-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .insight-text {
+            color: var(--text-dim);
+            margin-left: 8px;
+        }
+
+        .differentiation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .diff-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .diff-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .diff-content {
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* ==================== STANDARDS ==================== */
+        .standards-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .standard-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--teal);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 0.95rem;
+        }
+
+        .standard-code {
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 4px;
+        }
+
+        .standard-description {
+            color: var(--text-dim);
+        }
+
+        /* ==================== LEVELED PROBLEMS ==================== */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .level-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .level-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .level-1 .level-header {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--blue);
+            border-bottom-color: var(--blue);
+        }
+
+        .level-2 .level-header {
+            background: rgba(13, 148, 136, 0.15);
+            color: var(--teal);
+            border-bottom-color: var(--teal);
+        }
+
+        .level-3 .level-header {
+            background: rgba(212, 135, 15, 0.15);
+            color: var(--amber);
+            border-bottom-color: var(--amber);
+        }
+
+        .level-4 .level-header {
+            background: rgba(232, 67, 109, 0.15);
+            color: var(--pink);
+            border-bottom-color: var(--pink);
+        }
+
+        .level-content {
+            padding: 16px;
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* ==================== BUILD SCRIPT ==================== */
+        .script-container {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border);
             border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .script-header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .script-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .copy-btn {
+            background: var(--amber);
+            color: var(--navy);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #f0a030;
+        }
+
+        .copy-btn.copied {
+            background: var(--teal);
+        }
+
+        .script-panel {
+            background: rgba(0, 0, 0, 0.3);
             padding: 20px;
             font-family: 'Monaco', 'Courier New', monospace;
             font-size: 0.85rem;
             line-height: 1.6;
             overflow-x: auto;
-            max-height: 350px;
+            max-height: 400px;
             overflow-y: auto;
-        }
-
-        .code-line {
-            margin-bottom: 8px;
-        }
-
-        .code-comment {
             color: var(--text-dim);
         }
 
-        .code-function {
-            color: var(--blue);
+        .script-line {
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
-        .code-string {
-            color: var(--teal);
-        }
-
-        .code-highlight {
-            color: var(--amber);
-            font-weight: 600;
-        }
-
-        /* ==================== DEMO SECTION ==================== */
-        .demo-section {
-            max-width: 1200px;
-            margin: 80px auto;
-            padding: 0 20px;
-        }
-
-        .demo-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-
-        .demo-card {
-            border-radius: 12px;
-            overflow: hidden;
-            padding: 0;
-            border: 2px solid;
-        }
-
-        .demo-card.before {
-            border-color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .demo-card.after {
-            border-color: #22c55e;
-            background: rgba(34, 197, 94, 0.1);
-        }
-
-        .demo-header {
-            padding: 20px;
-            border-bottom: 2px solid;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .demo-card.before .demo-header {
-            border-bottom-color: #ef4444;
-            color: #fca5a5;
-        }
-
-        .demo-card.after .demo-header {
-            border-bottom-color: #22c55e;
-            color: #86efac;
-        }
-
-        .demo-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 16px;
-            padding: 24px;
-        }
-
-        .stat-item {
+        /* ==================== EMPTY STATE ==================== */
+        .empty-state {
             text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .demo-card.before .stat-value {
-            color: #fca5a5;
-        }
-
-        .demo-card.after .stat-value {
-            color: #86efac;
-        }
-
-        .stats-badge {
-            display: inline-block;
-            background: rgba(212, 135, 15, 0.2);
-            border: 1px solid var(--amber);
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin: 12px 6px 0 0;
-            color: var(--amber);
-        }
-
-        /* ==================== SLIDE TYPES GRID ==================== */
-        .slide-types-section {
-            max-width: 1200px;
-            margin: 80px auto;
-            padding: 0 20px;
-        }
-
-        .types-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        .type-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            text-align: center;
-            transition: all 0.3s ease;
-            animation: slide-in-up 0.6s ease forwards;
-        }
-
-        .type-card:hover {
-            background: rgba(212, 135, 15, 0.1);
-            border-color: var(--amber);
-            transform: translateY(-4px);
-        }
-
-        .type-emoji {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-        }
-
-        .type-name {
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-
-        .type-description {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
-
-        /* ==================== WORKFLOW SECTION ==================== */
-        .workflow-section {
-            max-width: 1200px;
-            margin: 80px auto;
-            padding: 0 20px;
-        }
-
-        .workflow-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
-
-        .workflow-step {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 28px;
-            position: relative;
-            transition: all 0.3s ease;
-            animation: slide-in-up 0.6s ease forwards;
-        }
-
-        .workflow-step:nth-child(1) { animation-delay: 0.1s; }
-        .workflow-step:nth-child(2) { animation-delay: 0.2s; }
-        .workflow-step:nth-child(3) { animation-delay: 0.3s; }
-        .workflow-step:nth-child(4) { animation-delay: 0.4s; }
-        .workflow-step:nth-child(5) { animation-delay: 0.5s; }
-        .workflow-step:nth-child(6) { animation-delay: 0.6s; }
-        .workflow-step:nth-child(7) { animation-delay: 0.7s; }
-
-        .workflow-step:hover {
-            background: rgba(212, 135, 15, 0.1);
-            border-color: var(--amber);
-            transform: translateY(-4px);
-        }
-
-        .workflow-number {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--amber);
-            color: var(--navy);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 16px;
-        }
-
-        .workflow-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .workflow-description {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            line-height: 1.6;
-        }
-
-        /* ==================== FOOTER ==================== */
-        footer {
-            background: var(--navy);
-            border-top: 1px solid var(--border);
             padding: 40px 20px;
-            margin-top: 100px;
-            text-align: center;
         }
 
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
         }
 
-        .footer-text {
+        .empty-text {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .empty-hint {
             font-size: 0.95rem;
             color: var(--text-dim);
-            margin-bottom: 16px;
-        }
-
-        .footer-credits {
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .footer-credits span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .footer-credits span::before {
-            content: '•';
-            color: var(--amber);
-        }
-
-        .footer-credits span:first-child::before {
-            display: none;
         }
 
         /* ==================== RESPONSIVE ==================== */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-            }
-
-            .pipeline-container {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .pipeline-arrow {
-                display: none !important;
-            }
-
-            .detail-content {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-
-            .demo-container {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            .section-title {
-                font-size: 1.5rem;
-                margin-bottom: 30px;
-            }
-
-            .workflow-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .types-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-        }
-
-        @media (max-width: 480px) {
             header {
-                padding: 40px 16px;
+                padding: 30px 16px;
             }
 
             .hero h1 {
                 font-size: 2rem;
             }
 
-            .hero-subtitle {
-                font-size: 0.95rem;
+            main {
+                padding: 40px 16px;
             }
 
-            .pipeline-step {
-                min-width: 140px;
-                padding: 16px 12px;
+            .drop-zone {
+                padding: 40px 20px;
             }
 
-            .step-number {
-                width: 40px;
-                height: 40px;
+            .drop-icon {
+                font-size: 3rem;
+            }
+
+            .file-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .slide-map {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .differentiation-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .levels-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .script-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .copy-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .section-heading {
+                font-size: 1.1rem;
+            }
+
+            .stat-value {
                 font-size: 1.2rem;
             }
 
-            .step-title {
-                font-size: 0.9rem;
+            .drop-zone {
+                padding: 30px 16px;
             }
 
-            .demo-stats {
-                grid-template-columns: 1fr;
-                gap: 12px;
+            .slide-map {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 8px;
             }
 
-            .detail-content {
-                padding: 20px;
+            .slide-card {
+                padding: 8px;
             }
 
-            .code-panel {
-                font-size: 0.75rem;
+            .slide-icon {
+                font-size: 1.4rem;
+            }
+
+            .slide-type {
+                font-size: 0.65rem;
             }
         }
     </style>
@@ -682,429 +732,813 @@
         <div class="hero">
             <div class="hero-pulse"></div>
             <h1>The <span class="digester">Digester</span></h1>
-            <p class="hero-subtitle">Chews up cluttered CPM lesson decks. Spits out clean, standards-aligned, story-driven presentations.</p>
-            <div class="tagline-badge">Drummond Design System + MCA-III Alignment</div>
+            <p class="hero-subtitle">Drop a CPM lesson PPTX. Get instant analysis, standards alignment, and teaching insights.</p>
+            <div class="tagline-badge">Client-side PPTX Analysis + MCA-III Standards</div>
         </div>
     </header>
 
-    <!-- ==================== PIPELINE SECTION ==================== -->
-    <section class="pipeline-section">
-        <h2 class="section-title">The Pipeline</h2>
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main>
+        <!-- DROP ZONE -->
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-icon">📤</div>
+            <div class="drop-text">Drop your CPM lesson PPTX here</div>
+            <div class="drop-hint">or click to browse</div>
+            <button class="upload-btn" id="uploadBtn">Select File</button>
+            <input type="file" id="fileInput" class="file-input" accept=".pptx" />
+        </div>
 
-        <div class="pipeline-container">
-            <div class="pipeline-step active" onclick="showStep(0)">
-                <div class="step-number">1</div>
-                <div class="step-title">Drop</div>
-                <div class="step-description">Upload a CPM lesson PPTX</div>
-            </div>
-
-            <div class="pipeline-arrow"></div>
-
-            <div class="pipeline-step" onclick="showStep(1)">
-                <div class="step-number">2</div>
-                <div class="step-title">Analyze</div>
-                <div class="step-description">Auto-classify every slide & extract content</div>
-            </div>
-
-            <div class="pipeline-arrow"></div>
-
-            <div class="pipeline-step" onclick="showStep(2)">
-                <div class="step-number">3</div>
-                <div class="step-title">Align</div>
-                <div class="step-description">Match to MCA-III standards & vocabulary</div>
-            </div>
-
-            <div class="pipeline-arrow"></div>
-
-            <div class="pipeline-step" onclick="showStep(3)">
-                <div class="step-number">4</div>
-                <div class="step-title">Rebuild</div>
-                <div class="step-description">Generate clean slides with story arc</div>
-            </div>
-
-            <div class="pipeline-arrow"></div>
-
-            <div class="pipeline-step" onclick="showStep(4)">
-                <div class="step-number">5</div>
-                <div class="step-title">Deliver</div>
-                <div class="step-description">Visual QA + polished PPTX output</div>
+        <!-- PROGRESS BAR -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-label" id="progressLabel">Analyzing your lesson...</div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar" id="progressBar"></div>
             </div>
         </div>
 
-        <!-- DETAIL PANEL -->
-        <div class="detail-panel" id="detailPanel">
-            <div class="detail-header">
-                <span class="detail-icon" id="detailIcon">📥</span>
-                <h3 class="detail-title" id="detailTitle">Drop Your Lesson</h3>
-            </div>
-            <div class="detail-content">
-                <div class="detail-text">
-                    <h3 id="detailHeading">Upload Any CPM Lesson</h3>
-                    <p id="detailDescription">
-                        Drop any CPM lesson PPTX into the chat. No preparation needed. The Digester automatically accepts file formats from any edition or variant of CPM curriculum. Just paste, and we take care of the rest.
-                    </p>
-                    <div class="tag-list" id="tagList">
-                        <div class="tag">CPM Algebra 1</div>
-                        <div class="tag">CPM Algebra 2</div>
-                        <div class="tag">CPM Geometry</div>
-                        <div class="tag">CPM Pre-Calc</div>
-                    </div>
-                </div>
-                <div class="code-panel">
-                    <div class="code-line"><span class="code-comment">// User input example</span></div>
-                    <div class="code-line"></div>
-                    <div class="code-line"><span class="code-function">user</span>: <span class="code-string">"Here's my CPM Algebra 1 lesson"</span></div>
-                    <div class="code-line"><span class="code-function">attachments</span>: [<span class="code-string">"lesson-7-2.pptx"</span>]</div>
-                    <div class="code-line"></div>
-                    <div class="code-line"><span class="code-comment">// Digester processes immediately</span></div>
-                    <div class="code-line"><span class="code-highlight">✓ File received</span></div>
-                    <div class="code-line"><span class="code-highlight">✓ Format validated</span></div>
-                    <div class="code-line"><span class="code-highlight">✓ Extracting slides...</span></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== DEMO SECTION ==================== -->
-    <section class="demo-section">
-        <h2 class="section-title">Proven: 9.1.2 Area of Circles</h2>
-
-        <div class="demo-container">
-            <div class="demo-card before">
-                <div class="demo-header">❌ Before</div>
-                <div class="demo-stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Slides</div>
-                        <div class="stat-value">51</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Quality</div>
-                        <div class="stat-value">⚠️</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Standards</div>
-                        <div class="stat-value">0</div>
-                    </div>
-                </div>
-                <div style="padding: 24px; border-top: 1px solid rgba(239, 68, 68, 0.3);">
-                    <div style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 12px;">Issues found:</div>
-                    <div style="font-size: 0.85rem; color: #fca5a5;">
-                        • Cluttered design<br>
-                        • Duplicate slides<br>
-                        • No standards alignment<br>
-                        • No vocabulary embedded<br>
-                        • Inconsistent formatting
-                    </div>
-                </div>
+        <!-- RESULTS PANEL -->
+        <div class="results-panel" id="resultsPanel">
+            <!-- File Info -->
+            <div class="results-section delay-1">
+                <h2 class="section-heading">📄 Lesson Details</h2>
+                <div class="file-info" id="fileInfo"></div>
             </div>
 
-            <div class="demo-card after">
-                <div class="demo-header">✅ After</div>
-                <div class="demo-stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Slides</div>
-                        <div class="stat-value">25</div>
+            <!-- Slide Map -->
+            <div class="results-section delay-2">
+                <h2 class="section-heading">📺 Slide Classification</h2>
+                <div class="slide-map" id="slideMap"></div>
+            </div>
+
+            <!-- Topics Detected -->
+            <div class="results-section delay-3" id="topicsSection">
+                <h2 class="section-heading">🔍 Topics Detected</h2>
+                <div class="tags-container" id="topicsContainer"></div>
+            </div>
+
+            <!-- Standards Aligned -->
+            <div class="results-section delay-4" id="standardsSection">
+                <h2 class="section-heading">🎯 Standards Alignment</h2>
+                <div class="standards-list" id="standardsList"></div>
+            </div>
+
+            <!-- Teaching Insights -->
+            <div class="results-section delay-5" id="insightsSection">
+                <h2 class="section-heading">💡 Teaching Insights</h2>
+                <div id="insightsContainer"></div>
+            </div>
+
+            <!-- Build Script -->
+            <div class="results-section delay-6" id="scriptSection">
+                <h2 class="section-heading">⚙️ Build Script</h2>
+                <div class="script-container">
+                    <div class="script-header">
+                        <div class="script-title">rebuild.py — Generated Build Script</div>
+                        <button class="copy-btn" id="copyBtn">Copy to Clipboard</button>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Quality</div>
-                        <div class="stat-value">⭐</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Standards</div>
-                        <div class="stat-value">6</div>
-                    </div>
-                </div>
-                <div style="padding: 24px; border-top: 1px solid rgba(34, 197, 94, 0.3);">
-                    <div style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 12px;">Improvements:</div>
-                    <div style="font-size: 0.85rem; color: #86efac;">
-                        • "The Pizza Problem" story arc<br>
-                        • Roles embedded in design<br>
-                        • MCA-III tagged & aligned<br>
-                        • 12 vocabulary terms<br>
-                        • Consistent, polished design
-                    </div>
+                    <div class="script-panel" id="scriptPanel"></div>
                 </div>
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 40px;">
-            <div class="stats-badge">51 → 25 slides</div>
-            <div class="stats-badge">6 MCA-III benchmarks aligned</div>
-            <div class="stats-badge">12 vocabulary terms embedded</div>
+        <!-- EMPTY STATE (shown when no file) -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">👀</div>
+            <div class="empty-text">No lesson loaded yet</div>
+            <div class="empty-hint">Upload a PPTX file to begin analysis</div>
         </div>
-    </section>
-
-    <!-- ==================== SLIDE TYPES GRID ==================== -->
-    <section class="slide-types-section">
-        <h2 class="section-title">23 Slide Types</h2>
-
-        <div class="types-grid">
-            <div class="type-card"><div class="type-emoji">🎯</div><div class="type-name">Title Slide</div><div class="type-description">Lesson opening</div></div>
-            <div class="type-card"><div class="type-emoji">📖</div><div class="type-name">Content</div><div class="type-description">Main instruction</div></div>
-            <div class="type-card"><div class="type-emoji">❓</div><div class="type-name">Question</div><div class="type-description">Student prompt</div></div>
-            <div class="type-card"><div class="type-emoji">🔑</div><div class="type-name">Key Concept</div><div class="type-description">Core idea</div></div>
-            <div class="type-card"><div class="type-emoji">📊</div><div class="type-name">Data Table</div><div class="type-description">Numerical info</div></div>
-            <div class="type-card"><div class="type-emoji">📈</div><div class="type-name">Graph</div><div class="type-description">Visual analysis</div></div>
-            <div class="type-card"><div class="type-emoji">🎨</div><div class="type-name">Diagram</div><div class="type-description">Visual model</div></div>
-            <div class="type-card"><div class="type-emoji">✏️</div><div class="type-name">Practice</div><div class="type-description">Student work</div></div>
-            <div class="type-card"><div class="type-emoji">💡</div><div class="type-name">Example</div><div class="type-description">Worked problem</div></div>
-            <div class="type-card"><div class="type-emoji">⚡</div><div class="type-name">Challenge</div><div class="type-description">Advanced task</div></div>
-            <div class="type-card"><div class="type-emoji">🎭</div><div class="type-name">Role</div><div class="type-description">Student role</div></div>
-            <div class="type-card"><div class="type-emoji">🔗</div><div class="type-name">Connection</div><div class="type-description">Real-world link</div></div>
-            <div class="type-card"><div class="type-emoji">📝</div><div class="type-name">Notes</div><div class="type-description">Vocabulary</div></div>
-            <div class="type-card"><div class="type-emoji">✅</div><div class="type-name">Reflection</div><div class="type-description">Student thinking</div></div>
-            <div class="type-card"><div class="type-emoji">🎯</div><div class="type-name">Learning Goal</div><div class="type-description">Objective</div></div>
-            <div class="type-card"><div class="type-emoji">📌</div><div class="type-name">Summary</div><div class="type-description">Lesson wrap-up</div></div>
-            <div class="type-card"><div class="type-emoji">🔄</div><div class="type-name">Review</div><div class="type-description">Prior knowledge</div></div>
-            <div class="type-card"><div class="type-emoji">🎪</div><div class="type-name">Launch</div><div class="type-description">Engagement hook</div></div>
-            <div class="type-card"><div class="type-emoji">🏆</div><div class="type-name">Assessment</div><div class="type-description">Check for understanding</div></div>
-            <div class="type-card"><div class="type-emoji">🔍</div><div class="type-name">Exploration</div><div class="type-description">Discovery activity</div></div>
-            <div class="type-card"><div class="type-emoji">🎬</div><div class="type-name">Media</div><div class="type-description">Video/animation</div></div>
-            <div class="type-card"><div class="type-emoji">🛠️</div><div class="type-name">Resources</div><div class="type-description">Tools & materials</div></div>
-            <div class="type-card"><div class="type-emoji">📍</div><div class="type-name">Standard</div><div class="type-description">MCA-III aligned</div></div>
-        </div>
-    </section>
-
-    <!-- ==================== WORKFLOW SECTION ==================== -->
-    <section class="workflow-section">
-        <h2 class="section-title">How You Use It</h2>
-
-        <div class="workflow-grid">
-            <div class="workflow-step">
-                <div class="workflow-number">1</div>
-                <div class="workflow-title">Drop a PPTX</div>
-                <div class="workflow-description">Paste your CPM lesson file into Claude. Any edition, any unit, any lesson deck.</div>
-            </div>
-
-            <div class="workflow-step">
-                <div class="workflow-number">2</div>
-                <div class="workflow-title">Digester Analyzes</div>
-                <div class="workflow-description">The system automatically extracts content and classifies all 51+ slides into the 23 slide types.</div>
-            </div>
-
-            <div class="workflow-step">
-                <div class="workflow-number">3</div>
-                <div class="workflow-title">Standards Alignment</div>
-                <div class="workflow-description">Your lesson is cross-referenced against MCA-III benchmarks and vocabulary standards.</div>
-            </div>
-
-            <div class="workflow-step">
-                <div class="workflow-number">4</div>
-                <div class="workflow-title">Story Arc Designed</div>
-                <div class="workflow-description">The Digester identifies a compelling narrative thread and structures the lesson around it.</div>
-            </div>
-
-            <div class="workflow-step">
-                <div class="workflow-number">5</div>
-                <div class="workflow-title">Build Script Runs</div>
-                <div class="workflow-description">Automated build process assembles clean, polished slides using 23 specialized builders.</div>
-            </div>
-
-            <div class="workflow-step">
-                <div class="workflow-number">6</div>
-                <div class="workflow-title">Visual QA Check</div>
-                <div class="workflow-description">LibreOffice pipeline catches formatting issues, missing elements, and design inconsistencies.</div>
-            </div>
-
-            <div class="workflow-step">
-                <div class="workflow-number">7</div>
-                <div class="workflow-title">Polished PPTX</div>
-                <div class="workflow-description">Download your finished lesson: cleaner, standards-aligned, story-driven, and ready to teach.</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== FOOTER ==================== -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-text">
-                <strong>The Lesson Digester</strong> — Drummond Design System • MCA-III Aligned • Built for CPM Math
-            </div>
-            <div class="footer-credits">
-                <span>Transform your lesson decks</span>
-                <span>Standards-aligned design</span>
-                <span>Story-driven pedagogy</span>
-            </div>
-        </div>
-    </footer>
+    </main>
 
     <!-- ==================== JAVASCRIPT ==================== -->
     <script src="js/digester-core.js"></script>
     <script>
-        // Step data configuration
-        const stepData = [
-            {
-                icon: '📥',
-                title: 'Drop Your Lesson',
-                heading: 'Upload Any CPM Lesson',
-                description: 'Drop any CPM lesson PPTX into the chat. No preparation needed. The Digester automatically accepts file formats from any edition or variant of CPM curriculum. Just paste, and we take care of the rest.',
-                tags: ['CPM Algebra 1', 'CPM Algebra 2', 'CPM Geometry', 'CPM Pre-Calc'],
-                code: `// User input example
-
-user: "Here's my CPM Algebra 1 lesson"
-attachments: ["lesson-7-2.pptx"]
-
-// Digester processes immediately
-✓ File received
-✓ Format validated
-✓ Extracting slides...`
+        // ==================== TEACHING INSIGHTS DATABASE ====================
+        const TEACHING_INSIGHTS = {
+            'circumference and area': {
+                misconceptions: [
+                    {
+                        error: 'Confusing diameter with radius',
+                        why: 'Students may use the full diameter when only the radius is needed in formulas',
+                        address: 'Always emphasize that radius = diameter ÷ 2. Use visual models showing the radius clearly marked from center to edge.'
+                    },
+                    {
+                        error: 'Treating pi (π) as a variable to solve for',
+                        why: 'Students may think π is an unknown that needs to be calculated',
+                        address: 'Remind students that π ≈ 3.14 is a constant. It represents the ratio of circumference to diameter.'
+                    },
+                    {
+                        error: 'Mixing up circumference and area formulas',
+                        why: 'Students forget which formula has what exponent or coefficient',
+                        address: 'Create a visual anchor: C = πd (circumference involves diameter, linear). A = πr² (area is squared).'
+                    }
+                ],
+                differentiation: {
+                    emergent: 'Start with hands-on measurement: wrap string around circles, measure the diameter, compare ratios. Use concrete numbers before formulas.',
+                    ell: 'Use visual and kinesthetic models. Provide word problem templates. Allow use of formula sheets. Practice with real-world objects.',
+                    extending: 'Explore the history of π. Calculate area of composite shapes (circles + rectangles). Solve multi-step problems with real-world contexts.'
+                },
+                essential_understandings: [
+                    'π is a constant ratio that relates a circle\'s circumference to its diameter',
+                    'Radius and diameter have a 1:2 relationship',
+                    'Circumference is the perimeter of a circle (C = πd or C = 2πr)',
+                    'Area measures the space inside a circle (A = πr²)'
+                ]
             },
-            {
-                icon: '🔍',
-                title: 'Analyze Content',
-                heading: 'Extract & Classify All Slides',
-                description: 'The Digester extracts every text element, image, and object. Classifies each slide into 23 types: title, content, question, example, practice, challenge, and more. Builds a structured JSON representation of your entire lesson.',
-                tags: ['Classification', 'Content Extraction', 'Metadata', 'Structure'],
-                code: `// rebuild.py analyzes lesson
-
-slide_1: {
-  type: "Title Slide",
-  content: "9.1.2 Area of Circles",
-  elements: 3
-}
-
-slide_2: {
-  type: "Launch",
-  content: "The Pizza Problem",
-  questions: 1,
-  complexity: "mid"
-}
-
-// Classification complete
-✓ 51 slides analyzed
-✓ 23 types detected
-✓ Topics extracted`
+            'proportional relationships': {
+                misconceptions: [
+                    {
+                        error: 'Thinking proportional means "just add the same amount"',
+                        why: 'Students confuse additive relationships (linear with slope but not through origin) with proportional (multiplicative)',
+                        address: 'Use the "multiplicative" language: each time x multiplies by 2, y must multiply by 2. Show that proportional graphs pass through (0,0).'
+                    },
+                    {
+                        error: 'Not recognizing proportional relationships in different forms',
+                        why: 'Students may not see that y = 2x, y/x = 2, and a table with ratio 2:1 are all the same relationship',
+                        address: 'Show multiple representations side-by-side: equation, table, graph. Highlight the constant ratio.'
+                    },
+                    {
+                        error: 'Confusing slope with unit rate',
+                        why: 'Students may not understand that slope IS the unit rate for proportional relationships',
+                        address: 'Use consistent language. "For every 1 unit of x, y changes by m units. That slope m is our unit rate."'
+                    }
+                ],
+                differentiation: {
+                    emergent: 'Use tape diagrams and area models. Focus on concrete contexts (recipes, ratios of ingredients). Build tables together.',
+                    ell: 'Provide sentence stems: "For every __ units of x, there are __ units of y." Use graphs with grids and labeled points.',
+                    extending: 'Explore non-proportional linear relationships. Work with constants of proportionality as fractions or decimals. Connect to real-world rates.'
+                },
+                essential_understandings: [
+                    'Proportional relationships have a constant unit rate or ratio',
+                    'In a proportional relationship, when one quantity multiplies by a factor, the other multiplies by the same factor',
+                    'The graph of a proportional relationship is a straight line through the origin',
+                    'The equation of a proportional relationship is y = kx, where k is the constant of proportionality'
+                ]
             },
-            {
-                icon: '🎯',
-                title: 'Align Standards',
-                heading: 'MCA-III Cross-Reference',
-                description: 'The Digester maps your lesson content to MCA-III benchmarks. Identifies vocabulary terms, runs gap analysis, and generates diagnostic quiz items. Every standard is covered, every term is embedded.',
-                tags: ['MCA-III Standards', 'Vocabulary', 'Gap Analysis', 'Assessments'],
-                code: `// standards.py alignment
-
-lesson: "9.1.2 Area of Circles"
-
-mca_benchmarks: [
-  "8.G.B.1 - Properties of shapes",
-  "8.G.B.5 - Geometric properties"
-]
-
-vocabulary: [
-  "circumference", "diameter",
-  "radius", "pi", "area"
-]
-
-// Gap analysis & quiz items
-✓ 6 benchmarks aligned
-✓ 12 vocabulary terms
-✓ 8 quiz items generated`
+            'pythagorean theorem': {
+                misconceptions: [
+                    {
+                        error: 'Applying Pythagorean theorem to non-right triangles',
+                        why: 'Students forget that the theorem ONLY applies to right triangles',
+                        address: 'Always check for the right angle first. Use the phrase "in a right triangle" consistently. Mark right angles clearly.'
+                    },
+                    {
+                        error: 'Forgetting to take the square root',
+                        why: 'Students calculate a² + b² = c² but forget c² means they need to √ to find c',
+                        address: 'Emphasize: "The theorem gives us c². To find c, we need the square root." Practice with both sides of the equation.'
+                    },
+                    {
+                        error: 'Assigning wrong sides as a, b, or c',
+                        why: 'Students may confuse which sides are legs vs hypotenuse, especially in word problems',
+                        address: 'Reinforce: c is ALWAYS the longest side, opposite the right angle. The legs are the two sides forming the right angle.'
+                    }
+                ],
+                differentiation: {
+                    emergent: 'Use physical models: tangram squares on each side of a right triangle. Count unit squares to verify the theorem.',
+                    ell: 'Provide diagrams with labeled sides. Use step-by-step problem templates. Work with perfect squares first (3-4-5 triangles).',
+                    extending: 'Derive the theorem geometrically. Explore Pythagorean triples. Solve complex multi-step word problems in 3D contexts.'
+                },
+                essential_understandings: [
+                    'The Pythagorean theorem (a² + b² = c²) relates the sides of RIGHT triangles only',
+                    'In a right triangle, the hypotenuse (c) is the side opposite the right angle',
+                    'The legs (a and b) are the two sides that form the right angle',
+                    'To find a missing side, substitute known values and solve'
+                ]
             },
-            {
-                icon: '🏗️',
-                title: 'Rebuild Slides',
-                heading: 'Generate Story-Arc Design',
-                description: 'The story arc is identified and the build script assembles new slides using 23 specialized builders. Each builder knows how to create perfect title slides, questions, examples, practice sets, and more. Output is clean, cohesive, and pedagogically sound.',
-                tags: ['Story Arc', 'Build System', '23 Builders', 'Design System'],
-                code: `// engine.py builds slides
-
-story_arc = ["Hook", "Explore",
-             "Teach", "Practice",
-             "Reflect", "Close"]
-
-builders = [
-  build_title_slide(),
-  build_launch_slide(),
-  build_content_slides(),
-  build_practice_set(),
-  build_summary_slide()
-]
-
-// Assembly complete
-✓ 25 polished slides
-✓ Story arc embedded
-✓ Roles integrated`
+            'equations': {
+                misconceptions: [
+                    {
+                        error: 'Forgetting to apply operations to both sides equally',
+                        why: 'Students may subtract from only one side or not distribute operations consistently',
+                        address: 'Use the Balance Beam model: whatever you do to one side, you MUST do to the other. Practice saying this aloud.'
+                    },
+                    {
+                        error: 'Combining unlike terms',
+                        why: 'Students may add or subtract terms that have different variables or exponents',
+                        address: 'Define "like terms" clearly: same variable, same exponent. Color-code or circle like terms before combining.'
+                    },
+                    {
+                        error: 'Sign errors when distributing or combining',
+                        why: 'Students forget negative signs when moving terms or distributing negatives',
+                        address: 'Use a "multiply by -1" mindset. Explicitly write out sign changes. Practice with negative coefficients.'
+                    }
+                ],
+                differentiation: {
+                    emergent: 'Use balance scales or algebra tiles to model equation solving physically. Start with one-step equations.',
+                    ell: 'Provide equation-solving steps as a checklist. Use color-coding for like terms. Work with simpler numbers (no fractions initially).',
+                    extending: 'Solve equations with fractions, decimals, and multiple variables. Explore equivalence and identity. Connect to function notation.'
+                },
+                essential_understandings: [
+                    'An equation is a statement that two expressions are equal',
+                    'To solve an equation, perform the same operation on both sides to maintain balance',
+                    'Combining like terms means adding or subtracting terms with identical variable parts',
+                    'The solution is the value that makes the equation true'
+                ]
             },
-            {
-                icon: '✨',
-                title: 'Deliver',
-                heading: 'Visual QA & Export',
-                description: 'LibreOffice visual QA pipeline scans for formatting issues, missing elements, color consistency, and typography. Auto-fixes what it can. Exports a polished, professional PPTX ready for your classroom.',
-                tags: ['LibreOffice', 'QA Testing', 'Export', 'Polish'],
-                code: `// qa_pipeline.py visual check
-
-checks: [
-  "Color consistency ✓",
-  "Typography baseline ✓",
-  "Element alignment ✓",
-  "Missing images ✓",
-  "Slide layouts ✓"
-]
-
-export_format: "PPTX"
-target: "lesson-digested.pptx"
-
-// Quality assurance passed
-✓ 0 issues found
-✓ Fully optimized
-✓ Ready to teach`
+            'linear functions': {
+                misconceptions: [
+                    {
+                        error: 'Misinterpreting slope as just a number without meaning',
+                        why: 'Students calculate slope but don\'t connect it to rate of change or real-world meaning',
+                        address: 'Always interpret slope: "For each unit increase in x, y increases by m units." Connect to context (e.g., cost per item, miles per hour).'
+                    },
+                    {
+                        error: 'Confusing slope and y-intercept',
+                        why: 'Students may think the y-intercept is part of the slope or vice versa',
+                        address: 'Use the forms: f(x) = mx + b. "m is the slope (rate of change), b is the y-intercept (starting value at x=0)"'
+                    },
+                    {
+                        error: 'Not recognizing functions in different representations',
+                        why: 'A function shown in a table, graph, equation, or verbal form may not be recognized as the "same" function',
+                        address: 'Show all four representations side by side. Practice converting between them. Highlight that they describe the same relationship.'
+                    }
+                ],
+                differentiation: {
+                    emergent: 'Start with real-world linear contexts (phone plans, car rentals). Create tables and graphs together. Use slope triangles on graphs.',
+                    ell: 'Provide sentence frames: "As __ increases by __, __ increases by __." Use color-coded equations: y = (slope)x + (y-intercept).',
+                    extending: 'Compare linear vs non-linear functions. Solve systems of linear functions. Explore piecewise linear functions and real-world modeling.'
+                },
+                essential_understandings: [
+                    'A linear function can be represented as f(x) = mx + b',
+                    'The slope m represents the rate of change (rise over run)',
+                    'The y-intercept b is the output when the input is zero',
+                    'Linear functions model relationships where the change is constant'
+                ]
             }
+        };
+
+        // ==================== STANDARDS DATABASE ====================
+        const MCA_BENCHMARKS = {
+            'circumference': [
+                { code: '7.3.1.1', desc: 'Calculate perimeter and area of circles (MCA-III)' }
+            ],
+            'area': [
+                { code: '7.3.1.1', desc: 'Calculate perimeter and area of circles (MCA-III)' },
+                { code: '8.3.1.1', desc: 'Use the Pythagorean theorem with two- and three-dimensional figures' }
+            ],
+            'diameter': [
+                { code: '7.3.1.1', desc: 'Use formulas for circles — circumference = πd, area = πr²' }
+            ],
+            'radius': [
+                { code: '7.3.1.1', desc: 'Use formulas for circles — circumference = πd, area = πr²' }
+            ],
+            'pi': [
+                { code: '7.3.1.1', desc: 'Understand pi as the ratio of circumference to diameter' }
+            ],
+            'proportional': [
+                { code: '7.1.1.1', desc: 'Know that every rational number can be written as a ratio of integers' },
+                { code: '7.1.1.2', desc: 'Understand that division of integers follows the rules for signs' },
+                { code: '7.2.2.1', desc: 'Represent proportional relationships with equations' }
+            ],
+            'percent': [
+                { code: '7.1.1.4', desc: 'Convert between fractions, decimals, and percents' },
+                { code: '7.2.3.1', desc: 'Use proportional reasoning to solve problems with percent' }
+            ],
+            'equation': [
+                { code: '7.2.4.1', desc: 'Represent relationships in various forms (tables, graphs, equations)' },
+                { code: '8.2.4.1', desc: 'Solve multi-step equations in one variable' }
+            ],
+            'slope': [
+                { code: '8.2.1.2', desc: 'Use linear functions to represent relationships' },
+                { code: '8.2.2.1', desc: 'Represent linear functions with tables, graphs, equations' }
+            ],
+            'linear': [
+                { code: '8.2.1.1', desc: 'Understand that a function assigns each input exactly one output' },
+                { code: '8.2.2.1', desc: 'Represent linear functions with tables, graphs, equations' },
+                { code: '8.2.4.4', desc: 'Express linear equations in slope-intercept, point-slope, standard forms' }
+            ],
+            'pythagorean': [
+                { code: '8.3.1.1', desc: 'Use the Pythagorean theorem with two- and three-dimensional figures' },
+                { code: '8.3.1.2', desc: 'Determine distance between two points using Pythagorean theorem' }
+            ],
+            'function': [
+                { code: '8.2.1.1', desc: 'Understand that a function assigns each input exactly one output' },
+                { code: '8.2.1.3', desc: 'Identify graphical properties of functions (linear vs. non-linear)' }
+            ],
+            'quadratic': [
+                { code: '8.EE.A.1', desc: 'Properties of integer exponents and expressions with exponents' }
+            ]
+        };
+
+        // ==================== SLIDE TYPE KEYWORDS ====================
+        const SLIDE_TYPES = {
+            INTRO_AGENDA: {
+                keywords: ['need to', 'do', 'next', 'notebook', 'pencil', 'chromebook', 'focus skill', 'goal'],
+                priority: 10
+            },
+            CHECKIN_FEELINGS: {
+                keywords: ['feeling', 'number', 'team', 'how are you', 'temperature'],
+                priority: 9
+            },
+            BREATHING: {
+                keywords: ['breathe', 'breathing', 'mindful', 'meditation', 'relax'],
+                priority: 9
+            },
+            LEARNING_TARGET: {
+                keywords: ['learning target', 'success criteria', 'i will', 'know if', 'objective'],
+                priority: 8
+            },
+            TEAM_ROLES: {
+                keywords: ['facilitator', 'task manager', 'resource manager', 'recorder', 'reporter'],
+                priority: 7
+            },
+            STORY_NARRATIVE: {
+                keywords: ['story', 'once upon', 'character', 'narrative'],
+                priority: 5
+            },
+            STORY_DRAMATIC: {
+                keywords: ['alert', 'emergency', 'breaking', 'urgent', 'danger'],
+                priority: 6
+            },
+            ACTIVITY_LAUNCH: {
+                keywords: ['teams complete', 'activity', 'launch', 'let\'s', 'do this'],
+                priority: 7
+            },
+            PROBLEM_SLIDE: {
+                keywords: [],
+                priority: 4
+            },
+            EXIT_TICKET: {
+                keywords: ['exit ticket', 'exit', 'closure', 'wrap up', 'learn'],
+                priority: 8
+            },
+            HOMEWORK: {
+                keywords: ['homework', 'tonight', 'hw:', 'assignment'],
+                priority: 9
+            },
+            DAY_DIVIDER: {
+                keywords: ['day 2', 'day two', 'day 3', 'day 4', 'day 5'],
+                priority: 9
+            },
+            CLOSURE: {
+                keywords: ['closure', 'summary', 'wrap', 'conclusion'],
+                priority: 8
+            }
+        };
+
+        // ==================== TOPIC DETECTION ====================
+        const TOPIC_PATTERNS = [
+            { topic: 'circumference and area', pattern: /circumference|area|circle/i },
+            { topic: 'diameter', pattern: /diameter/i },
+            { topic: 'radius', pattern: /radius/i },
+            { topic: 'pi', pattern: /\bpi\b|π|3\.14/i },
+            { topic: 'proportional relationships', pattern: /proportional|ratio|unit rate/i },
+            { topic: 'percent', pattern: /percent|%|discount/i },
+            { topic: 'equations', pattern: /equation|solve|linear|balance/i },
+            { topic: 'slope', pattern: /slope|rise over run|gradient/i },
+            { topic: 'linear functions', pattern: /linear function|function|f\(x\)|y = mx/i },
+            { topic: 'pythagorean theorem', pattern: /pythagorean|hypotenuse|right triangle/i },
+            { topic: 'exponent', pattern: /exponent|power|squared|cubed|exponentiation/i }
         ];
 
-        // Initialize the dashboard
-        function initDashboard() {
-            showStep(0);
+        // ==================== STATE ====================
+        let currentAnalysis = null;
+
+        // ==================== EVENT LISTENERS ====================
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', copyBuildScript);
+
+        // ==================== FILE HANDLING ====================
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
         }
 
-        // Show step details
-        function showStep(index) {
-            const step = stepData[index];
+        function handleFile(file) {
+            if (!file.name.endsWith('.pptx')) {
+                alert('Please select a valid PPTX file');
+                return;
+            }
 
-            // Update active step highlight
-            document.querySelectorAll('.pipeline-step').forEach((el, i) => {
-                el.classList.toggle('active', i === index);
+            document.getElementById('progressContainer').classList.add('visible');
+            document.getElementById('resultsPanel').classList.remove('visible');
+            document.getElementById('emptyState').style.display = 'none';
+
+            analyzePPTX(file);
+        }
+
+        // ==================== PPTX PARSING ====================
+        async function analyzePPTX(file) {
+            try {
+                updateProgress(10, 'Loading file...');
+
+                const zip = await JSZip.loadAsync(file);
+                updateProgress(30, 'Extracting slides...');
+
+                // Get slide files
+                const slideFiles = Object.keys(zip.files)
+                    .filter(f => f.match(/ppt\/slides\/slide(\d+)\.xml/))
+                    .sort((a, b) => {
+                        const numA = parseInt(a.match(/slide(\d+)/)[1]);
+                        const numB = parseInt(b.match(/slide(\d+)/)[1]);
+                        return numA - numB;
+                    });
+
+                const slides = [];
+                for (const slidePath of slideFiles) {
+                    const xml = await zip.file(slidePath).async('string');
+                    const slideNum = parseInt(slidePath.match(/slide(\d+)/)[1]);
+                    const text = extractTextFromXML(xml);
+                    slides.push({
+                        num: slideNum,
+                        text: text,
+                        type: classifySlide(text)
+                    });
+                }
+
+                updateProgress(60, 'Detecting topics...');
+
+                // Detect topics
+                const allText = slides.map(s => s.text).join(' ');
+                const topics = detectTopics(allText);
+
+                // Get standards
+                const standards = getStandardsForTopics(topics);
+
+                // Get teaching insights
+                const insights = getTeachingInsights(topics);
+
+                // Generate build script
+                const buildScript = generateBuildScript(slides, topics, standards);
+
+                updateProgress(90, 'Preparing results...');
+
+                // Store analysis
+                currentAnalysis = {
+                    filename: file.name,
+                    slideCount: slides.length,
+                    slides: slides,
+                    topics: topics,
+                    standards: standards,
+                    insights: insights,
+                    buildScript: buildScript
+                };
+
+                updateProgress(100, 'Complete!');
+                displayResults();
+
+                setTimeout(() => {
+                    document.getElementById('progressContainer').classList.remove('visible');
+                }, 800);
+            } catch (error) {
+                console.error('Error analyzing PPTX:', error);
+                alert('Error analyzing file: ' + error.message);
+                document.getElementById('progressContainer').classList.remove('visible');
+            }
+        }
+
+        // ==================== TEXT EXTRACTION ====================
+        function extractTextFromXML(xml) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xml, 'text/xml');
+
+            // Find all text elements (namespace-aware)
+            const textElements = doc.querySelectorAll('a\\:t, t');
+            const text = Array.from(textElements)
+                .map(el => el.textContent)
+                .join(' ');
+
+            return text.trim();
+        }
+
+        // ==================== SLIDE CLASSIFICATION ====================
+        function classifySlide(text) {
+            const lowerText = text.toLowerCase();
+            let bestMatch = 'PROBLEM_SLIDE';
+            let highestPriority = SLIDE_TYPES.PROBLEM_SLIDE.priority;
+
+            for (const [type, config] of Object.entries(SLIDE_TYPES)) {
+                if (config.keywords.length === 0) continue;
+
+                const matchCount = config.keywords.filter(keyword =>
+                    lowerText.includes(keyword.toLowerCase())
+                ).length;
+
+                if (matchCount > 0 && config.priority > highestPriority) {
+                    bestMatch = type;
+                    highestPriority = config.priority;
+                }
+            }
+
+            // Check for problem slide pattern (numbers with hyphens)
+            if (/\d+-\d+/.test(text)) {
+                bestMatch = 'PROBLEM_SLIDE';
+            }
+
+            return bestMatch;
+        }
+
+        // ==================== TOPIC DETECTION ====================
+        function detectTopics(text) {
+            const topics = new Set();
+            const lowerText = text.toLowerCase();
+
+            for (const pattern of TOPIC_PATTERNS) {
+                if (pattern.pattern.test(text)) {
+                    topics.add(pattern.topic);
+                }
+            }
+
+            return Array.from(topics);
+        }
+
+        // ==================== STANDARDS MATCHING ====================
+        function getStandardsForTopics(topics) {
+            const standards = new Map();
+            const seenBenchmarks = new Set();
+
+            for (const topic of topics) {
+                const topicKey = topic.split(' ')[0].toLowerCase();
+                if (MCA_BENCHMARKS[topicKey]) {
+                    for (const benchmark of MCA_BENCHMARKS[topicKey]) {
+                        const key = benchmark.code;
+                        if (!seenBenchmarks.has(key)) {
+                            standards.set(key, benchmark);
+                            seenBenchmarks.add(key);
+                        }
+                    }
+                }
+            }
+
+            return Array.from(standards.values());
+        }
+
+        // ==================== TEACHING INSIGHTS ====================
+        function getTeachingInsights(topics) {
+            const insights = {};
+
+            for (const topic of topics) {
+                if (TEACHING_INSIGHTS[topic]) {
+                    insights[topic] = TEACHING_INSIGHTS[topic];
+                }
+            }
+
+            return insights;
+        }
+
+        // ==================== BUILD SCRIPT GENERATION ====================
+        function generateBuildScript(slides, topics, standards) {
+            const lines = [];
+            lines.push('#!/usr/bin/env python3');
+            lines.push('"""');
+            lines.push('Lesson Digester - Auto-generated Build Script');
+            lines.push('Rebuilds your lesson with clean slides, standards alignment, and teaching insights');
+            lines.push('"""');
+            lines.push('');
+            lines.push('from pptx import Presentation');
+            lines.push('from pptx.util import Pt, Inches');
+            lines.push('');
+            lines.push('# Initialize presentation');
+            lines.push('prs = Presentation()');
+            lines.push('');
+            lines.push('# Slide Classification Analysis');
+            lines.push('slide_types = {');
+
+            const typeMap = {};
+            slides.forEach(s => {
+                typeMap[s.type] = (typeMap[s.type] || 0) + 1;
             });
 
-            // Update detail panel
-            document.getElementById('detailIcon').textContent = step.icon;
-            document.getElementById('detailTitle').textContent = step.title;
-            document.getElementById('detailHeading').textContent = step.heading;
-            document.getElementById('detailDescription').textContent = step.description;
+            for (const [type, count] of Object.entries(typeMap)) {
+                lines.push(`    '${type}': ${count},`);
+            }
+            lines.push('}');
+            lines.push('');
 
-            // Update tags
-            const tagList = document.getElementById('tagList');
-            tagList.innerHTML = step.tags.map(tag => `<div class="tag">${tag}</div>`).join('');
+            lines.push('# Topics Detected');
+            lines.push('topics = [');
+            topics.forEach(topic => {
+                lines.push(`    '${topic}',`);
+            });
+            lines.push(']');
+            lines.push('');
 
-            // Update code panel with syntax highlighting
-            const codePanel = document.querySelector('.code-panel');
-            const lines = step.code.split('\n');
-            codePanel.innerHTML = lines.map(line => {
-                let highlightedLine = line;
+            lines.push('# MCA-III Standards Alignment');
+            lines.push('standards = [');
+            standards.forEach(std => {
+                lines.push(`    ('${std.code}', '${std.desc}'),`);
+            });
+            lines.push(']');
+            lines.push('');
 
-                // Apply syntax highlighting
-                highlightedLine = highlightedLine.replace(/\/\/.*/g, match => `<span class="code-comment">${match}</span>`);
-                highlightedLine = highlightedLine.replace(/"([^"]*)"/g, match => `<span class="code-string">${match}</span>`);
-                highlightedLine = highlightedLine.replace(/\b(function|const|let|var|class|import|export|return)\b/g, match => `<span class="code-function">${match}</span>`);
+            lines.push('# Build Process');
+            lines.push('def build_slides():');
+            lines.push('    """Generate rebuilt lesson deck"""');
+            lines.push('    # 1. Create title slide');
+            lines.push('    # 2. Add learning target');
+            lines.push('    # 3. Build story arc');
+            lines.push('    # 4. Add content slides');
+            lines.push('    # 5. Embed vocabulary');
+            lines.push('    # 6. Add assessments');
+            lines.push('    pass');
+            lines.push('');
 
-                // Highlight special terms
-                highlightedLine = highlightedLine.replace(/✓|✗/g, match => `<span class="code-highlight">${match}</span>`);
+            lines.push('if __name__ == "__main__":');
+            lines.push('    build_slides()');
+            lines.push('    print("✓ Lesson rebuilt successfully")');
 
-                return `<div class="code-line">${highlightedLine || '&nbsp;'}</div>`;
-            }).join('');
-
-            // Trigger fade animation
-            const detailPanel = document.getElementById('detailPanel');
-            detailPanel.style.animation = 'none';
-            setTimeout(() => {
-                detailPanel.style.animation = 'fade-in 0.4s ease';
-            }, 10);
+            return lines.join('\n');
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', initDashboard);
+        // ==================== RESULTS DISPLAY ====================
+        function displayResults() {
+            if (!currentAnalysis) return;
 
-        // Add smooth scroll behavior
-        document.documentElement.style.scrollBehavior = 'smooth';
+            // File Info
+            document.getElementById('fileInfo').innerHTML = `
+                <div class="file-stat">
+                    <div class="stat-label">Filename</div>
+                    <div class="stat-value">${currentAnalysis.filename}</div>
+                </div>
+                <div class="file-stat">
+                    <div class="stat-label">Total Slides</div>
+                    <div class="stat-value">${currentAnalysis.slideCount}</div>
+                </div>
+                <div class="file-stat">
+                    <div class="stat-label">Topics Found</div>
+                    <div class="stat-value">${currentAnalysis.topics.length}</div>
+                </div>
+                <div class="file-stat">
+                    <div class="stat-label">Standards Aligned</div>
+                    <div class="stat-value">${currentAnalysis.standards.length}</div>
+                </div>
+            `;
+
+            // Slide Map
+            const slideMapHTML = currentAnalysis.slides.map(slide => {
+                const typeInfo = Digester.slideTypes[slide.type] || { icon: '❓', label: 'Unknown' };
+                return `
+                    <div class="slide-card" title="${typeInfo.label}: ${slide.text.substring(0, 50)}...">
+                        <div class="slide-number">Slide ${slide.num}</div>
+                        <div class="slide-icon">${typeInfo.icon}</div>
+                        <div class="slide-type">${typeInfo.label}</div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('slideMap').innerHTML = slideMapHTML;
+
+            // Topics
+            if (currentAnalysis.topics.length > 0) {
+                document.getElementById('topicsSection').style.display = 'block';
+                document.getElementById('topicsContainer').innerHTML = currentAnalysis.topics
+                    .map(topic => `<span class="tag tag-teal">${topic}</span>`)
+                    .join('');
+            } else {
+                document.getElementById('topicsSection').style.display = 'none';
+            }
+
+            // Standards
+            if (currentAnalysis.standards.length > 0) {
+                document.getElementById('standardsSection').style.display = 'block';
+                document.getElementById('standardsList').innerHTML = currentAnalysis.standards
+                    .map(std => `
+                        <div class="standard-item">
+                            <div class="standard-code">${std.code}</div>
+                            <div class="standard-description">${std.desc}</div>
+                        </div>
+                    `)
+                    .join('');
+            } else {
+                document.getElementById('standardsSection').style.display = 'none';
+            }
+
+            // Teaching Insights
+            if (Object.keys(currentAnalysis.insights).length > 0) {
+                document.getElementById('insightsSection').style.display = 'block';
+                let insightsHTML = '';
+
+                for (const [topic, insight] of Object.entries(currentAnalysis.insights)) {
+                    insightsHTML += `
+                        <div style="margin-bottom: 30px;">
+                            <h3 style="color: var(--amber); margin-bottom: 16px; font-size: 1.05rem;">📚 ${topic.charAt(0).toUpperCase() + topic.slice(1)}</h3>
+
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="color: var(--text); margin-bottom: 12px; font-weight: 700;">Common Misconceptions</h4>
+                                <div class="misconceptions-list">
+                                    ${insight.misconceptions.map(m => `
+                                        <div class="misconception-card">
+                                            <div class="misconception-title">❌ ${m.error}</div>
+                                            <div class="misconception-item">
+                                                <span class="insight-label">Why:</span>
+                                                <span class="insight-text">${m.why}</span>
+                                            </div>
+                                            <div class="misconception-item">
+                                                <span class="insight-label">How to Address:</span>
+                                                <span class="insight-text">${m.address}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="color: var(--text); margin-bottom: 12px; font-weight: 700;">Differentiation Strategies</h4>
+                                <div class="differentiation-grid">
+                                    <div class="diff-card">
+                                        <div class="diff-label">🌱 Emergent</div>
+                                        <div class="diff-content">${insight.differentiation.emergent}</div>
+                                    </div>
+                                    <div class="diff-card">
+                                        <div class="diff-label">🌍 ELL Support</div>
+                                        <div class="diff-content">${insight.differentiation.ell}</div>
+                                    </div>
+                                    <div class="diff-card">
+                                        <div class="diff-label">⭐ Extending</div>
+                                        <div class="diff-content">${insight.differentiation.extending}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 style="color: var(--text); margin-bottom: 12px; font-weight: 700;">Essential Understandings</h4>
+                                <ul style="margin-left: 20px; color: var(--text-dim); line-height: 1.8;">
+                                    ${insight.essential_understandings.map(eu => `<li>${eu}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('insightsContainer').innerHTML = insightsHTML;
+            } else {
+                document.getElementById('insightsSection').style.display = 'none';
+            }
+
+            // Build Script
+            document.getElementById('scriptPanel').innerHTML = currentAnalysis.buildScript
+                .split('\n')
+                .map(line => `<div class="script-line">${escapeHTML(line)}</div>`)
+                .join('');
+
+            // Show results panel
+            document.getElementById('resultsPanel').classList.add('visible');
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function updateProgress(percent, label) {
+            const progressBar = document.getElementById('progressBar');
+            const progressLabel = document.getElementById('progressLabel');
+            progressBar.style.width = percent + '%';
+            progressLabel.textContent = label;
+        }
+
+        function copyBuildScript() {
+            if (!currentAnalysis) return;
+
+            const text = currentAnalysis.buildScript;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        function escapeHTML(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('emptyState').style.display = 'block';
+        });
     </script>
 </body>
 </html>
