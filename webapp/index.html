@@ -1469,7 +1469,7 @@
                 updateProgress(10, 'Loading file...');
 
                 const zip = await JSZip.loadAsync(file);
-                updateProgress(30, 'Extracting slides...');
+                updateProgress(20, 'Extracting slides...');
 
                 // Get slide files
                 const slideFiles = Object.keys(zip.files)
@@ -1480,15 +1480,67 @@
                         return numA - numB;
                     });
 
+                // ── Extract all media files from ppt/media/ ──
+                const mediaFiles = {};
+                const mediaKeys = Object.keys(zip.files).filter(f => f.startsWith('ppt/media/'));
+                for (const mPath of mediaKeys) {
+                    try {
+                        const blob = await zip.file(mPath).async('blob');
+                        const ext = mPath.split('.').pop().toLowerCase();
+                        const mimeMap = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp', svg: 'image/svg+xml', emf: 'image/emf', wmf: 'image/wmf', tiff: 'image/tiff', tif: 'image/tiff' };
+                        const mime = mimeMap[ext] || 'image/png';
+                        // Convert blob to base64 data URI
+                        const b64 = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                        // Store by filename (e.g., "image1.png")
+                        const fname = mPath.split('/').pop();
+                        mediaFiles[fname] = { data: b64, ext: ext, mime: mime };
+                    } catch (e) {
+                        console.warn('Could not extract media:', mPath, e);
+                    }
+                }
+
+                updateProgress(35, 'Mapping images to slides...');
+
                 const slides = [];
                 for (const slidePath of slideFiles) {
                     const xml = await zip.file(slidePath).async('string');
                     const slideNum = parseInt(slidePath.match(/slide(\d+)/)[1]);
                     const text = extractTextFromXML(xml);
+
+                    // ── Extract images for this slide via .rels ──
+                    const slideImages = [];
+                    const relsPath = slidePath.replace('ppt/slides/', 'ppt/slides/_rels/') + '.rels';
+                    const relsFile = zip.file(relsPath);
+                    if (relsFile) {
+                        try {
+                            const relsXml = await relsFile.async('string');
+                            const relsParser = new DOMParser();
+                            const relsDoc = relsParser.parseFromString(relsXml, 'text/xml');
+                            const rels = relsDoc.querySelectorAll('Relationship');
+                            for (const rel of rels) {
+                                const relType = rel.getAttribute('Type') || '';
+                                const target = rel.getAttribute('Target') || '';
+                                if (relType.includes('/image') && target.includes('media/')) {
+                                    const imgName = target.split('/').pop();
+                                    if (mediaFiles[imgName]) {
+                                        slideImages.push(mediaFiles[imgName]);
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Could not parse rels for slide', slideNum, e);
+                        }
+                    }
+
                     slides.push({
                         num: slideNum,
                         text: text,
-                        type: classifySlide(text)
+                        type: classifySlide(text),
+                        images: slideImages
                     });
                 }
 
@@ -1905,6 +1957,231 @@
             document.getElementById('resultsPanel').classList.add('visible');
         }
 
+        // ==================== SVG MATH VISUAL GENERATOR ====================
+        // Generates SVG-based math visuals as base64 data URIs for embedding in PPTX
+        const MathVisuals = {
+            // ── Number Line ──
+            numberLine: function(min, max, marks, label) {
+                const w = 600, h = 120, pad = 40;
+                const lineY = 60, lineW = w - 2 * pad;
+                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
+                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
+                // Main line
+                svg += '<line x1="' + pad + '" y1="' + lineY + '" x2="' + (w - pad) + '" y2="' + lineY + '" stroke="#1E2761" stroke-width="2"/>';
+                // Arrows
+                svg += '<polygon points="' + (w - pad) + ',' + lineY + ' ' + (w - pad - 8) + ',' + (lineY - 5) + ' ' + (w - pad - 8) + ',' + (lineY + 5) + '" fill="#1E2761"/>';
+                svg += '<polygon points="' + pad + ',' + lineY + ' ' + (pad + 8) + ',' + (lineY - 5) + ' ' + (pad + 8) + ',' + (lineY + 5) + '" fill="#1E2761"/>';
+                // Tick marks and labels
+                const range = max - min;
+                for (const m of marks) {
+                    const x = pad + ((m - min) / range) * lineW;
+                    svg += '<line x1="' + x + '" y1="' + (lineY - 10) + '" x2="' + x + '" y2="' + (lineY + 10) + '" stroke="#1E2761" stroke-width="1.5"/>';
+                    svg += '<text x="' + x + '" y="' + (lineY + 28) + '" text-anchor="middle" font-size="12" fill="#1E2761">' + m + '</text>';
+                }
+                if (label) {
+                    svg += '<text x="' + (w / 2) + '" y="16" text-anchor="middle" font-size="13" font-weight="bold" fill="#0D9488">' + label + '</text>';
+                }
+                svg += '</svg>';
+                return 'data:image/svg+xml;base64,' + btoa(svg);
+            },
+
+            // ── Fraction Bar ──
+            fractionBar: function(numerator, denominator, label) {
+                const w = 400, h = 100, pad = 20;
+                const barH = 36, barW = w - 2 * pad, barY = 40;
+                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
+                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
+                // Whole bar outline
+                svg += '<rect x="' + pad + '" y="' + barY + '" width="' + barW + '" height="' + barH + '" fill="#F0F9FF" stroke="#1E2761" stroke-width="1.5" rx="4"/>';
+                // Filled portion
+                const fillW = (numerator / denominator) * barW;
+                svg += '<rect x="' + pad + '" y="' + barY + '" width="' + fillW + '" height="' + barH + '" fill="#0D9488" rx="4" opacity="0.7"/>';
+                // Division lines
+                for (let i = 1; i < denominator; i++) {
+                    const x = pad + (i / denominator) * barW;
+                    svg += '<line x1="' + x + '" y1="' + barY + '" x2="' + x + '" y2="' + (barY + barH) + '" stroke="#1E2761" stroke-width="1"/>';
+                }
+                // Label
+                svg += '<text x="' + (w / 2) + '" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="#1E2761">' + (label || (numerator + '/' + denominator)) + '</text>';
+                svg += '<text x="' + (w / 2) + '" y="' + (barY + barH + 18) + '" text-anchor="middle" font-size="11" fill="#475569">' + numerator + ' out of ' + denominator + ' parts</text>';
+                svg += '</svg>';
+                return 'data:image/svg+xml;base64,' + btoa(svg);
+            },
+
+            // ── Area Model (for multiplication) ──
+            areaModel: function(a, b, label) {
+                const w = 400, h = 320, pad = 50;
+                const gridW = w - 2 * pad, gridH = h - 2 * pad - 30;
+                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
+                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
+                // Title
+                svg += '<text x="' + (w / 2) + '" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#1E2761">' + (label || (a + ' x ' + b)) + '</text>';
+                // Break numbers into tens and ones
+                const aTens = Math.floor(a / 10) * 10, aOnes = a % 10;
+                const bTens = Math.floor(b / 10) * 10, bOnes = b % 10;
+                const parts = [];
+                if (aTens > 0 && bTens > 0) parts.push({ r: aTens, c: bTens, color: '#0D9488' });
+                if (aTens > 0 && bOnes > 0) parts.push({ r: aTens, c: bOnes, color: '#3B82F6' });
+                if (aOnes > 0 && bTens > 0) parts.push({ r: aOnes, c: bTens, color: '#D4870F' });
+                if (aOnes > 0 && bOnes > 0) parts.push({ r: aOnes, c: bOnes, color: '#E8436D' });
+                // Simple 2x2 grid
+                const cols = (bOnes > 0 && bTens > 0) ? 2 : 1;
+                const rows = (aOnes > 0 && aTens > 0) ? 2 : 1;
+                const cellW = gridW / cols, cellH = gridH / rows;
+                const startY = 35;
+                let idx = 0;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        if (idx >= parts.length) break;
+                        const p = parts[idx++];
+                        const cx = pad + c * cellW, cy = startY + r * cellH;
+                        svg += '<rect x="' + cx + '" y="' + cy + '" width="' + cellW + '" height="' + cellH + '" fill="' + p.color + '" opacity="0.2" stroke="#1E2761" stroke-width="1.5"/>';
+                        svg += '<text x="' + (cx + cellW / 2) + '" y="' + (cy + cellH / 2 + 6) + '" text-anchor="middle" font-size="16" font-weight="bold" fill="' + p.color + '">' + (p.r * p.c) + '</text>';
+                        svg += '<text x="' + (cx + cellW / 2) + '" y="' + (cy + cellH / 2 + 22) + '" text-anchor="middle" font-size="10" fill="#475569">' + p.r + ' x ' + p.c + '</text>';
+                    }
+                }
+                // Row / col labels
+                const rowLabels = aTens > 0 && aOnes > 0 ? [aTens, aOnes] : [a];
+                const colLabels = bTens > 0 && bOnes > 0 ? [bTens, bOnes] : [b];
+                for (let r = 0; r < rowLabels.length; r++) {
+                    svg += '<text x="' + (pad - 8) + '" y="' + (startY + r * cellH + cellH / 2 + 5) + '" text-anchor="end" font-size="12" font-weight="bold" fill="#1E2761">' + rowLabels[r] + '</text>';
+                }
+                for (let c = 0; c < colLabels.length; c++) {
+                    svg += '<text x="' + (pad + c * cellW + cellW / 2) + '" y="' + (startY - 6) + '" text-anchor="middle" font-size="12" font-weight="bold" fill="#1E2761">' + colLabels[c] + '</text>';
+                }
+                // Total
+                svg += '<text x="' + (w / 2) + '" y="' + (h - 8) + '" text-anchor="middle" font-size="13" fill="#0D9488">Total: ' + (a * b) + '</text>';
+                svg += '</svg>';
+                return 'data:image/svg+xml;base64,' + btoa(svg);
+            },
+
+            // ── Percent Bar ──
+            percentBar: function(percent, label) {
+                const w = 500, h = 80, pad = 20;
+                const barH = 30, barW = w - 2 * pad, barY = 30;
+                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
+                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
+                svg += '<text x="' + pad + '" y="20" font-size="12" font-weight="bold" fill="#1E2761">' + (label || (percent + '%')) + '</text>';
+                svg += '<rect x="' + pad + '" y="' + barY + '" width="' + barW + '" height="' + barH + '" fill="#F0F9FF" stroke="#1E2761" stroke-width="1" rx="4"/>';
+                const fillW = (percent / 100) * barW;
+                svg += '<rect x="' + pad + '" y="' + barY + '" width="' + fillW + '" height="' + barH + '" fill="#D4870F" rx="4" opacity="0.7"/>';
+                // 0%, 25%, 50%, 75%, 100% marks
+                for (let p = 0; p <= 100; p += 25) {
+                    const x = pad + (p / 100) * barW;
+                    svg += '<text x="' + x + '" y="' + (barY + barH + 14) + '" text-anchor="middle" font-size="9" fill="#475569">' + p + '%</text>';
+                }
+                svg += '</svg>';
+                return 'data:image/svg+xml;base64,' + btoa(svg);
+            },
+
+            // ── Ratio Table ──
+            ratioTable: function(labelA, labelB, pairs, title) {
+                const w = 400, h = 120, pad = 20;
+                const cellW = 60, cellH = 28;
+                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
+                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
+                if (title) svg += '<text x="' + (w / 2) + '" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#1E2761">' + title + '</text>';
+                const startX = pad, startY = 24;
+                // Header column
+                svg += '<rect x="' + startX + '" y="' + startY + '" width="' + (cellW + 10) + '" height="' + cellH + '" fill="#1E2761"/>';
+                svg += '<text x="' + (startX + (cellW + 10) / 2) + '" y="' + (startY + 19) + '" text-anchor="middle" font-size="11" fill="white" font-weight="bold">' + labelA + '</text>';
+                svg += '<rect x="' + startX + '" y="' + (startY + cellH) + '" width="' + (cellW + 10) + '" height="' + cellH + '" fill="#1E2761"/>';
+                svg += '<text x="' + (startX + (cellW + 10) / 2) + '" y="' + (startY + cellH + 19) + '" text-anchor="middle" font-size="11" fill="white" font-weight="bold">' + labelB + '</text>';
+                // Data cells
+                for (let i = 0; i < Math.min(pairs.length, 5); i++) {
+                    const cx = startX + (cellW + 10) + i * cellW;
+                    svg += '<rect x="' + cx + '" y="' + startY + '" width="' + cellW + '" height="' + cellH + '" fill="#F0FDFA" stroke="#0D9488" stroke-width="1"/>';
+                    svg += '<text x="' + (cx + cellW / 2) + '" y="' + (startY + 19) + '" text-anchor="middle" font-size="12" fill="#1E2761">' + pairs[i][0] + '</text>';
+                    svg += '<rect x="' + cx + '" y="' + (startY + cellH) + '" width="' + cellW + '" height="' + cellH + '" fill="#FFF7ED" stroke="#D4870F" stroke-width="1"/>';
+                    svg += '<text x="' + (cx + cellW / 2) + '" y="' + (startY + cellH + 19) + '" text-anchor="middle" font-size="12" fill="#1E2761">' + pairs[i][1] + '</text>';
+                }
+                svg += '</svg>';
+                return 'data:image/svg+xml;base64,' + btoa(svg);
+            },
+
+            // ── Pick the right visual for a topic ──
+            getVisualsForTopic: function(topic) {
+                const t = topic.toLowerCase();
+                const visuals = [];
+                if (t.includes('fraction') || t.includes('equivalen')) {
+                    visuals.push({ img: this.fractionBar(3, 4, '3/4'), caption: 'Fraction Model' });
+                    visuals.push({ img: this.fractionBar(2, 3, '2/3'), caption: 'Equivalent Fractions' });
+                }
+                if (t.includes('number line') || t.includes('locate') || t.includes('compar') || t.includes('rational') || t.includes('irrational')) {
+                    visuals.push({ img: this.numberLine(-5, 5, [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5], 'Number Line'), caption: 'Number Line' });
+                }
+                if (t.includes('percent')) {
+                    visuals.push({ img: this.percentBar(75, '75% = 3/4'), caption: 'Percent Model' });
+                }
+                if (t.includes('ratio') || t.includes('rate') || t.includes('proportion')) {
+                    visuals.push({ img: this.ratioTable('x', 'y', [[1, 3], [2, 6], [3, 9], [4, 12], ['?', '?']], 'Ratio Table'), caption: 'Ratio Table' });
+                }
+                if (t.includes('area') || t.includes('multipli') || t.includes('circumference') || t.includes('circle')) {
+                    visuals.push({ img: this.areaModel(23, 15, '23 x 15'), caption: 'Area Model' });
+                }
+                if (t.includes('pythagor')) {
+                    visuals.push({ img: this.numberLine(0, 15, [0, 3, 5, 12, 13, 15], 'a=3, b=4, c=5'), caption: 'Pythagorean Triple' });
+                }
+                if (t.includes('factor') || t.includes('prime') || t.includes('gcf') || t.includes('lcm')) {
+                    visuals.push({ img: this.areaModel(12, 8, 'Factor Pairs of 12 x 8'), caption: 'Factor Model' });
+                }
+                if (t.includes('mean') || t.includes('median') || t.includes('range')) {
+                    visuals.push({ img: this.numberLine(0, 20, [2, 5, 8, 10, 12, 15, 18], 'Data Points'), caption: 'Data Distribution' });
+                }
+                if (t.includes('equation') || t.includes('inequalit') || t.includes('solve') || t.includes('system')) {
+                    visuals.push({ img: this.numberLine(-10, 10, [-10, -5, 0, 5, 10], 'Solution Set'), caption: 'Solution Number Line' });
+                }
+                if (t.includes('similar') || t.includes('scal')) {
+                    visuals.push({ img: this.ratioTable('Original', 'Scaled', [[2, 6], [3, 9], [5, 15]], 'Scale Factor = 3'), caption: 'Scaling Table' });
+                }
+                // Default if nothing matched
+                if (visuals.length === 0) {
+                    visuals.push({ img: this.numberLine(0, 10, [0, 2, 4, 6, 8, 10], topic), caption: 'Number Line' });
+                }
+                return visuals;
+            }
+        };
+
+        // ==================== MATH-TOOLBOX LINKS ====================
+        // Generates hyperlinks to interactive math tools
+        const MathToolbox = {
+            baseUrl: 'https://discrafty-cpu.github.io/math-toolbox',
+            tools: {
+                'number-line': { label: 'Interactive Number Line', path: '/number-line' },
+                'fraction-bars': { label: 'Fraction Bar Explorer', path: '/fraction-bars' },
+                'area-model': { label: 'Area Model Builder', path: '/area-model' },
+                'ratio-table': { label: 'Ratio Table Tool', path: '/ratio-table' },
+                'percent-bar': { label: 'Percent Bar Model', path: '/percent-bar' },
+                'graphing': { label: 'Coordinate Graphing', path: '/graphing' },
+                'equation-balance': { label: 'Equation Balance', path: '/equation-balance' }
+            },
+
+            getLinksForTopic: function(topic) {
+                const t = topic.toLowerCase();
+                const links = [];
+                if (t.includes('number line') || t.includes('locate') || t.includes('compar') || t.includes('rational') || t.includes('irrational'))
+                    links.push(this.tools['number-line']);
+                if (t.includes('fraction') || t.includes('equivalen'))
+                    links.push(this.tools['fraction-bars']);
+                if (t.includes('area') || t.includes('multipli') || t.includes('circumference'))
+                    links.push(this.tools['area-model']);
+                if (t.includes('ratio') || t.includes('rate') || t.includes('proportion'))
+                    links.push(this.tools['ratio-table']);
+                if (t.includes('percent'))
+                    links.push(this.tools['percent-bar']);
+                if (t.includes('equation') || t.includes('solve') || t.includes('system'))
+                    links.push(this.tools['equation-balance']);
+                if (t.includes('pythagor') || t.includes('graph') || t.includes('coordinate'))
+                    links.push(this.tools['graphing']);
+                if (links.length === 0) links.push(this.tools['number-line']);
+                return links;
+            },
+
+            getUrl: function(tool) {
+                return this.baseUrl + tool.path;
+            }
+        };
+
         // ==================== PPTX GENERATOR (Lesson-Flow + 23-Point Analysis) ====================
         // Rebuilt deck flows like an actual math lesson with original content preserved,
         // scaffolding woven in, and teacher reference material at the end.
@@ -1974,19 +2251,123 @@
                 slideGroups[s.type].push(s);
             }
 
+            // ── Pre-generate topic visuals ──
+            const topicVisuals = [];
+            for (const topic of analysis.topics) {
+                const tvs = MathVisuals.getVisualsForTopic(topic);
+                topicVisuals.push(...tvs);
+            }
+
+            // ── Pre-generate math toolbox links ──
+            const toolboxLinks = [];
+            for (const topic of analysis.topics) {
+                const tLinks = MathToolbox.getLinksForTopic(topic);
+                for (const tl of tLinks) {
+                    if (!toolboxLinks.find(l => l.path === tl.path)) toolboxLinks.push(tl);
+                }
+            }
+
             // ════════════════════════════════════════════════════════
             //  PART 1: THE LESSON (every original slide rebuilt, no limits)
             // ════════════════════════════════════════════════════════
 
-            // Helper: build one slide per original slide — full content, clean layout
-            function buildContentSlide(s, titleOverride, accent) {
+            // ── Layout detection: determines which layout to use per slide type ──
+            function getLayout(slideType) {
+                const twoCol = ['PROBLEM_SLIDE', 'EQUATION_SOLVE', 'NOTICE_WONDER', 'WOULD_YOU_RATHER', 'VOCABULARY_CARDS', 'FOCUS_SKILL_DETAIL', 'MATH_TOOL'];
+                const centered = ['INTRO_AGENDA', 'CHECKIN_FEELINGS', 'BREATHING', 'COMMITMENT', 'DAY_DIVIDER', 'TIMER'];
+                const fullVisBelow = ['ACTIVITY_LAUNCH', 'WARMUP_REVIEW', 'EXIT_TICKET'];
+                if (twoCol.includes(slideType)) return 'two-col';
+                if (centered.includes(slideType)) return 'centered';
+                if (fullVisBelow.includes(slideType)) return 'full-vis-below';
+                return 'full-width'; // stories, discussions, learning log, etc.
+            }
+
+            // Helper: build one slide per original slide — auto-detect layout, images + visuals
+            function buildContentSlide(s, titleOverride, accent, extraVisual) {
                 const info = Digester.slideTypes[s.type] || { label: s.type, icon: '' };
                 const sl = pres.addSlide();
                 header(sl, titleOverride || info.label, accent || C.navy);
-                sl.addText(s.text, {
-                    x: 0.5, y: 0.95, w: 9, h: 4.0,
-                    fontSize: 13, color: C.textDark, wrap: true, valign: "top"
-                });
+                const layout = getLayout(s.type);
+                const hasOrigImg = s.images && s.images.length > 0;
+                const hasVisual = extraVisual || hasOrigImg;
+
+                if (layout === 'two-col' && hasVisual) {
+                    // ── Two-Column: image/visual LEFT, text RIGHT ──
+                    // Image on the left
+                    if (hasOrigImg) {
+                        try {
+                            sl.addImage({ data: s.images[0].data, x: 0.3, y: 0.95, w: 4.2, h: 3.2, sizing: { type: 'contain', w: 4.2, h: 3.2 } });
+                        } catch (e) { console.warn('Image embed error:', e); }
+                        // If extra visual too, put it below original image
+                        if (extraVisual) {
+                            try {
+                                sl.addImage({ data: extraVisual.img, x: 0.3, y: 4.2, w: 4.2, h: 0.9, sizing: { type: 'contain', w: 4.2, h: 0.9 } });
+                            } catch (e) {}
+                        }
+                    } else if (extraVisual) {
+                        try {
+                            sl.addImage({ data: extraVisual.img, x: 0.3, y: 0.95, w: 4.2, h: 3.2, sizing: { type: 'contain', w: 4.2, h: 3.2 } });
+                        } catch (e) { console.warn('SVG embed error:', e); }
+                    }
+                    // Text on the right
+                    sl.addText(s.text, {
+                        x: 4.8, y: 0.95, w: 4.8, h: 4.0,
+                        fontSize: 12, color: C.textDark, wrap: true, valign: "top"
+                    });
+                } else if (layout === 'centered') {
+                    // ── Centered: text in the middle, larger font ──
+                    sl.addText(s.text, {
+                        x: 1.0, y: 1.2, w: 8.0, h: 3.2,
+                        fontSize: 16, color: C.textDark, wrap: true, valign: "middle", align: "center"
+                    });
+                    if (hasOrigImg) {
+                        try {
+                            sl.addImage({ data: s.images[0].data, x: 3.5, y: 4.2, w: 3.0, h: 1.0, sizing: { type: 'contain', w: 3.0, h: 1.0 } });
+                        } catch (e) {}
+                    }
+                } else if (layout === 'full-vis-below' && hasVisual) {
+                    // ── Full width text on top, visual below ──
+                    sl.addText(s.text, {
+                        x: 0.5, y: 0.95, w: 9, h: 2.2,
+                        fontSize: 13, color: C.textDark, wrap: true, valign: "top"
+                    });
+                    const imgSrc = hasOrigImg ? s.images[0].data : (extraVisual ? extraVisual.img : null);
+                    if (imgSrc) {
+                        try {
+                            sl.addImage({ data: imgSrc, x: 1.5, y: 3.3, w: 7.0, h: 1.8, sizing: { type: 'contain', w: 7.0, h: 1.8 } });
+                        } catch (e) {}
+                    }
+                } else {
+                    // ── Full-width (default): text fills the slide ──
+                    if (hasOrigImg) {
+                        // Text left 60%, image right 40%
+                        sl.addText(s.text, {
+                            x: 0.5, y: 0.95, w: 5.5, h: 4.0,
+                            fontSize: 13, color: C.textDark, wrap: true, valign: "top"
+                        });
+                        try {
+                            sl.addImage({ data: s.images[0].data, x: 6.2, y: 0.95, w: 3.3, h: 3.5, sizing: { type: 'contain', w: 3.3, h: 3.5 } });
+                        } catch (e) {}
+                    } else {
+                        sl.addText(s.text, {
+                            x: 0.5, y: 0.95, w: 9, h: 4.0,
+                            fontSize: 13, color: C.textDark, wrap: true, valign: "top"
+                        });
+                    }
+                }
+                // Additional original images (2nd, 3rd, etc.) — add as thumbnails at bottom
+                if (hasOrigImg && s.images.length > 1) {
+                    const maxExtra = Math.min(s.images.length - 1, 3);
+                    for (let ei = 0; ei < maxExtra; ei++) {
+                        try {
+                            sl.addImage({
+                                data: s.images[ei + 1].data,
+                                x: 0.5 + ei * 3.1, y: 4.6, w: 2.8, h: 0.85,
+                                sizing: { type: 'contain', w: 2.8, h: 0.85 }
+                            });
+                        } catch (e) {}
+                    }
+                }
                 footer(sl, "Original slide " + s.num + "  •  " + info.icon + " " + info.label);
                 return sl;
             }
@@ -2052,9 +2433,10 @@
                 }
             }
 
-            // ─── Vocabulary (ALL original + essential understandings) ───
+            // ─── Vocabulary (ALL original + essential understandings, with visuals) ───
             for (const s of (slideGroups['VOCABULARY_CARDS'] || [])) {
-                buildContentSlide(s, "Key Vocabulary", C.teal);
+                const vis = topicVisuals.length > 0 ? topicVisuals[0] : null;
+                buildContentSlide(s, "Key Vocabulary", C.teal, vis);
             }
             // Also add essential understandings slide if we have insights
             const hasVocab = Object.values(analysis.insights).some(i => i && i.essential_understandings);
@@ -2084,9 +2466,10 @@
                 }
             }
 
-            // ─── Warm-Up / Review (ALL) ───
+            // ─── Warm-Up / Review (ALL, with visuals) ───
             for (const s of (slideGroups['WARMUP_REVIEW'] || [])) {
-                buildContentSlide(s, "Warm-Up", C.blue);
+                const vis = topicVisuals.length > 0 ? topicVisuals[0] : null;
+                buildContentSlide(s, "Warm-Up", C.blue, vis);
             }
 
             // ─── Team Roles (ALL) ───
@@ -2127,12 +2510,14 @@
                 footer(slide, "RISA: Routine • Integrated • Structured • Academic");
             }
 
-            // ─── Focus Skill / Math Tool (ALL) ───
+            // ─── Focus Skill / Math Tool (ALL, with visuals) ───
             for (const s of (slideGroups['FOCUS_SKILL_DETAIL'] || [])) {
-                buildContentSlide(s, null, C.blue);
+                const vis = topicVisuals.length > 0 ? topicVisuals[0] : null;
+                buildContentSlide(s, null, C.blue, vis);
             }
             for (const s of (slideGroups['MATH_TOOL'] || [])) {
-                buildContentSlide(s, null, C.teal);
+                const vis = topicVisuals.length > 1 ? topicVisuals[1] : (topicVisuals[0] || null);
+                buildContentSlide(s, null, C.teal, vis);
             }
 
             // ─── Activity Launch (ALL) ───
@@ -2148,11 +2533,14 @@
                 buildContentSlide(s, null, C.amber);
             }
 
-            // ─── Problem Slides (ALL — the actual math) ───
+            // ─── Problem Slides (ALL — the actual math, with generated visuals) ───
             const problemSlides = [...(slideGroups['PROBLEM_SLIDE'] || []), ...(slideGroups['EQUATION_SOLVE'] || [])];
             let frameIdx = 0;
+            let visualIdx = 0;
             for (const s of problemSlides) {
-                const sl = buildContentSlide(s, "Problem — Slide " + s.num);
+                const vis = topicVisuals.length > 0 ? topicVisuals[visualIdx % topicVisuals.length] : null;
+                const sl = buildContentSlide(s, "Problem — Slide " + s.num, C.navy, vis);
+                visualIdx++;
                 // Add sentence frame hint at the bottom
                 if (typeof SENTENCE_FRAMES !== 'undefined') {
                     const frames = SENTENCE_FRAMES.problem_solving;
@@ -2205,6 +2593,32 @@
                 footer(slide, "RISA: Routine • Integrated • Structured • Academic");
             }
 
+            // ─── Math Toolbox — Interactive Links ───
+            if (toolboxLinks.length > 0) {
+                slide = pres.addSlide();
+                header(slide, "Math Toolbox — Try It!", C.teal);
+                slide.addText("Use these interactive tools to explore today's math concepts:", {
+                    x: 0.5, y: 1.0, w: 9, h: 0.35, fontSize: 13, color: C.textDark
+                });
+                yPos = 1.5;
+                for (const tool of toolboxLinks) {
+                    if (yPos > 4.5) break;
+                    const url = MathToolbox.getUrl(tool);
+                    slide.addText([
+                        { text: tool.label, options: { fontSize: 14, bold: true, color: C.teal, hyperlink: { url: url } } }
+                    ], { x: 0.8, y: yPos, w: 8.5, h: 0.4, bullet: true });
+                    slide.addText(url, { x: 1.3, y: yPos + 0.32, w: 8, h: 0.22, fontSize: 9, color: C.textMid });
+                    yPos += 0.7;
+                }
+                // If we have a visual, add it as a preview
+                if (topicVisuals.length > 0) {
+                    try {
+                        slide.addImage({ data: topicVisuals[0].img, x: 6.5, y: 3.8, w: 3.0, h: 1.5, sizing: { type: 'contain', w: 3.0, h: 1.5 } });
+                    } catch (e) {}
+                }
+                footer(slide, "math-toolbox  •  Interactive Math Models");
+            }
+
             // ─── Sentence Frames (support slide) ───
             if (typeof SENTENCE_FRAMES !== 'undefined') {
                 slide = pres.addSlide();
@@ -2235,9 +2649,10 @@
                 buildContentSlide(s, "Timer", C.textMid);
             }
 
-            // ─── Exit Ticket (ALL) ───
+            // ─── Exit Ticket (ALL, with visuals) ───
             for (const s of (slideGroups['EXIT_TICKET'] || [])) {
-                buildContentSlide(s, "Exit Ticket", C.pink);
+                const vis = topicVisuals.length > 0 ? topicVisuals[topicVisuals.length - 1] : null;
+                buildContentSlide(s, "Exit Ticket", C.pink, vis);
             }
 
             // ─── Learning Log (ALL) ───
