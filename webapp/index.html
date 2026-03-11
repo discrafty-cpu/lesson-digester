@@ -1081,7 +1081,7 @@
 
             <!-- Proficiency Rubric -->
             <div class="results-section delay-5" id="rubricSection">
-                <h2 class="section-heading">📊 Proficiency Rubric — Drummond Scale</h2>
+                <h2 class="section-heading">📊 RMS Proficiency Rubric</h2>
                 <button class="rubric-expand-all" id="rubricExpandAll">Expand All</button>
                 <div id="rubricContainer"></div>
             </div>
@@ -1854,426 +1854,347 @@
 
         // ==================== PPTX GENERATOR ====================
         async function buildPresentation(analysis) {
-            // Create presentation using PptxGenJS
             const pres = new PptxGenJS();
-
-            // Configure layout
             pres.defineLayout({ name: 'LAYOUT_16x9', width: 10, height: 5.625 });
-            pres.defineLayout({ name: 'LAYOUT_BLANK', width: 10, height: 5.625 });
 
-            const colors = {
-                navy: "1E2761",
-                amber: "D4870F",
-                teal: "0D9488",
-                blue: "3B82F6",
-                pink: "E8436D",
-                bg: "0f1729",
-                white: "FFFFFF",
-                lightGray: "F1F1F1"
+            const C = {
+                navy: "1E2761", amber: "D4870F", teal: "0D9488",
+                blue: "3B82F6", pink: "E8436D", white: "FFFFFF",
+                lightGray: "F1F1F1", textDark: "1E293B", textMid: "475569"
             };
 
-            // Slide 1: Title Slide
+            // ── Helper: standard slide header ──
+            function addHeader(sl, title, color) {
+                sl.background = { color: C.white };
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.7, fill: { color: color || C.navy } });
+                sl.addText(title, { x: 0.3, y: 0.1, w: 9.4, h: 0.5, fontSize: 24, bold: true, color: C.white, align: "left" });
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0.7, w: 10, h: 0.04, fill: { color: C.teal } });
+            }
+
+            // ── Helper: fuzzy RISA topic match ──
+            function findRisaTopic(topics) {
+                const risaKeys = Object.keys(RISA_DIALOGUES);
+                for (const topic of topics) {
+                    // Exact match first
+                    if (RISA_DIALOGUES[topic]) return topic;
+                    // Partial match: check if any RISA key is contained in topic or vice versa
+                    const tLower = topic.toLowerCase();
+                    for (const key of risaKeys) {
+                        if (tLower.includes(key) || key.includes(tLower)) return key;
+                        // Word overlap: if 2+ words match
+                        const tWords = tLower.split(/\s+/);
+                        const kWords = key.split(/\s+/);
+                        const overlap = tWords.filter(w => w.length > 3 && kWords.includes(w));
+                        if (overlap.length >= 2) return key;
+                    }
+                }
+                // Fallback: return first available key
+                return risaKeys.length > 0 ? risaKeys[0] : null;
+            }
+
+            // ═══════════════════════════════════════════
+            // SLIDE 1: Title
+            // ═══════════════════════════════════════════
             let slide = pres.addSlide();
-            slide.background = { color: colors.navy };
-            const titleText = "Grade " + selectedGrade + " - " + analysis.topics.join(", ");
+            slide.background = { color: C.navy };
+            const topicList = analysis.topics.slice(0, 5).join(", ");
+            const titleText = "Grade " + selectedGrade + " — " + topicList;
             slide.addText(titleText, {
-                x: 0.5, y: 1.5, w: 9, h: 1.5,
-                fontSize: 44, bold: true, color: colors.white,
-                align: "center", breakOnSpace: true
+                x: 0.5, y: 1.2, w: 9, h: 1.8,
+                fontSize: 36, bold: true, color: C.white,
+                align: "center", valign: "middle"
             });
             slide.addText("Standards-Aligned • Group Based Learning", {
-                x: 0.5, y: 3.2, w: 9, h: 0.6,
-                fontSize: 24, color: colors.amber,
-                align: "center"
+                x: 0.5, y: 3.3, w: 9, h: 0.5,
+                fontSize: 18, color: C.amber, align: "center"
             });
-            // Amber accent bar at bottom
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 5, w: 10, h: 0.625,
-                fill: { color: colors.amber }
-            });
+            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5, w: 10, h: 0.625, fill: { color: C.amber } });
 
-            // Slide 2: Learning Target
+            // ═══════════════════════════════════════════
+            // SLIDE 2: Learning Targets
+            // ═══════════════════════════════════════════
             slide = pres.addSlide();
-            slide.background = { color: colors.white };
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 0, w: 10, h: 0.7,
-                fill: { color: colors.navy }
-            });
-            slide.addText("Learning Target", {
-                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
-                fontSize: 28, bold: true, color: colors.white,
-                align: "left"
-            });
-            // Teal accent line
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 0.7, w: 10, h: 0.05,
-                fill: { color: colors.teal }
-            });
+            addHeader(slide, "Learning Targets", C.navy);
 
-            let yPos = 1.2;
-            const targetTexts = analysis.topics.map(topic =>
-                "I can " + topic + " using mathematical reasoning"
-            );
-            for (const target of targetTexts) {
-                slide.addText(target, {
-                    x: 0.5, y: yPos, w: 9, h: 0.5,
-                    fontSize: 16, color: colors.navy,
-                    align: "left"
-                });
-                yPos += 0.55;
-            }
-
-            // Standards at bottom
-            if (analysis.standards.length > 0) {
-                const standardsText = analysis.standards.map(s => s.code).join(" • ");
-                slide.addText(standardsText, {
-                    x: 0.5, y: 5, w: 9, h: 0.5,
-                    fontSize: 10, color: colors.lightGray,
-                    align: "center"
-                });
-            }
-
-            // Slide 3: Vocabulary Cards
-            slide = pres.addSlide();
-            slide.background = { color: colors.white };
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 0, w: 10, h: 0.7,
-                fill: { color: colors.navy }
-            });
-            slide.addText("Key Vocabulary", {
-                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
-                fontSize: 28, bold: true, color: colors.white,
-                align: "left"
-            });
-
-            yPos = 1.2;
+            let yPos = 1.0;
             for (const topic of analysis.topics) {
+                if (yPos > 5.0) break;
+                slide.addText("I can " + topic + " using mathematical reasoning", {
+                    x: 0.5, y: yPos, w: 9, h: 0.4,
+                    fontSize: 14, color: C.navy, bullet: true
+                });
+                yPos += 0.5;
+            }
+
+            if (analysis.standards.length > 0) {
+                const codes = analysis.standards.map(s => s.code).join(" • ");
+                slide.addText(codes, { x: 0.3, y: 5.1, w: 9.4, h: 0.4, fontSize: 9, color: C.textMid, align: "center" });
+            }
+
+            // ═══════════════════════════════════════════
+            // SLIDE 3: Standards Alignment
+            // ═══════════════════════════════════════════
+            if (analysis.standards.length > 0) {
+                slide = pres.addSlide();
+                addHeader(slide, "Standards Alignment — MCA-III Benchmarks", C.teal);
+
+                yPos = 0.95;
+                for (const std of analysis.standards) {
+                    if (yPos > 5.1) break;
+                    slide.addText([
+                        { text: std.code, options: { bold: true, color: C.teal, fontSize: 11 } },
+                        { text: "  " + std.desc, options: { color: C.textMid, fontSize: 11 } }
+                    ], { x: 0.5, y: yPos, w: 9, h: 0.35, bullet: true });
+                    yPos += 0.4;
+                }
+
+                slide.addText(analysis.standards.length + " benchmarks aligned", {
+                    x: 0.3, y: 5.2, w: 9.4, h: 0.3, fontSize: 9, color: C.textMid, align: "center"
+                });
+            }
+
+            // ═══════════════════════════════════════════
+            // SLIDE 4: Key Vocabulary / Essential Understandings
+            // ═══════════════════════════════════════════
+            slide = pres.addSlide();
+            addHeader(slide, "Key Vocabulary & Essential Understandings", C.navy);
+
+            yPos = 0.95;
+            for (const topic of analysis.topics) {
+                if (yPos > 4.8) break;
                 const insight = analysis.insights[topic];
                 if (insight && insight.essential_understandings) {
                     slide.addText(topic.toUpperCase(), {
-                        x: 0.5, y: yPos, w: 9, h: 0.3,
-                        fontSize: 14, bold: true, color: colors.amber
+                        x: 0.5, y: yPos, w: 9, h: 0.28,
+                        fontSize: 12, bold: true, color: C.amber
                     });
-                    yPos += 0.35;
+                    yPos += 0.32;
 
-                    for (const understanding of insight.essential_understandings.slice(0, 3)) {
-                        slide.addText(understanding, {
-                            x: 0.7, y: yPos, w: 8.8, h: 0.4,
-                            fontSize: 12, color: colors.navy,
-                            bullet: true
+                    for (const u of insight.essential_understandings.slice(0, 3)) {
+                        if (yPos > 5.0) break;
+                        slide.addText(u, {
+                            x: 0.7, y: yPos, w: 8.8, h: 0.35,
+                            fontSize: 11, color: C.textDark, bullet: true
                         });
-                        yPos += 0.45;
-                        if (yPos > 5.2) break;
+                        yPos += 0.38;
                     }
-                    if (yPos > 5.2) break;
+                    yPos += 0.1;
                 }
             }
 
-            // Slide 4: Misconceptions
+            // ═══════════════════════════════════════════
+            // SLIDE 5: Common Misconceptions
+            // ═══════════════════════════════════════════
             slide = pres.addSlide();
-            slide.background = { color: colors.white };
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 0, w: 10, h: 0.7,
-                fill: { color: colors.pink }
-            });
-            slide.addText("Common Misconceptions", {
-                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
-                fontSize: 28, bold: true, color: colors.white,
-                align: "left"
-            });
+            addHeader(slide, "Common Misconceptions", C.pink);
 
-            yPos = 1.2;
+            yPos = 0.95;
             for (const topic of analysis.topics) {
+                if (yPos > 5.0) break;
                 const insight = analysis.insights[topic];
                 if (insight && insight.misconceptions) {
-                    for (const misconception of insight.misconceptions) {
-                        const bulletText = typeof misconception === 'string' ? misconception : misconception.error;
-                        slide.addText(bulletText, {
-                            x: 0.5, y: yPos, w: 9, h: 0.5,
-                            fontSize: 13, color: colors.navy,
-                            bullet: true
-                        });
-                        yPos += 0.55;
+                    for (const m of insight.misconceptions) {
                         if (yPos > 5.0) break;
+                        const txt = typeof m === 'string' ? m : m.error;
+                        slide.addText(txt, {
+                            x: 0.5, y: yPos, w: 9, h: 0.42,
+                            fontSize: 12, color: C.textDark, bullet: true
+                        });
+                        yPos += 0.48;
                     }
-                    if (yPos > 5.0) break;
                 }
             }
 
-            // Slide 5: Differentiation Strategies
+            // ═══════════════════════════════════════════
+            // SLIDE 6: Differentiation Strategies
+            // ═══════════════════════════════════════════
             slide = pres.addSlide();
-            slide.background = { color: colors.white };
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 0, w: 10, h: 0.7,
-                fill: { color: colors.teal }
-            });
-            slide.addText("Differentiation Strategies", {
-                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
-                fontSize: 28, bold: true, color: colors.white,
-                align: "left"
-            });
+            addHeader(slide, "Differentiation Strategies", C.teal);
 
-            yPos = 1.2;
+            yPos = 0.95;
             for (const topic of analysis.topics) {
+                if (yPos > 4.5) break;
                 const insight = analysis.insights[topic];
                 if (insight && insight.differentiation) {
                     const diff = insight.differentiation;
 
-                    slide.addText("🌱 Emergent", {
-                        x: 0.5, y: yPos, w: 9, h: 0.3,
-                        fontSize: 12, bold: true, color: colors.teal
-                    });
-                    yPos += 0.35;
-                    slide.addText(diff.emergent, {
-                        x: 0.7, y: yPos, w: 8.8, h: 0.6,
-                        fontSize: 11, color: colors.navy,
-                        wrap: true
-                    });
-                    yPos += 0.75;
+                    slide.addText("🌱 Emergent", { x: 0.5, y: yPos, w: 9, h: 0.25, fontSize: 11, bold: true, color: C.teal });
+                    yPos += 0.28;
+                    slide.addText(diff.emergent, { x: 0.7, y: yPos, w: 8.8, h: 0.55, fontSize: 10, color: C.textDark, wrap: true });
+                    yPos += 0.6;
 
-                    slide.addText("🌍 ELL Support", {
-                        x: 0.5, y: yPos, w: 9, h: 0.3,
-                        fontSize: 12, bold: true, color: colors.teal
-                    });
-                    yPos += 0.35;
-                    slide.addText(diff.ell, {
-                        x: 0.7, y: yPos, w: 8.8, h: 0.6,
-                        fontSize: 11, color: colors.navy,
-                        wrap: true
-                    });
-                    yPos += 0.75;
-
-                    if (yPos > 4.5) break;
+                    slide.addText("🌍 ELL Support", { x: 0.5, y: yPos, w: 9, h: 0.25, fontSize: 11, bold: true, color: C.teal });
+                    yPos += 0.28;
+                    slide.addText(diff.ell, { x: 0.7, y: yPos, w: 8.8, h: 0.55, fontSize: 10, color: C.textDark, wrap: true });
+                    yPos += 0.65;
                 }
             }
 
-            // Slide 6: RISA Social Dialogue
+            // ═══════════════════════════════════════════
+            // SLIDE 7: RISA Social Dialogue (fuzzy match)
+            // ═══════════════════════════════════════════
+            const risaMatch = findRisaTopic(analysis.topics);
             slide = pres.addSlide();
-            slide.background = { color: colors.white };
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 0, w: 10, h: 0.7,
-                fill: { color: colors.navy }
-            });
-            slide.addText("RISA Oral Interaction: Social", {
-                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
-                fontSize: 28, bold: true, color: colors.white,
-                align: "left"
-            });
+            addHeader(slide, "RISA Oral Interaction: Social", C.navy);
 
-            yPos = 1.2;
-            const socialTopic = analysis.topics[0];
-            if (socialTopic && RISA_DIALOGUES[socialTopic] && RISA_DIALOGUES[socialTopic].social) {
-                const socialScript = RISA_DIALOGUES[socialTopic].social.script;
-                for (const dialogue of socialScript.slice(0, 10)) {
-                    const speakerColor = dialogue.speaker === "A" ? colors.teal : colors.amber;
-                    const dialogueLine = dialogue.speaker + ": " + dialogue.line;
+            yPos = 0.95;
+            if (risaMatch && RISA_DIALOGUES[risaMatch] && RISA_DIALOGUES[risaMatch].social) {
+                const social = RISA_DIALOGUES[risaMatch].social;
+                slide.addText("Topic: " + social.title, {
+                    x: 0.5, y: yPos, w: 9, h: 0.3,
+                    fontSize: 12, bold: true, color: C.amber
+                });
+                yPos += 0.4;
 
-                    slide.addText(dialogueLine, {
-                        x: 0.5, y: yPos, w: 9, h: 0.4,
-                        fontSize: 12, color: speakerColor,
-                        align: "left"
-                    });
-                    yPos += 0.45;
+                for (const d of social.script.slice(0, 10)) {
                     if (yPos > 4.8) break;
+                    const color = d.speaker === "A" ? C.teal : C.amber;
+                    slide.addText("Student " + d.speaker + ":  " + d.line, {
+                        x: 0.5, y: yPos, w: 9, h: 0.35,
+                        fontSize: 12, color: color
+                    });
+                    yPos += 0.38;
                 }
+            } else {
+                slide.addText("No RISA dialogue available for detected topics.", {
+                    x: 0.5, y: 2.5, w: 9, h: 0.5,
+                    fontSize: 14, color: C.textMid, align: "center", italic: true
+                });
             }
-
-            // RISA footer
             slide.addText("RISA: Routine • Integrated • Structured • Academic", {
-                x: 0.5, y: 5.3, w: 9, h: 0.3,
-                fontSize: 9, color: colors.lightGray,
-                align: "center"
+                x: 0.3, y: 5.2, w: 9.4, h: 0.25, fontSize: 9, color: C.textMid, align: "center"
             });
 
-            // Slide 7: RISA Academic Dialogue
+            // ═══════════════════════════════════════════
+            // SLIDE 8: RISA Academic Dialogue (fuzzy match)
+            // ═══════════════════════════════════════════
             slide = pres.addSlide();
-            slide.background = { color: colors.white };
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 0, w: 10, h: 0.7,
-                fill: { color: colors.navy }
-            });
-            slide.addText("RISA Oral Interaction: Academic", {
-                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
-                fontSize: 28, bold: true, color: colors.white,
-                align: "left"
-            });
+            addHeader(slide, "RISA Oral Interaction: Academic", C.navy);
 
-            yPos = 1.2;
-            if (socialTopic && RISA_DIALOGUES[socialTopic] && RISA_DIALOGUES[socialTopic].academic) {
-                const academicScript = RISA_DIALOGUES[socialTopic].academic.script;
-                for (const dialogue of academicScript.slice(0, 10)) {
-                    const speakerColor = dialogue.speaker === "A" ? colors.teal : colors.amber;
-                    const dialogueLine = dialogue.speaker + ": " + dialogue.line;
+            yPos = 0.95;
+            if (risaMatch && RISA_DIALOGUES[risaMatch] && RISA_DIALOGUES[risaMatch].academic) {
+                const academic = RISA_DIALOGUES[risaMatch].academic;
+                slide.addText("Topic: " + academic.title, {
+                    x: 0.5, y: yPos, w: 9, h: 0.3,
+                    fontSize: 12, bold: true, color: C.amber
+                });
+                yPos += 0.4;
 
-                    slide.addText(dialogueLine, {
-                        x: 0.5, y: yPos, w: 9, h: 0.4,
-                        fontSize: 12, color: speakerColor,
-                        align: "left"
-                    });
-                    yPos += 0.45;
+                for (const d of academic.script.slice(0, 10)) {
                     if (yPos > 4.8) break;
+                    const color = d.speaker === "A" ? C.teal : C.amber;
+                    slide.addText("Student " + d.speaker + ":  " + d.line, {
+                        x: 0.5, y: yPos, w: 9, h: 0.35,
+                        fontSize: 12, color: color
+                    });
+                    yPos += 0.38;
                 }
+            } else {
+                slide.addText("No RISA dialogue available for detected topics.", {
+                    x: 0.5, y: 2.5, w: 9, h: 0.5,
+                    fontSize: 14, color: C.textMid, align: "center", italic: true
+                });
             }
-
-            // RISA footer
             slide.addText("RISA: Routine • Integrated • Structured • Academic", {
-                x: 0.5, y: 5.3, w: 9, h: 0.3,
-                fontSize: 9, color: colors.lightGray,
-                align: "center"
+                x: 0.3, y: 5.2, w: 9.4, h: 0.25, fontSize: 9, color: C.textMid, align: "center"
             });
 
-            // Slide 8: Proficiency Rubric (if rubric data available)
+            // ═══════════════════════════════════════════
+            // SLIDE(S) 9+: RMS Proficiency Rubric (multi-slide if needed)
+            // ═══════════════════════════════════════════
             if (typeof RUBRIC_DESCRIPTORS !== 'undefined' && analysis.standards.length > 0) {
-                const rubricStandards = analysis.standards.slice(0, 3); // Max 3 benchmarks per slide
-                const rubricData = getRubricsForStandards(rubricStandards.map(s => s.code));
+                const allCodes = analysis.standards.map(s => s.code);
+                const rubricData = getRubricsForStandards(allCodes);
                 const rubricCodes = Object.keys(rubricData);
 
-                if (rubricCodes.length > 0) {
+                const levelDefs = [
+                    { key: 'exemplary',  label: 'Exemplary (10)',  color: '0D9488' },
+                    { key: 'proficient', label: 'Proficient (8.5)', color: '3B82F6' },
+                    { key: 'developing', label: 'Developing (7.5)', color: 'D4870F' },
+                    { key: 'beginning',  label: 'Beginning (6.5)',  color: 'E8436D' }
+                ];
+
+                // Show up to 6 benchmarks across rubric slides (2 per slide with full table)
+                const benchmarksPerSlide = 2;
+                const maxBenchmarks = Math.min(rubricCodes.length, 6);
+
+                for (let startIdx = 0; startIdx < maxBenchmarks; startIdx += benchmarksPerSlide) {
                     slide = pres.addSlide();
-                    slide.background = { color: colors.white };
+                    addHeader(slide, "RMS Proficiency Rubric", C.navy);
 
-                    // Navy header bar
-                    slide.addShape(pres.shapes.RECTANGLE, {
-                        x: 0, y: 0, w: 10, h: 0.7,
-                        fill: { color: colors.navy }
-                    });
-                    slide.addText("Proficiency Rubric — Drummond Scale", {
-                        x: 0.3, y: 0.1, w: 9.4, h: 0.5,
-                        fontSize: 24, bold: true, color: colors.white,
-                        align: "left"
-                    });
+                    let ry = 0.9;
+                    const endIdx = Math.min(startIdx + benchmarksPerSlide, maxBenchmarks);
 
-                    // Teal accent line
-                    slide.addShape(pres.shapes.RECTANGLE, {
-                        x: 0, y: 0.7, w: 10, h: 0.04,
-                        fill: { color: colors.teal }
-                    });
+                    for (let bi = startIdx; bi < endIdx; bi++) {
+                        const code = rubricCodes[bi];
+                        const rubric = rubricData[code];
 
-                    const levelDefs = [
-                        { key: 'exemplary',  label: 'Exemplary (10)',  color: '0D9488' },
-                        { key: 'proficient', label: 'Proficient (8.5)', color: '3B82F6' },
-                        { key: 'developing', label: 'Developing (7.5)', color: 'D4870F' },
-                        { key: 'beginning',  label: 'Beginning (6.5)',  color: 'E8436D' }
-                    ];
-
-                    // Table layout for first benchmark (primary focus)
-                    const primaryCode = rubricCodes[0];
-                    const primaryRubric = rubricData[primaryCode];
-
-                    // Benchmark title
-                    slide.addText(primaryCode + ": " + primaryRubric.benchmark, {
-                        x: 0.3, y: 0.9, w: 9.4, h: 0.4,
-                        fontSize: 13, bold: true, color: colors.navy,
-                        align: "left"
-                    });
-
-                    // DOK badge
-                    slide.addText("DOK " + primaryRubric.dok, {
-                        x: 8.5, y: 0.9, w: 1.2, h: 0.35,
-                        fontSize: 10, bold: true, color: colors.amber,
-                        align: "center"
-                    });
-
-                    // Build table rows for primary benchmark
-                    const tableRows = [];
-
-                    // Header row
-                    tableRows.push([
-                        { text: "Level", options: { bold: true, fontSize: 10, color: 'FFFFFF', fill: { color: colors.navy }, align: 'center', valign: 'middle' } },
-                        { text: "Descriptor", options: { bold: true, fontSize: 10, color: 'FFFFFF', fill: { color: colors.navy }, align: 'left', valign: 'middle' } }
-                    ]);
-
-                    // Level rows
-                    for (const level of levelDefs) {
-                        const desc = primaryRubric.descriptors[level.key] || '';
-                        // Truncate long descriptors for slide readability
-                        const shortDesc = desc.length > 120 ? desc.substring(0, 117) + '...' : desc;
-                        tableRows.push([
-                            { text: level.label, options: { fontSize: 9, bold: true, color: level.color, align: 'center', valign: 'middle' } },
-                            { text: shortDesc, options: { fontSize: 9, color: '333333', align: 'left', valign: 'middle' } }
-                        ]);
-                    }
-
-                    slide.addTable(tableRows, {
-                        x: 0.3, y: 1.4, w: 9.4,
-                        colW: [1.6, 7.8],
-                        border: { pt: 0.5, color: 'CCCCCC' },
-                        rowH: [0.3, 0.55, 0.55, 0.55, 0.55],
-                        autoPage: false
-                    });
-
-                    // If additional benchmarks, show them compactly below
-                    if (rubricCodes.length > 1) {
-                        let extraY = 4.0;
-                        slide.addShape(pres.shapes.RECTANGLE, {
-                            x: 0.3, y: extraY - 0.15, w: 9.4, h: 0.02,
-                            fill: { color: colors.teal }
+                        // Benchmark title
+                        slide.addText(code + ": " + rubric.benchmark, {
+                            x: 0.3, y: ry, w: 8.2, h: 0.3,
+                            fontSize: 11, bold: true, color: C.navy
                         });
+                        slide.addText("DOK " + rubric.dok, {
+                            x: 8.5, y: ry, w: 1.2, h: 0.3,
+                            fontSize: 10, bold: true, color: C.amber, align: "center"
+                        });
+                        ry += 0.35;
 
-                        for (let i = 1; i < rubricCodes.length && extraY < 5.3; i++) {
-                            const extraCode = rubricCodes[i];
-                            const extraRubric = rubricData[extraCode];
-                            slide.addText(extraCode + ": " + extraRubric.benchmark, {
-                                x: 0.3, y: extraY, w: 7.5, h: 0.3,
-                                fontSize: 10, bold: true, color: colors.navy,
-                                align: "left"
-                            });
-                            slide.addText("DOK " + extraRubric.dok, {
-                                x: 8.5, y: extraY, w: 1.2, h: 0.3,
-                                fontSize: 9, color: colors.amber,
-                                align: "center"
-                            });
-                            // Show just the Proficient descriptor as summary
-                            const profDesc = extraRubric.descriptors.proficient || '';
-                            const shortProfDesc = profDesc.length > 100 ? profDesc.substring(0, 97) + '...' : profDesc;
-                            slide.addText("Proficient: " + shortProfDesc, {
-                                x: 0.5, y: extraY + 0.3, w: 9.2, h: 0.35,
-                                fontSize: 8, italic: true, color: '666666',
-                                align: "left"
-                            });
-                            extraY += 0.75;
+                        // Build table
+                        const rows = [];
+                        rows.push([
+                            { text: "Level", options: { bold: true, fontSize: 9, color: 'FFFFFF', fill: { color: C.navy }, align: 'center', valign: 'middle' } },
+                            { text: "Descriptor", options: { bold: true, fontSize: 9, color: 'FFFFFF', fill: { color: C.navy }, align: 'left', valign: 'middle' } }
+                        ]);
+                        for (const lv of levelDefs) {
+                            const desc = rubric.descriptors[lv.key] || '';
+                            const short = desc.length > 140 ? desc.substring(0, 137) + '...' : desc;
+                            rows.push([
+                                { text: lv.label, options: { fontSize: 8, bold: true, color: lv.color, align: 'center', valign: 'middle' } },
+                                { text: short, options: { fontSize: 8, color: '333333', align: 'left', valign: 'middle' } }
+                            ]);
                         }
+
+                        slide.addTable(rows, {
+                            x: 0.3, y: ry, w: 9.4,
+                            colW: [1.4, 8.0],
+                            border: { pt: 0.5, color: 'CCCCCC' },
+                            rowH: [0.22, 0.42, 0.42, 0.42, 0.42],
+                            autoPage: false
+                        });
+                        ry += 2.1;
                     }
 
-                    // Footer
-                    slide.addText("Drummond Proficiency Scale • MCA-III Benchmark ALDs", {
-                        x: 0.5, y: 5.35, w: 9, h: 0.25,
-                        fontSize: 8, color: colors.lightGray,
-                        align: "center"
+                    slide.addText("RMS Proficiency Scale • MCA-III Benchmark ALDs", {
+                        x: 0.3, y: 5.3, w: 9.4, h: 0.2,
+                        fontSize: 8, color: C.textMid, align: "center"
                     });
                 }
             }
 
-            // Slide 9: Closure
+            // ═══════════════════════════════════════════
+            // FINAL SLIDE: Reflection & Closure
+            // ═══════════════════════════════════════════
             slide = pres.addSlide();
-            slide.background = { color: colors.navy };
+            slide.background = { color: C.navy };
             slide.addText("Reflection & Closure", {
                 x: 0.5, y: 1.5, w: 9, h: 1,
-                fontSize: 44, bold: true, color: colors.white,
-                align: "center"
+                fontSize: 36, bold: true, color: C.white, align: "center"
             });
             slide.addText("What did you learn today?", {
                 x: 0.5, y: 2.8, w: 9, h: 0.6,
-                fontSize: 24, color: colors.amber,
-                align: "center"
+                fontSize: 20, color: C.amber, align: "center"
             });
             slide.addText("Share with your team.", {
                 x: 0.5, y: 3.5, w: 9, h: 0.6,
-                fontSize: 24, color: colors.amber,
-                align: "center"
+                fontSize: 20, color: C.amber, align: "center"
             });
-            // Teal bottom bar
-            slide.addShape(pres.shapes.RECTANGLE, {
-                x: 0, y: 5.2, w: 10, h: 0.425,
-                fill: { color: colors.teal }
-            });
+            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.2, w: 10, h: 0.425, fill: { color: C.teal } });
 
-            // Generate filename
+            // ── Generate & download ──
             const filename = analysis.filename
                 .replace('.pptx', '')
                 .replace(/[^a-z0-9]/gi, '_') + '_rebuilt.pptx';
-
-            // Save presentation (writeFile triggers browser download)
             await pres.writeFile({ fileName: filename });
             return filename;
         }
