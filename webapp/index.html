@@ -1905,31 +1905,34 @@
             document.getElementById('resultsPanel').classList.add('visible');
         }
 
-        // ==================== PPTX GENERATOR (Full 23-Point Build) ====================
+        // ==================== PPTX GENERATOR (Lesson-Flow + 23-Point Analysis) ====================
+        // Rebuilt deck flows like an actual math lesson with original content preserved,
+        // scaffolding woven in, and teacher reference material at the end.
         async function buildPresentation(analysis) {
             const pres = new PptxGenJS();
             pres.defineLayout({ name: 'LAYOUT_16x9', width: 10, height: 5.625 });
 
+            // Minimal color palette — clean, not techy
             const C = {
                 navy: "1E2761", amber: "D4870F", teal: "0D9488",
                 blue: "3B82F6", pink: "E8436D", white: "FFFFFF",
-                lightGray: "F1F1F1", textDark: "1E293B", textMid: "475569"
+                lightBg: "F8FAFC", textDark: "1E293B", textMid: "475569",
+                border: "E2E8F0"
             };
 
-            // ── Helper: standard slide header ──
-            function addHeader(sl, title, color) {
+            let slide, yPos;
+
+            // ── Helpers ──
+            function header(sl, title, accent) {
                 sl.background = { color: C.white };
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.7, fill: { color: color || C.navy } });
-                sl.addText(title, { x: 0.3, y: 0.1, w: 9.4, h: 0.5, fontSize: 24, bold: true, color: C.white, align: "left" });
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0.7, w: 10, h: 0.04, fill: { color: C.teal } });
+                sl.addText(title, { x: 0.5, y: 0.2, w: 9, h: 0.45, fontSize: 22, bold: true, color: accent || C.navy });
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 0.68, w: 2, h: 0.04, fill: { color: accent || C.navy } });
             }
 
-            // ── Helper: slide footer ──
-            function addFooter(sl, text) {
-                sl.addText(text, { x: 0.3, y: 5.25, w: 9.4, h: 0.25, fontSize: 8, color: C.textMid, align: "center" });
+            function footer(sl, text) {
+                sl.addText(text, { x: 0.5, y: 5.25, w: 9, h: 0.25, fontSize: 7, color: C.textMid, align: "left" });
             }
 
-            // ── Helper: fuzzy RISA topic match ──
             function findRisaTopic(topics) {
                 const risaKeys = Object.keys(RISA_DIALOGUES);
                 for (const topic of topics) {
@@ -1946,421 +1949,352 @@
                 return risaKeys.length > 0 ? risaKeys[0] : null;
             }
 
-            // ── Helper: type color mapping for slide map ──
-            function typeColor(type) {
-                const map = {
-                    INTRO_AGENDA: C.navy, LEARNING_TARGET: C.teal, TEAM_ROLES: C.blue,
-                    TEAM_ROLES_ACTIVITY: C.blue, STORY_NARRATIVE: C.amber, STORY_DRAMATIC: C.pink,
-                    STORY_MISSION: C.amber, PROBLEM_SLIDE: C.teal, ACTIVITY_LAUNCH: C.blue,
-                    EXIT_TICKET: C.pink, CLOSURE: C.navy, HOMEWORK: C.textMid,
-                    CHECKIN_FEELINGS: C.amber, BREATHING: C.teal, COMMITMENT: C.teal,
-                    DAY_DIVIDER: C.navy, FOCUS_SKILL_DETAIL: C.blue, MATH_TOOL: C.teal,
-                    GROUP_DISCUSSION: C.amber, VOCABULARY_CARDS: C.blue, NOTICE_WONDER: C.teal,
-                    WOULD_YOU_RATHER: C.amber, WARMUP_REVIEW: C.blue, EQUATION_SOLVE: C.teal,
-                    LEARNING_LOG: C.navy, TIMER: C.textMid
-                };
-                return map[type] || C.textMid;
+            // ── Sort original slides by lesson flow ──
+            const flowOrder = [
+                'INTRO_AGENDA', 'CHECKIN_FEELINGS', 'BREATHING', 'COMMITMENT',
+                'LEARNING_TARGET', 'VOCABULARY_CARDS', 'WARMUP_REVIEW',
+                'TEAM_ROLES', 'TEAM_ROLES_ACTIVITY',
+                'STORY_NARRATIVE', 'STORY_DRAMATIC', 'STORY_MISSION',
+                'FOCUS_SKILL_DETAIL', 'MATH_TOOL', 'NOTICE_WONDER', 'WOULD_YOU_RATHER',
+                'ACTIVITY_LAUNCH', 'GROUP_DISCUSSION',
+                'PROBLEM_SLIDE', 'EQUATION_SOLVE',
+                'DAY_DIVIDER',
+                'EXIT_TICKET', 'LEARNING_LOG', 'CLOSURE', 'HOMEWORK', 'TIMER'
+            ];
+            const sortedSlides = [...analysis.slides].sort((a, b) => {
+                const ai = flowOrder.indexOf(a.type);
+                const bi = flowOrder.indexOf(b.type);
+                return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+            });
+
+            // Group slides by type
+            const slideGroups = {};
+            for (const s of sortedSlides) {
+                if (!slideGroups[s.type]) slideGroups[s.type] = [];
+                slideGroups[s.type].push(s);
             }
 
-            let slide, yPos;
+            // ════════════════════════════════════════════════════════
+            //  PART 1: THE LESSON (every original slide rebuilt, no limits)
+            // ════════════════════════════════════════════════════════
 
-            // ═══════════════════════════════════════════
-            // SLIDE 1: Title
-            // ═══════════════════════════════════════════
+            // Helper: build one slide per original slide — full content, clean layout
+            function buildContentSlide(s, titleOverride, accent) {
+                const info = Digester.slideTypes[s.type] || { label: s.type, icon: '' };
+                const sl = pres.addSlide();
+                header(sl, titleOverride || info.label, accent || C.navy);
+                sl.addText(s.text, {
+                    x: 0.5, y: 0.95, w: 9, h: 4.0,
+                    fontSize: 13, color: C.textDark, wrap: true, valign: "top"
+                });
+                footer(sl, "Original slide " + s.num + "  •  " + info.icon + " " + info.label);
+                return sl;
+            }
+
+            // ─── Title ───
             slide = pres.addSlide();
             slide.background = { color: C.navy };
-            const topicList = analysis.topics.slice(0, 5).join(", ");
-            const titleText = "Grade " + selectedGrade + " — " + topicList;
-            slide.addText(titleText, {
-                x: 0.5, y: 1.0, w: 9, h: 1.8,
-                fontSize: 36, bold: true, color: C.white,
-                align: "center", valign: "middle"
-            });
-            slide.addText("Standards-Aligned • Group Based Learning", {
-                x: 0.5, y: 3.0, w: 9, h: 0.5,
+            const topicList = analysis.topics.join(", ");
+            slide.addText("Grade " + selectedGrade, {
+                x: 0.5, y: 1.0, w: 9, h: 0.6,
                 fontSize: 18, color: C.amber, align: "center"
             });
-            slide.addText(analysis.slideCount + " slides analyzed • " + analysis.topics.length + " topics • " + analysis.standards.length + " benchmarks", {
-                x: 0.5, y: 3.7, w: 9, h: 0.4,
-                fontSize: 13, color: C.white, align: "center"
+            slide.addText(topicList, {
+                x: 0.5, y: 1.6, w: 9, h: 1.5,
+                fontSize: 32, bold: true, color: C.white,
+                align: "center", valign: "middle", wrap: true
             });
-            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5, w: 10, h: 0.625, fill: { color: C.amber } });
-
-            // ═══════════════════════════════════════════
-            // SLIDE 2: Slide Map — Classification Grid
-            // ═══════════════════════════════════════════
-            slide = pres.addSlide();
-            addHeader(slide, "Slide Map — Classification Grid", C.navy);
-
-            // Build a summary table of slide classifications
-            const typeCount = {};
-            analysis.slides.forEach(s => { typeCount[s.type] = (typeCount[s.type] || 0) + 1; });
-
-            // Grid of slide cards (up to 30 slides shown)
-            const maxCards = Math.min(analysis.slides.length, 30);
-            const cols = 10;
-            const cardW = 0.88;
-            const cardH = 0.5;
-            const startX = 0.35;
-            const startY = 0.9;
-
-            for (let i = 0; i < maxCards; i++) {
-                const s = analysis.slides[i];
-                const col = i % cols;
-                const row = Math.floor(i / cols);
-                const x = startX + col * (cardW + 0.08);
-                const y = startY + row * (cardH + 0.06);
-                const info = Digester.slideTypes[s.type] || { icon: '?', label: s.type };
-
-                slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                    x: x, y: y, w: cardW, h: cardH,
-                    fill: { color: typeColor(s.type) },
-                    rectRadius: 0.05
-                });
-                slide.addText(s.num.toString(), {
-                    x: x, y: y, w: cardW, h: 0.2,
-                    fontSize: 7, bold: true, color: C.white, align: "center"
-                });
-                slide.addText(info.icon, {
-                    x: x, y: y + 0.17, w: cardW, h: 0.18,
-                    fontSize: 11, color: C.white, align: "center"
-                });
-                slide.addText(info.label, {
-                    x: x, y: y + 0.34, w: cardW, h: 0.14,
-                    fontSize: 5, color: C.white, align: "center"
-                });
-            }
-
-            // Summary row at bottom
-            const typeSummary = Object.entries(typeCount).map(([t, c]) => {
-                const info = Digester.slideTypes[t] || { icon: '?', label: t };
-                return info.icon + " " + info.label + ": " + c;
-            }).join("  •  ");
-            addFooter(slide, typeSummary.substring(0, 200));
-
-            // ═══════════════════════════════════════════
-            // SLIDE 3: Learning Targets
-            // ═══════════════════════════════════════════
-            slide = pres.addSlide();
-            addHeader(slide, "Learning Targets", C.navy);
-
-            yPos = 1.0;
-            for (const topic of analysis.topics) {
-                if (yPos > 5.0) break;
-                slide.addText("I can " + topic + " using mathematical reasoning.", {
-                    x: 0.5, y: yPos, w: 9, h: 0.4,
-                    fontSize: 14, color: C.navy, bullet: true
-                });
-                yPos += 0.5;
-            }
             if (analysis.standards.length > 0) {
-                const codes = analysis.standards.map(s => s.code).join(" • ");
-                addFooter(slide, codes);
+                const codes = analysis.standards.map(s => s.code).join("  •  ");
+                slide.addText(codes, {
+                    x: 0.5, y: 3.8, w: 9, h: 0.6,
+                    fontSize: 10, color: C.amber, align: "center", wrap: true
+                });
+            }
+            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.1, w: 10, h: 0.525, fill: { color: C.teal } });
+
+            // ─── Intro / Agenda (ALL) ───
+            for (const s of (slideGroups['INTRO_AGENDA'] || [])) {
+                buildContentSlide(s, "What We Need Today");
             }
 
-            // ═══════════════════════════════════════════
-            // SLIDE 4: Standards Alignment
-            // ═══════════════════════════════════════════
-            if (analysis.standards.length > 0) {
+            // ─── Check-in / Breathing / Commitment (ALL, each gets own slide) ───
+            for (const s of (slideGroups['CHECKIN_FEELINGS'] || [])) {
+                buildContentSlide(s, "Check In", C.teal);
+            }
+            for (const s of (slideGroups['BREATHING'] || [])) {
+                buildContentSlide(s, "Breathing", C.teal);
+            }
+            for (const s of (slideGroups['COMMITMENT'] || [])) {
+                buildContentSlide(s, "Commitment", C.teal);
+            }
+
+            // ─── Learning Targets (ALL original, then generated if none) ───
+            const ltSlides = slideGroups['LEARNING_TARGET'] || [];
+            if (ltSlides.length > 0) {
+                for (const s of ltSlides) {
+                    buildContentSlide(s, "Learning Target");
+                }
+            } else {
                 slide = pres.addSlide();
-                addHeader(slide, "Standards Alignment — MCA-III Benchmarks", C.teal);
+                header(slide, "Learning Targets");
+                yPos = 1.0;
+                for (const topic of analysis.topics) {
+                    if (yPos > 4.5) break;
+                    slide.addText("I can " + topic + " using mathematical reasoning.", {
+                        x: 0.6, y: yPos, w: 8.8, h: 0.4,
+                        fontSize: 14, color: C.navy, bullet: true
+                    });
+                    yPos += 0.5;
+                }
+                if (analysis.standards.length > 0) {
+                    footer(slide, analysis.standards.map(s => s.code).join("  •  "));
+                }
+            }
 
-                yPos = 0.95;
-                for (const std of analysis.standards) {
-                    if (yPos > 5.1) break;
-                    slide.addText([
-                        { text: std.code, options: { bold: true, color: C.teal, fontSize: 11 } },
-                        { text: "  " + std.desc, options: { color: C.textMid, fontSize: 11 } }
-                    ], { x: 0.5, y: yPos, w: 9, h: 0.35, bullet: true });
+            // ─── Vocabulary (ALL original + essential understandings) ───
+            for (const s of (slideGroups['VOCABULARY_CARDS'] || [])) {
+                buildContentSlide(s, "Key Vocabulary", C.teal);
+            }
+            // Also add essential understandings slide if we have insights
+            const hasVocab = Object.values(analysis.insights).some(i => i && i.essential_understandings);
+            if (hasVocab) {
+                slide = pres.addSlide();
+                header(slide, "Essential Understandings", C.teal);
+                yPos = 1.0;
+                for (const topic of analysis.topics) {
+                    if (yPos > 4.6) break;
+                    const insight = analysis.insights[topic];
+                    if (insight && insight.essential_understandings) {
+                        slide.addText(topic.toUpperCase(), {
+                            x: 0.5, y: yPos, w: 9, h: 0.25,
+                            fontSize: 10, bold: true, color: C.amber
+                        });
+                        yPos += 0.28;
+                        for (const u of insight.essential_understandings) {
+                            if (yPos > 4.9) break;
+                            slide.addText(u, {
+                                x: 0.6, y: yPos, w: 8.8, h: 0.36,
+                                fontSize: 11, color: C.textDark, bullet: true
+                            });
+                            yPos += 0.4;
+                        }
+                        yPos += 0.08;
+                    }
+                }
+            }
+
+            // ─── Warm-Up / Review (ALL) ───
+            for (const s of (slideGroups['WARMUP_REVIEW'] || [])) {
+                buildContentSlide(s, "Warm-Up", C.blue);
+            }
+
+            // ─── Team Roles (ALL) ───
+            for (const s of (slideGroups['TEAM_ROLES'] || [])) {
+                buildContentSlide(s, "Team Roles", C.blue);
+            }
+            for (const s of (slideGroups['TEAM_ROLES_ACTIVITY'] || [])) {
+                buildContentSlide(s, "Team Roles — Activity", C.blue);
+            }
+
+            // ─── Story / Narrative (ALL) ───
+            for (const s of (slideGroups['STORY_NARRATIVE'] || [])) {
+                buildContentSlide(s, null, C.amber);
+            }
+            for (const s of (slideGroups['STORY_DRAMATIC'] || [])) {
+                buildContentSlide(s, null, C.pink);
+            }
+            for (const s of (slideGroups['STORY_MISSION'] || [])) {
+                buildContentSlide(s, null, C.amber);
+            }
+
+            // ─── RISA Social Dialogue ───
+            const risaMatch = findRisaTopic(analysis.topics);
+            if (risaMatch && RISA_DIALOGUES[risaMatch] && RISA_DIALOGUES[risaMatch].social) {
+                slide = pres.addSlide();
+                header(slide, "Talk With Your Partner — Social", C.teal);
+                const social = RISA_DIALOGUES[risaMatch].social;
+                yPos = 1.0;
+                for (const d of social.script) {
+                    if (yPos > 4.8) break;
+                    const isA = d.speaker === "A";
+                    slide.addText("Student " + d.speaker + ":  " + d.line, {
+                        x: isA ? 0.6 : 1.2, y: yPos, w: 8.2, h: 0.35,
+                        fontSize: 13, color: isA ? C.teal : C.amber
+                    });
                     yPos += 0.4;
                 }
-                addFooter(slide, analysis.standards.length + " benchmarks aligned to Grade " + selectedGrade + " MCA-III");
+                footer(slide, "RISA: Routine • Integrated • Structured • Academic");
             }
 
-            // ═══════════════════════════════════════════
-            // SLIDE 5: Key Vocabulary & Essential Understandings
-            // ═══════════════════════════════════════════
-            slide = pres.addSlide();
-            addHeader(slide, "Key Vocabulary & Essential Understandings", C.navy);
+            // ─── Focus Skill / Math Tool (ALL) ───
+            for (const s of (slideGroups['FOCUS_SKILL_DETAIL'] || [])) {
+                buildContentSlide(s, null, C.blue);
+            }
+            for (const s of (slideGroups['MATH_TOOL'] || [])) {
+                buildContentSlide(s, null, C.teal);
+            }
 
-            yPos = 0.95;
-            for (const topic of analysis.topics) {
-                if (yPos > 4.8) break;
-                const insight = analysis.insights[topic];
-                if (insight && insight.essential_understandings) {
-                    slide.addText(topic.toUpperCase(), {
-                        x: 0.5, y: yPos, w: 9, h: 0.28,
-                        fontSize: 12, bold: true, color: C.amber
+            // ─── Activity Launch (ALL) ───
+            for (const s of (slideGroups['ACTIVITY_LAUNCH'] || [])) {
+                buildContentSlide(s, null, C.blue);
+            }
+
+            // ─── Notice & Wonder / Would You Rather (ALL) ───
+            for (const s of (slideGroups['NOTICE_WONDER'] || [])) {
+                buildContentSlide(s, null, C.teal);
+            }
+            for (const s of (slideGroups['WOULD_YOU_RATHER'] || [])) {
+                buildContentSlide(s, null, C.amber);
+            }
+
+            // ─── Problem Slides (ALL — the actual math) ───
+            const problemSlides = [...(slideGroups['PROBLEM_SLIDE'] || []), ...(slideGroups['EQUATION_SOLVE'] || [])];
+            let frameIdx = 0;
+            for (const s of problemSlides) {
+                const sl = buildContentSlide(s, "Problem — Slide " + s.num);
+                // Add sentence frame hint at the bottom
+                if (typeof SENTENCE_FRAMES !== 'undefined') {
+                    const frames = SENTENCE_FRAMES.problem_solving;
+                    const hint = frames[frameIdx % frames.length];
+                    sl.addText('"' + hint + '"', {
+                        x: 0.6, y: 5.0, w: 8.8, h: 0.25,
+                        fontSize: 9, italic: true, color: C.teal
                     });
-                    yPos += 0.32;
-                    for (const u of insight.essential_understandings.slice(0, 3)) {
-                        if (yPos > 5.0) break;
-                        slide.addText(u, {
-                            x: 0.7, y: yPos, w: 8.8, h: 0.35,
-                            fontSize: 11, color: C.textDark, bullet: true
-                        });
-                        yPos += 0.38;
-                    }
-                    yPos += 0.1;
+                    frameIdx++;
                 }
             }
 
-            // ═══════════════════════════════════════════
-            // SLIDE 6: Common Misconceptions
-            // ═══════════════════════════════════════════
-            slide = pres.addSlide();
-            addHeader(slide, "Common Misconceptions", C.pink);
-
-            yPos = 0.95;
-            for (const topic of analysis.topics) {
-                if (yPos > 5.0) break;
-                const insight = analysis.insights[topic];
-                if (insight && insight.misconceptions) {
-                    slide.addText(topic.toUpperCase(), {
-                        x: 0.5, y: yPos, w: 9, h: 0.25,
-                        fontSize: 10, bold: true, color: C.pink
-                    });
-                    yPos += 0.28;
-                    for (const m of insight.misconceptions.slice(0, 4)) {
-                        if (yPos > 5.0) break;
-                        const txt = typeof m === 'string' ? m : m.error;
-                        slide.addText(txt, {
-                            x: 0.5, y: yPos, w: 9, h: 0.4,
-                            fontSize: 11, color: C.textDark, bullet: true
-                        });
-                        yPos += 0.44;
-                    }
-                    yPos += 0.08;
-                }
+            // ─── Day Dividers (ALL) ───
+            for (const s of (slideGroups['DAY_DIVIDER'] || [])) {
+                const sl = pres.addSlide();
+                sl.background = { color: C.navy };
+                sl.addText(s.text, {
+                    x: 0.5, y: 2.0, w: 9, h: 1.5,
+                    fontSize: 28, bold: true, color: C.white, align: "center", valign: "middle"
+                });
+                footer(sl, "Original slide " + s.num + "  •  Day Divider");
             }
-            addFooter(slide, "Source: SciMath Minnesota STEM Teacher Center Framework");
 
-            // ═══════════════════════════════════════════
-            // SLIDE 7: Differentiation Strategies
-            // ═══════════════════════════════════════════
-            slide = pres.addSlide();
-            addHeader(slide, "Differentiation Strategies", C.teal);
-
-            yPos = 0.95;
-            for (const topic of analysis.topics) {
-                if (yPos > 4.5) break;
-                const insight = analysis.insights[topic];
-                if (insight && insight.differentiation) {
-                    const diff = insight.differentiation;
-                    slide.addText(topic.toUpperCase(), {
-                        x: 0.5, y: yPos, w: 9, h: 0.25,
-                        fontSize: 10, bold: true, color: C.amber
+            // ─── Group Discussion (ALL) ───
+            for (const s of (slideGroups['GROUP_DISCUSSION'] || [])) {
+                const sl = buildContentSlide(s, null, C.amber);
+                if (typeof SENTENCE_FRAMES !== 'undefined') {
+                    sl.addText('"' + SENTENCE_FRAMES.explaining[0] + '"', {
+                        x: 0.6, y: 5.0, w: 8.8, h: 0.25,
+                        fontSize: 9, italic: true, color: C.teal
                     });
-                    yPos += 0.28;
-
-                    slide.addText("Emergent: " + diff.emergent, {
-                        x: 0.5, y: yPos, w: 9, h: 0.55,
-                        fontSize: 9, color: C.textDark, bullet: true, wrap: true
-                    });
-                    yPos += 0.55;
-
-                    slide.addText("ELL Support: " + diff.ell, {
-                        x: 0.5, y: yPos, w: 9, h: 0.55,
-                        fontSize: 9, color: C.textDark, bullet: true, wrap: true
-                    });
-                    yPos += 0.55;
-
-                    if (diff.extending) {
-                        slide.addText("Extending: " + diff.extending, {
-                            x: 0.5, y: yPos, w: 9, h: 0.55,
-                            fontSize: 9, color: C.textDark, bullet: true, wrap: true
-                        });
-                        yPos += 0.55;
-                    }
-                    yPos += 0.1;
                 }
             }
 
-            // ═══════════════════════════════════════════
-            // SLIDE 8: Sentence Frames (ELL Scaffolding)
-            // ═══════════════════════════════════════════
+            // ─── RISA Academic Dialogue ───
+            if (risaMatch && RISA_DIALOGUES[risaMatch] && RISA_DIALOGUES[risaMatch].academic) {
+                slide = pres.addSlide();
+                header(slide, "Talk With Your Partner — Academic", C.navy);
+                const academic = RISA_DIALOGUES[risaMatch].academic;
+                yPos = 1.0;
+                for (const d of academic.script) {
+                    if (yPos > 4.8) break;
+                    const isA = d.speaker === "A";
+                    slide.addText("Student " + d.speaker + ":  " + d.line, {
+                        x: isA ? 0.6 : 1.2, y: yPos, w: 8.2, h: 0.35,
+                        fontSize: 13, color: isA ? C.teal : C.amber
+                    });
+                    yPos += 0.4;
+                }
+                footer(slide, "RISA: Routine • Integrated • Structured • Academic");
+            }
+
+            // ─── Sentence Frames (support slide) ───
             if (typeof SENTENCE_FRAMES !== 'undefined') {
                 slide = pres.addSlide();
-                addHeader(slide, "Sentence Frames — ELL Scaffolding", C.teal);
-
-                const frames = (typeof getRelevantSentenceFrames === 'function')
-                    ? getRelevantSentenceFrames(analysis.slides)
-                    : SENTENCE_FRAMES;
-
-                yPos = 0.95;
-                const frameCategories = {
-                    problem_solving: { label: "Problem Solving", color: C.teal },
-                    explaining: { label: "Explaining & Justifying", color: C.blue },
-                    comparing: { label: "Comparing", color: C.amber },
-                    vocabulary: { label: "Vocabulary", color: C.navy },
-                    reflection: { label: "Reflection", color: C.pink }
+                header(slide, "Sentence Frames", C.teal);
+                yPos = 1.0;
+                const cats = {
+                    problem_solving: "Problem Solving",
+                    explaining: "Explaining & Justifying",
+                    comparing: "Comparing",
+                    vocabulary: "Vocabulary",
+                    reflection: "Reflection"
                 };
-
-                for (const [cat, config] of Object.entries(frameCategories)) {
-                    if (!frames[cat] || yPos > 4.6) continue;
-                    slide.addText(config.label, {
-                        x: 0.5, y: yPos, w: 9, h: 0.22,
-                        fontSize: 10, bold: true, color: config.color
-                    });
-                    yPos += 0.25;
-
-                    for (const frame of frames[cat].slice(0, 2)) {
+                for (const [key, label] of Object.entries(cats)) {
+                    if (!SENTENCE_FRAMES[key] || yPos > 4.5) continue;
+                    slide.addText(label, { x: 0.5, y: yPos, w: 9, h: 0.22, fontSize: 10, bold: true, color: C.navy });
+                    yPos += 0.24;
+                    for (const f of SENTENCE_FRAMES[key].slice(0, 2)) {
                         if (yPos > 5.0) break;
-                        slide.addText('"' + frame + '"', {
-                            x: 0.7, y: yPos, w: 8.8, h: 0.3,
-                            fontSize: 9, italic: true, color: C.textDark, bullet: true
-                        });
-                        yPos += 0.32;
+                        slide.addText('"' + f + '"', { x: 0.7, y: yPos, w: 8.6, h: 0.26, fontSize: 9, italic: true, color: C.textDark, bullet: true });
+                        yPos += 0.28;
                     }
                     yPos += 0.06;
                 }
-                addFooter(slide, "Use sentence frames to support academic discussion for all learners");
             }
 
-            // ═══════════════════════════════════════════
-            // SLIDE 9: Team Role Integration
-            // ═══════════════════════════════════════════
-            if (typeof TEAM_ROLE_PROMPTS !== 'undefined') {
-                slide = pres.addSlide();
-                addHeader(slide, "Team Role Integration", C.blue);
-
-                const roleColors = {
-                    facilitator: C.teal,
-                    resource_manager: C.amber,
-                    task_manager: C.pink,
-                    recorder_reporter: C.blue
-                };
-                const roleLabels = {
-                    facilitator: "Facilitator",
-                    resource_manager: "Resource Manager",
-                    task_manager: "Task Manager",
-                    recorder_reporter: "Recorder / Reporter"
-                };
-
-                const prompts = (typeof getRelevantRolePrompts === 'function')
-                    ? getRelevantRolePrompts(analysis.slides)
-                    : TEAM_ROLE_PROMPTS;
-
-                // Use problem_launch prompts (most common)
-                const activePrompts = prompts.problem_launch || prompts.discussion || TEAM_ROLE_PROMPTS.problem_launch;
-
-                yPos = 0.95;
-                for (const [role, lines] of Object.entries(activePrompts)) {
-                    if (yPos > 4.5) break;
-                    const color = roleColors[role] || C.textMid;
-                    const label = roleLabels[role] || role;
-
-                    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                        x: 0.3, y: yPos, w: 9.4, h: 0.95,
-                        fill: { color: C.lightGray },
-                        rectRadius: 0.08
-                    });
-                    slide.addText(label, {
-                        x: 0.5, y: yPos + 0.05, w: 9, h: 0.22,
-                        fontSize: 11, bold: true, color: color
-                    });
-
-                    const promptText = lines.slice(0, 2).map(l => '"' + l + '"').join("   ");
-                    slide.addText(promptText, {
-                        x: 0.5, y: yPos + 0.3, w: 9, h: 0.55,
-                        fontSize: 9, color: C.textDark, wrap: true
-                    });
-                    yPos += 1.05;
-                }
-                addFooter(slide, "CPM Team Roles • Group-Based Learning Protocol");
+            // ─── Timer (ALL) ───
+            for (const s of (slideGroups['TIMER'] || [])) {
+                buildContentSlide(s, "Timer", C.textMid);
             }
 
-            // ═══════════════════════════════════════════
-            // SLIDE 10: RISA Social Dialogue (fuzzy match)
-            // ═══════════════════════════════════════════
-            const risaMatch = findRisaTopic(analysis.topics);
+            // ─── Exit Ticket (ALL) ───
+            for (const s of (slideGroups['EXIT_TICKET'] || [])) {
+                buildContentSlide(s, "Exit Ticket", C.pink);
+            }
+
+            // ─── Learning Log (ALL) ───
+            for (const s of (slideGroups['LEARNING_LOG'] || [])) {
+                buildContentSlide(s, null, C.navy);
+            }
+
+            // ─── Closure (ALL) ───
+            for (const s of (slideGroups['CLOSURE'] || [])) {
+                const sl = buildContentSlide(s, "Closure", C.navy);
+                sl.addText('"I used to think _____. Now I know _____."', {
+                    x: 0.6, y: 5.0, w: 8.8, h: 0.25,
+                    fontSize: 9, italic: true, color: C.teal
+                });
+            }
+
+            // ─── Homework (ALL) ───
+            for (const s of (slideGroups['HOMEWORK'] || [])) {
+                buildContentSlide(s, "Homework");
+            }
+
+            // ════════════════════════════════════════════════════════
+            //  PART 2: TEACHER REFERENCE (after lesson content)
+            // ════════════════════════════════════════════════════════
+
+            // ─── Divider ───
             slide = pres.addSlide();
-            addHeader(slide, "RISA Oral Interaction: Social", C.navy);
+            slide.background = { color: C.navy };
+            slide.addText("Teacher Reference", {
+                x: 0.5, y: 1.8, w: 9, h: 1,
+                fontSize: 36, bold: true, color: C.white, align: "center"
+            });
+            slide.addText("The following slides are for teacher planning and are not part of the student lesson.", {
+                x: 1, y: 3.2, w: 8, h: 0.6,
+                fontSize: 14, color: C.amber, align: "center"
+            });
 
-            yPos = 0.95;
-            if (risaMatch && RISA_DIALOGUES[risaMatch] && RISA_DIALOGUES[risaMatch].social) {
-                const social = RISA_DIALOGUES[risaMatch].social;
-                slide.addText("Topic: " + social.title, {
-                    x: 0.5, y: yPos, w: 9, h: 0.3,
-                    fontSize: 12, bold: true, color: C.amber
-                });
-                yPos += 0.4;
-                for (const d of social.script.slice(0, 10)) {
-                    if (yPos > 4.8) break;
-                    const color = d.speaker === "A" ? C.teal : C.amber;
-                    slide.addText("Student " + d.speaker + ":  " + d.line, {
-                        x: 0.5, y: yPos, w: 9, h: 0.35,
-                        fontSize: 12, color: color
-                    });
-                    yPos += 0.38;
-                }
-            } else {
-                slide.addText("No RISA dialogue available for detected topics.", {
-                    x: 0.5, y: 2.5, w: 9, h: 0.5,
-                    fontSize: 14, color: C.textMid, align: "center", italic: true
-                });
-            }
-            addFooter(slide, "RISA: Routine • Integrated • Structured • Academic");
-
-            // ═══════════════════════════════════════════
-            // SLIDE 11: RISA Academic Dialogue (fuzzy match)
-            // ═══════════════════════════════════════════
-            slide = pres.addSlide();
-            addHeader(slide, "RISA Oral Interaction: Academic", C.navy);
-
-            yPos = 0.95;
-            if (risaMatch && RISA_DIALOGUES[risaMatch] && RISA_DIALOGUES[risaMatch].academic) {
-                const academic = RISA_DIALOGUES[risaMatch].academic;
-                slide.addText("Topic: " + academic.title, {
-                    x: 0.5, y: yPos, w: 9, h: 0.3,
-                    fontSize: 12, bold: true, color: C.amber
-                });
-                yPos += 0.4;
-                for (const d of academic.script.slice(0, 10)) {
-                    if (yPos > 4.8) break;
-                    const color = d.speaker === "A" ? C.teal : C.amber;
-                    slide.addText("Student " + d.speaker + ":  " + d.line, {
-                        x: 0.5, y: yPos, w: 9, h: 0.35,
-                        fontSize: 12, color: color
-                    });
-                    yPos += 0.38;
-                }
-            } else {
-                slide.addText("No RISA dialogue available for detected topics.", {
-                    x: 0.5, y: 2.5, w: 9, h: 0.5,
-                    fontSize: 14, color: C.textMid, align: "center", italic: true
-                });
-            }
-            addFooter(slide, "RISA: Routine • Integrated • Structured • Academic");
-
-            // ═══════════════════════════════════════════
-            // SLIDE(S) 12+: Leveled Problems (DOK 1, 2, 3)
-            // ═══════════════════════════════════════════
+            // ─── Leveled Problems (DOK 1, 2, 3) ───
             if (typeof getLeveledProblems === 'function') {
                 const leveledData = getLeveledProblems(analysis.topics);
-
                 if (leveledData.length > 0) {
-                    // STUDENT PROBLEMS SLIDE (no answers)
                     for (const item of leveledData.slice(0, 2)) {
                         slide = pres.addSlide();
-                        addHeader(slide, "Leveled Problems: " + item.topic, C.teal);
-
-                        yPos = 0.95;
+                        header(slide, "Leveled Problems: " + item.topic, C.teal);
+                        yPos = 1.0;
                         const dokLevels = [
                             { key: 'dok1', label: 'DOK 1 — Recall', color: C.teal },
                             { key: 'dok2', label: 'DOK 2 — Skill / Concept', color: C.blue },
                             { key: 'dok3', label: 'DOK 3 — Strategic Thinking', color: C.amber }
                         ];
-
                         for (const dok of dokLevels) {
-                            if (!item.problems[dok.key] || yPos > 4.6) continue;
+                            if (!item.problems[dok.key] || yPos > 4.5) continue;
                             slide.addText(dok.label, {
                                 x: 0.5, y: yPos, w: 9, h: 0.22,
                                 fontSize: 10, bold: true, color: dok.color
                             });
                             yPos += 0.26;
-
-                            // Show 1-2 problems per DOK level
                             for (const prob of item.problems[dok.key].slice(0, 2)) {
                                 if (yPos > 5.0) break;
                                 slide.addText(prob.stem, {
@@ -2369,16 +2303,15 @@
                                 });
                                 yPos += 0.44;
                             }
-                            yPos += 0.08;
+                            yPos += 0.06;
                         }
-                        addFooter(slide, "Depth of Knowledge (DOK) Leveled Practice • Grade " + selectedGrade);
+                        footer(slide, "Teacher Reference • DOK Leveled Practice");
                     }
 
-                    // ANSWER KEY SLIDE
+                    // Answer Key
                     slide = pres.addSlide();
-                    addHeader(slide, "Leveled Problems — Answer Key", C.navy);
-
-                    yPos = 0.95;
+                    header(slide, "Answer Key", C.navy);
+                    yPos = 1.0;
                     for (const item of leveledData.slice(0, 2)) {
                         if (yPos > 4.5) break;
                         slide.addText(item.topic.toUpperCase(), {
@@ -2386,168 +2319,157 @@
                             fontSize: 9, bold: true, color: C.amber
                         });
                         yPos += 0.25;
-
                         const allProbs = [
                             ...(item.problems.dok1 || []).slice(0, 2),
                             ...(item.problems.dok2 || []).slice(0, 1),
                             ...(item.problems.dok3 || []).slice(0, 1)
                         ];
-
                         for (const prob of allProbs) {
                             if (yPos > 5.0) break;
-                            const shortStem = prob.stem.length > 50 ? prob.stem.substring(0, 47) + '...' : prob.stem;
+                            const shortQ = prob.stem.length > 45 ? prob.stem.substring(0, 42) + '...' : prob.stem;
                             slide.addText([
-                                { text: "Q: ", options: { bold: true, fontSize: 8, color: C.navy } },
-                                { text: shortStem + "  ", options: { fontSize: 8, color: C.textMid } },
-                                { text: "A: " + prob.answer, options: { bold: true, fontSize: 8, color: C.teal } }
+                                { text: shortQ + "  ", options: { fontSize: 8, color: C.textMid } },
+                                { text: prob.answer, options: { bold: true, fontSize: 8, color: C.teal } }
                             ], { x: 0.5, y: yPos, w: 9, h: 0.35, wrap: true });
                             yPos += 0.38;
                         }
-                        yPos += 0.1;
+                        yPos += 0.08;
                     }
-                    addFooter(slide, "Teacher Reference — Answer Key");
+                    footer(slide, "Teacher Reference • Answer Key");
                 }
             }
 
-            // ═══════════════════════════════════════════
-            // SLIDE(S): RMS Proficiency Rubric (multi-slide if needed)
-            // ═══════════════════════════════════════════
+            // ─── Misconceptions & Differentiation ───
+            const hasInsights = Object.keys(analysis.insights).length > 0;
+            if (hasInsights) {
+                slide = pres.addSlide();
+                header(slide, "Misconceptions & Differentiation", C.pink);
+                yPos = 1.0;
+                for (const topic of analysis.topics) {
+                    if (yPos > 4.5) break;
+                    const insight = analysis.insights[topic];
+                    if (!insight) continue;
+
+                    slide.addText(topic.toUpperCase(), {
+                        x: 0.5, y: yPos, w: 9, h: 0.22,
+                        fontSize: 9, bold: true, color: C.amber
+                    });
+                    yPos += 0.25;
+
+                    if (insight.misconceptions) {
+                        for (const m of insight.misconceptions.slice(0, 2)) {
+                            if (yPos > 4.8) break;
+                            const txt = typeof m === 'string' ? m : m.error;
+                            slide.addText("Watch for: " + txt, {
+                                x: 0.6, y: yPos, w: 8.8, h: 0.35,
+                                fontSize: 9, color: C.textDark, bullet: true, wrap: true
+                            });
+                            yPos += 0.38;
+                        }
+                    }
+                    if (insight.differentiation) {
+                        slide.addText("Emergent: " + insight.differentiation.emergent.substring(0, 120), {
+                            x: 0.6, y: yPos, w: 8.8, h: 0.32,
+                            fontSize: 8, color: C.teal, wrap: true
+                        });
+                        yPos += 0.35;
+                        slide.addText("ELL: " + insight.differentiation.ell.substring(0, 120), {
+                            x: 0.6, y: yPos, w: 8.8, h: 0.32,
+                            fontSize: 8, color: C.blue, wrap: true
+                        });
+                        yPos += 0.38;
+                    }
+                }
+                footer(slide, "Teacher Reference • SciMath Minnesota Framework");
+            }
+
+            // ─── RMS Proficiency Rubric ───
             if (typeof RUBRIC_DESCRIPTORS !== 'undefined' && analysis.standards.length > 0) {
                 const allCodes = analysis.standards.map(s => s.code);
                 const rubricData = getRubricsForStandards(allCodes);
                 const rubricCodes = Object.keys(rubricData);
-
                 const levelDefs = [
                     { key: 'exemplary',  label: 'Exemplary (10)',  color: '0D9488' },
                     { key: 'proficient', label: 'Proficient (8.5)', color: '3B82F6' },
                     { key: 'developing', label: 'Developing (7.5)', color: 'D4870F' },
                     { key: 'beginning',  label: 'Beginning (6.5)',  color: 'E8436D' }
                 ];
-
-                const benchmarksPerSlide = 2;
                 const maxBenchmarks = Math.min(rubricCodes.length, 6);
-
-                for (let startIdx = 0; startIdx < maxBenchmarks; startIdx += benchmarksPerSlide) {
+                for (let startIdx = 0; startIdx < maxBenchmarks; startIdx += 2) {
                     slide = pres.addSlide();
-                    addHeader(slide, "RMS Proficiency Rubric", C.navy);
-
+                    header(slide, "RMS Proficiency Rubric");
                     let ry = 0.9;
-                    const endIdx = Math.min(startIdx + benchmarksPerSlide, maxBenchmarks);
-
+                    const endIdx = Math.min(startIdx + 2, maxBenchmarks);
                     for (let bi = startIdx; bi < endIdx; bi++) {
                         const code = rubricCodes[bi];
                         const rubric = rubricData[code];
-
-                        slide.addText(code + ": " + rubric.benchmark, {
-                            x: 0.3, y: ry, w: 8.2, h: 0.3,
-                            fontSize: 11, bold: true, color: C.navy
+                        slide.addText(code + ": " + rubric.benchmark + "  (DOK " + rubric.dok + ")", {
+                            x: 0.3, y: ry, w: 9.4, h: 0.28,
+                            fontSize: 10, bold: true, color: C.navy
                         });
-                        slide.addText("DOK " + rubric.dok, {
-                            x: 8.5, y: ry, w: 1.2, h: 0.3,
-                            fontSize: 10, bold: true, color: C.amber, align: "center"
-                        });
-                        ry += 0.35;
-
+                        ry += 0.32;
                         const rows = [];
                         rows.push([
-                            { text: "Level", options: { bold: true, fontSize: 9, color: 'FFFFFF', fill: { color: C.navy }, align: 'center', valign: 'middle' } },
-                            { text: "Descriptor", options: { bold: true, fontSize: 9, color: 'FFFFFF', fill: { color: C.navy }, align: 'left', valign: 'middle' } }
+                            { text: "Level", options: { bold: true, fontSize: 8, color: 'FFFFFF', fill: { color: C.navy }, align: 'center', valign: 'middle' } },
+                            { text: "Descriptor", options: { bold: true, fontSize: 8, color: 'FFFFFF', fill: { color: C.navy }, align: 'left', valign: 'middle' } }
                         ]);
                         for (const lv of levelDefs) {
                             const desc = rubric.descriptors[lv.key] || '';
-                            const short = desc.length > 140 ? desc.substring(0, 137) + '...' : desc;
+                            const short = desc.length > 130 ? desc.substring(0, 127) + '...' : desc;
                             rows.push([
-                                { text: lv.label, options: { fontSize: 8, bold: true, color: lv.color, align: 'center', valign: 'middle' } },
-                                { text: short, options: { fontSize: 8, color: '333333', align: 'left', valign: 'middle' } }
+                                { text: lv.label, options: { fontSize: 7, bold: true, color: lv.color, align: 'center', valign: 'middle' } },
+                                { text: short, options: { fontSize: 7, color: '333333', align: 'left', valign: 'middle' } }
                             ]);
                         }
-
                         slide.addTable(rows, {
                             x: 0.3, y: ry, w: 9.4,
-                            colW: [1.4, 8.0],
-                            border: { pt: 0.5, color: 'CCCCCC' },
-                            rowH: [0.22, 0.42, 0.42, 0.42, 0.42],
+                            colW: [1.3, 8.1],
+                            border: { pt: 0.5, color: C.border },
+                            rowH: [0.2, 0.38, 0.38, 0.38, 0.38],
                             autoPage: false
                         });
-                        ry += 2.1;
+                        ry += 1.9;
                     }
-
-                    addFooter(slide, "RMS Proficiency Scale • MCA-III Benchmark ALDs");
+                    footer(slide, "Teacher Reference • RMS Proficiency Scale • MCA-III ALDs");
                 }
             }
 
-            // ═══════════════════════════════════════════
-            // SLIDE: Analysis Summary
-            // ═══════════════════════════════════════════
+            // ─── Slide Map (compact, at the end for reference) ───
             slide = pres.addSlide();
-            addHeader(slide, "Analysis Summary", C.navy);
+            header(slide, "Slide Map — Original Lesson Structure");
+            const typeCount = {};
+            analysis.slides.forEach(s => { typeCount[s.type] = (typeCount[s.type] || 0) + 1; });
 
-            // Build summary stats
-            const summaryItems = [
-                { label: "Slides Analyzed", value: analysis.slideCount.toString(), color: C.navy },
-                { label: "Slide Types Found", value: Object.keys(typeCount).length.toString(), color: C.teal },
-                { label: "Topics Detected", value: analysis.topics.length.toString(), color: C.amber },
-                { label: "Standards Aligned", value: analysis.standards.length.toString(), color: C.blue },
-                { label: "Teaching Insights", value: Object.keys(analysis.insights).length.toString(), color: C.pink },
-                { label: "Grade Level", value: "Grade " + selectedGrade, color: C.navy }
-            ];
-
-            const statCols = 3;
-            const statW = 2.8;
-            const statH = 1.2;
-            for (let i = 0; i < summaryItems.length; i++) {
-                const item = summaryItems[i];
-                const col = i % statCols;
-                const row = Math.floor(i / statCols);
-                const sx = 0.5 + col * (statW + 0.25);
-                const sy = 1.0 + row * (statH + 0.15);
-
-                slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                    x: sx, y: sy, w: statW, h: statH,
-                    fill: { color: C.lightGray }, rectRadius: 0.1
-                });
-                slide.addText(item.value, {
-                    x: sx, y: sy + 0.15, w: statW, h: 0.5,
-                    fontSize: 28, bold: true, color: item.color, align: "center"
-                });
-                slide.addText(item.label, {
-                    x: sx, y: sy + 0.7, w: statW, h: 0.3,
-                    fontSize: 11, color: C.textMid, align: "center"
-                });
+            yPos = 1.0;
+            // Compact list
+            const mapRows = [];
+            mapRows.push([
+                { text: "#", options: { bold: true, fontSize: 8, color: 'FFFFFF', fill: { color: C.navy }, align: 'center' } },
+                { text: "Type", options: { bold: true, fontSize: 8, color: 'FFFFFF', fill: { color: C.navy }, align: 'left' } },
+                { text: "Content Preview", options: { bold: true, fontSize: 8, color: 'FFFFFF', fill: { color: C.navy }, align: 'left' } }
+            ]);
+            for (const s of analysis.slides.slice(0, 18)) {
+                const info = Digester.slideTypes[s.type] || { icon: '?', label: s.type };
+                const preview = s.text.substring(0, 60).replace(/\n/g, ' ');
+                mapRows.push([
+                    { text: s.num.toString(), options: { fontSize: 7, align: 'center', color: C.textDark } },
+                    { text: info.icon + " " + info.label, options: { fontSize: 7, color: C.navy } },
+                    { text: preview, options: { fontSize: 7, color: C.textMid } }
+                ]);
             }
+            slide.addTable(mapRows, {
+                x: 0.3, y: 1.0, w: 9.4,
+                colW: [0.5, 1.8, 7.1],
+                border: { pt: 0.3, color: C.border },
+                rowH: Array(mapRows.length).fill(0.22),
+                autoPage: false
+            });
 
-            // What was covered
-            const coveredTypes = Object.entries(typeCount)
-                .map(([t, c]) => { const info = Digester.slideTypes[t] || { label: t }; return info.label + " (" + c + ")"; })
-                .join(", ");
-            slide.addText("Slide types: " + coveredTypes, {
-                x: 0.5, y: 4.6, w: 9, h: 0.5,
-                fontSize: 8, color: C.textMid, wrap: true
-            });
-            addFooter(slide, "Generated by The Lesson Digester • RMS Group-Based Learning");
-
-            // ═══════════════════════════════════════════
-            // FINAL SLIDE: Reflection & Closure
-            // ═══════════════════════════════════════════
-            slide = pres.addSlide();
-            slide.background = { color: C.navy };
-            slide.addText("Reflection & Closure", {
-                x: 0.5, y: 1.2, w: 9, h: 1,
-                fontSize: 36, bold: true, color: C.white, align: "center"
-            });
-            slide.addText("What did you learn today?", {
-                x: 0.5, y: 2.5, w: 9, h: 0.6,
-                fontSize: 20, color: C.amber, align: "center"
-            });
-            slide.addText("Share with your team.", {
-                x: 0.5, y: 3.2, w: 9, h: 0.6,
-                fontSize: 20, color: C.amber, align: "center"
-            });
-            slide.addText("I used to think _____. Now I know _____.", {
-                x: 1, y: 4.0, w: 8, h: 0.5,
-                fontSize: 16, italic: true, color: C.white, align: "center"
-            });
-            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.2, w: 10, h: 0.425, fill: { color: C.teal } });
+            const typeSummary = Object.entries(typeCount).map(([t, c]) => {
+                const info = Digester.slideTypes[t] || { label: t };
+                return info.label + "(" + c + ")";
+            }).join("  ");
+            footer(slide, typeSummary.substring(0, 200));
 
             // ── Generate & download ──
             const filename = analysis.filename
