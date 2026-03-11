@@ -698,6 +698,53 @@
             color: var(--text-dim);
         }
 
+        /* ==================== GRADE SELECTOR ==================== */
+        .grade-selector {
+            margin-bottom: 30px;
+            text-align: center;
+            animation: slide-in-up 0.4s ease;
+        }
+
+        .grade-selector-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .grade-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .grade-btn {
+            background: transparent;
+            border: 2px solid var(--navy);
+            color: var(--navy);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .grade-btn:hover {
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+
+        .grade-btn.active {
+            background: var(--amber);
+            color: var(--navy);
+            border-color: var(--amber);
+        }
+
         /* ==================== RESPONSIVE ==================== */
         @media (max-width: 768px) {
             header {
@@ -760,6 +807,15 @@
                 font-size: 1.2rem;
             }
 
+            .grade-selector-label {
+                font-size: 0.85rem;
+            }
+
+            .grade-btn {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+            }
+
             .drop-zone {
                 padding: 30px 16px;
             }
@@ -796,6 +852,16 @@
 
     <!-- ==================== MAIN CONTENT ==================== -->
     <main>
+        <!-- GRADE SELECTOR -->
+        <div class="grade-selector" id="mainGradeSelector">
+            <span class="grade-selector-label">Select Grade Level:</span>
+            <div class="grade-buttons">
+                <button class="grade-btn" data-grade="6">Grade 6</button>
+                <button class="grade-btn active" data-grade="7">Grade 7</button>
+                <button class="grade-btn" data-grade="8">Grade 8</button>
+            </div>
+        </div>
+
         <!-- DROP ZONE -->
         <div class="drop-zone" id="dropZone">
             <div class="drop-icon">📤</div>
@@ -875,9 +941,6 @@
     <!-- ==================== JAVASCRIPT ==================== -->
     <script src="js/digester-core.js"></script>
     <script>
-        // ==================== GRADE LEVEL STATE ====================
-        let selectedGrade = null;
-
         // ==================== TEACHING INSIGHTS DATABASE ====================
         const TEACHING_INSIGHTS = {
             // GRADE 6 TOPICS
@@ -918,166 +981,98 @@
 
         // ==================== RISA DIALOGUES DATABASE ====================
         const RISA_DIALOGUES = {
-            "circumference and area": {
-                social: {
-                    title: "Talking About Circles",
-                    vocabulary: ["circumference", "diameter", "radius", "area", "pi"],
-                    script: [
-                        {speaker: "A", line: "Hi! Can you help me understand circles?"},
-                        {speaker: "B", line: "Of course! What would you like to know?"},
-                        {speaker: "A", line: "What is the difference between circumference and area?"},
-                        {speaker: "B", line: "Well, circumference is the distance _____. Area is the space _____."},
-                        {speaker: "A", line: "How do you find the circumference?"},
-                        {speaker: "B", line: "You use the formula C = _____ times _____."},
-                        {speaker: "A", line: "And area?"},
-                        {speaker: "B", line: "Area uses A = _____ times _____ squared."},
-                        {speaker: "A", line: "So both formulas use _____. Thanks!"},
-                        {speaker: "B", line: "You're welcome! Practice makes it easier."}
-                    ]
-                },
-                academic: {
-                    title: "Mathematical Discussion: Circumference and Area",
-                    vocabulary: ["circumference", "diameter", "radius", "area", "pi", "constant of proportionality"],
-                    script: [
-                        {speaker: "A", line: "Good morning. How are you today?"},
-                        {speaker: "B", line: "I am doing well, thank you. And you?"},
-                        {speaker: "A", line: "I am well. I would like to discuss the properties of circles."},
-                        {speaker: "B", line: "That sounds interesting. What would you like to know?"},
-                        {speaker: "A", line: "What is the circumference of a circle?"},
-                        {speaker: "B", line: "The circumference is the distance around a circle. The formula is C = π times _____."},
-                        {speaker: "A", line: "What is the constant π?"},
-                        {speaker: "B", line: "π is approximately _____. It is the ratio of circumference to _____."},
-                        {speaker: "A", line: "How is area different from circumference?"},
-                        {speaker: "B", line: "Area measures the space inside. The formula is A = π times _____ squared."},
-                        {speaker: "A", line: "I see. So when you double the radius, the area increases by a factor of _____."},
-                        {speaker: "B", line: "That is correct. Thank you for the discussion."}
-                    ]
-                }
-            },
-            "proportional relationships": {
-                social: {
-                    title: "Talking About Ratios",
-                    vocabulary: ["proportional", "ratio", "unit rate", "constant", "scale"],
-                    script: [
-                        {speaker: "A", line: "Hey! Can we talk about proportions?"},
-                        {speaker: "B", line: "Sure! What about them?"},
-                        {speaker: "A", line: "What does it mean when something is proportional?"},
-                        {speaker: "B", line: "It means when one thing changes, the other changes by the same _____."},
-                        {speaker: "A", line: "Can you give me an example?"},
-                        {speaker: "B", line: "Sure! If you buy 2 apples for $3, then 4 apples cost _____."},
-                        {speaker: "A", line: "Oh! So the ratio stays the _____."},
-                        {speaker: "B", line: "Exactly! Every time you multiply one side by 2, you multiply the other by _____."},
-                        {speaker: "A", line: "That makes sense. Where do we see this?"},
-                        {speaker: "B", line: "In recipes, maps, and speed! Anywhere with a constant _____."}
-                    ]
-                },
-                academic: {
-                    title: "Mathematical Discussion: Proportional Relationships",
-                    vocabulary: ["proportional", "constant of proportionality", "unit rate", "ratio", "linear"],
-                    script: [
-                        {speaker: "A", line: "Good morning. May I discuss proportional relationships with you?"},
-                        {speaker: "B", line: "Of course. Please proceed."},
-                        {speaker: "A", line: "What is the definition of a proportional relationship?"},
-                        {speaker: "B", line: "A proportional relationship has a constant ratio. The equation is y = _____ times x."},
-                        {speaker: "A", line: "What does the constant represent?"},
-                        {speaker: "B", line: "The constant k is called the constant of _____."},
-                        {speaker: "A", line: "How do we identify it from a table?"},
-                        {speaker: "B", line: "We divide y by x. The result is _____."},
-                        {speaker: "A", line: "And on a graph?"},
-                        {speaker: "B", line: "A proportional relationship is a straight line through the _____."},
-                        {speaker: "A", line: "I see. So the unit rate equals the slope?"},
-                        {speaker: "B", line: "Yes. Thank you for this discussion."}
-                    ]
-                }
-            },
-            "equations": {
-                social: {
-                    title: "Talking About Solving Equations",
-                    vocabulary: ["variable", "solve", "balance", "solution", "inverse"],
-                    script: [
-                        {speaker: "A", line: "Can you help me solve this equation?"},
-                        {speaker: "B", line: "I would be happy to help!"},
-                        {speaker: "A", line: "What does it mean to solve an equation?"},
-                        {speaker: "B", line: "It means finding the value of x that makes the equation _____."},
-                        {speaker: "A", line: "How do you do that?"},
-                        {speaker: "B", line: "You do the same operation on both _____ to keep it balanced."},
-                        {speaker: "A", line: "Like a balance scale?"},
-                        {speaker: "B", line: "Exactly! Whatever you take from one side, you take from the _____."},
-                        {speaker: "A", line: "What if I have x + 3 = 7?"},
-                        {speaker: "B", line: "Subtract 3 from both sides. So x = _____."}
-                    ]
-                },
-                academic: {
-                    title: "Mathematical Discussion: Solving Equations",
-                    vocabulary: ["equation", "variable", "inverse operation", "solution", "equivalence"],
-                    script: [
-                        {speaker: "A", line: "Good morning. May we discuss equation solving?"},
-                        {speaker: "B", line: "Certainly. What aspect interests you?"},
-                        {speaker: "A", line: "What is the fundamental principle of solving equations?"},
-                        {speaker: "B", line: "We maintain equivalence by applying the same operation to both _____."},
-                        {speaker: "A", line: "What are inverse operations?"},
-                        {speaker: "B", line: "Operations that undo each other. Addition and _____ are inverses."},
-                        {speaker: "A", line: "Can you demonstrate with an example?"},
-                        {speaker: "B", line: "Consider 2x + 5 = 13. First subtract 5: 2x = _____."},
-                        {speaker: "A", line: "Then divide by 2?"},
-                        {speaker: "B", line: "Yes. Therefore x = _____. We can verify by substitution."},
-                        {speaker: "A", line: "Thank you. This is very clear now."},
-                        {speaker: "B", line: "You are welcome. Practice strengthens understanding."}
-                    ]
-                }
-            }
+            "ratios and rates": {social:{title:"Ratios",vocabulary:["ratio","rate","unit"],script:[{speaker:"A",line:"What's a ratio?"},{speaker:"B",line:"It compares two _____."},{speaker:"A",line:"Like 3 to 5?"},{speaker:"B",line:"Yes! You can write it 3:5 or as a _____."},{speaker:"A",line:"What about rates?"},{speaker:"B",line:"Rates compare quantities with different _____."},{speaker:"A",line:"Like miles per hour?"},{speaker:"B",line:"Exactly! That's a _____."}]},academic:{title:"Ratios and Rates",vocabulary:["ratio","rate","unit rate"],script:[{speaker:"A",line:"Explain ratios for me."},{speaker:"B",line:"A ratio is _____ between quantities."},{speaker:"A",line:"What distinguishes a rate?"},{speaker:"B",line:"A rate compares quantities with _____ units."},{speaker:"A",line:"Example?"},{speaker:"B",line:"Miles per hour. The unit rate is _____ per 1 unit."}]}},
+            "division of fractions": {social:{title:"Dividing Fractions",vocabulary:["divide","fraction","reciprocal","invert"],script:[{speaker:"A",line:"How do I divide 1/2 by 1/4?"},{speaker:"B",line:"Invert the second fraction and _____."},{speaker:"A",line:"So 1/2 times 4/1?"},{speaker:"B",line:"Yes! That equals _____."},{speaker:"A",line:"Why invert?"},{speaker:"B",line:"Division is the _____ of multiplication."}]},academic:{title:"Division of Fractions",vocabulary:["dividend","divisor","reciprocal","operation"],script:[{speaker:"A",line:"Why multiply by the reciprocal?"},{speaker:"B",line:"Because division and _____ are inverses."},{speaker:"A",line:"So a÷b = a × 1/b?"},{speaker:"B",line:"That's right. And 1/b is the _____ of b."}]}},
+            "positive and negative numbers": {social:{title:"Positive and Negative",vocabulary:["positive","negative","zero"],script:[{speaker:"A",line:"What about negative numbers?"},{speaker:"B",line:"They're less than _____."},{speaker:"A",line:"On a number line?"},{speaker:"B",line:"They're to the _____ of zero."},{speaker:"A",line:"What does -3 mean?"},{speaker:"B",line:"Three units _____ from zero."}]},academic:{title:"Integer Positions",vocabulary:["integer","opposite","position"],script:[{speaker:"A",line:"How do we locate integers?"},{speaker:"B",line:"Using a number line with _____ as the origin."},{speaker:"A",line:"What's the opposite of 5?"},{speaker:"B",line:"It's _____ because they're equidistant from zero."}]}},
+            "absolute value": {social:{title:"Absolute Value",vocabulary:["absolute value","distance","zero"],script:[{speaker:"A",line:"What does absolute value mean?"},{speaker:"B",line:"It's the _____ from zero."},{speaker:"A",line:"What's |−5|?"},{speaker:"B",line:"It's 5, because −5 is _____ units from zero."},{speaker:"A",line:"Is it always positive?"},{speaker:"B",line:"Yes. _____ can't be negative."}]},academic:{title:"Distance from Zero",vocabulary:["magnitude","distance","equidistant"],script:[{speaker:"A",line:"Define absolute value."},{speaker:"B",line:"It's the _____ of a number from zero."},{speaker:"A",line:"Why is |−3| = |3|?"},{speaker:"B",line:"Both are _____ units from zero."}]}},
+            "variables and expressions": {social:{title:"Variables",vocabulary:["variable","unknown","expression"],script:[{speaker:"A",line:"What's a variable?"},{speaker:"B",line:"It's a _____ that represents a number."},{speaker:"A",line:"Like x?"},{speaker:"B",line:"Right! In 2x + 3, x is the _____."},{speaker:"A",line:"Can I combine like terms?"},{speaker:"B",line:"Yes! 2x + 3x = _____."}]},academic:{title:"Algebraic Expressions",vocabulary:["variable","coefficient","like terms"],script:[{speaker:"A",line:"Define an algebraic expression."},{speaker:"B",line:"It's a _____ of variables, numbers, and operations."},{speaker:"A",line:"How do we simplify?"},{speaker:"B",line:"By combining _____ with the same variable."}]}},
+            "one-step equations and inequalities": {social:{title:"Solving Equations",vocabulary:["equation","solve","balance","inverse"],script:[{speaker:"A",line:"What's an equation?"},{speaker:"B",line:"A statement that two _____ are equal."},{speaker:"A",line:"How do I solve x + 5 = 12?"},{speaker:"B",line:"Subtract 5 from both _____."},{speaker:"A",line:"So x = _____?"},{speaker:"B",line:"Yes! Always do the _____ operation to both sides."}]},academic:{title:"Equations and Inequalities",vocabulary:["equivalent","operation","solution"],script:[{speaker:"A",line:"What maintains equation balance?"},{speaker:"B",line:"Applying the same _____ to both sides."},{speaker:"A",line:"What about inequalities?"},{speaker:"B",line:"Same process, but the solution is a _____."}]}},
+            "area of polygons": {social:{title:"Finding Area",vocabulary:["area","polygon","square units"],script:[{speaker:"A",line:"How do I find area?"},{speaker:"B",line:"It's the space _____ by a shape."},{speaker:"A",line:"Is it the same for all shapes?"},{speaker:"B",line:"No. Rectangle is length × _____."},{speaker:"A",line:"What about triangles?"},{speaker:"B",line:"Triangle area is _____ × base × height."}]},academic:{title:"Polygon Areas",vocabulary:["area","decompose","units"],script:[{speaker:"A",line:"How do we find irregular areas?"},{speaker:"B",line:"We _____ them into simpler shapes."},{speaker:"A",line:"Then add the areas?"},{speaker:"B",line:"Correct. Total area equals the _____ of all parts."}]}},
+            "surface area and volume": {social:{title:"3D Figures",vocabulary:["surface area","volume","faces"],script:[{speaker:"A",line:"What's surface area?"},{speaker:"B",line:"It's the _____ of all the faces."},{speaker:"A",line:"And volume?"},{speaker:"B",line:"Volume is the _____ inside the figure."},{speaker:"A",line:"For a box?"},{speaker:"B",line:"Volume = length × width × _____."}]},academic:{title:"3D Measurement",vocabulary:["net","face","cubic units"],script:[{speaker:"A",line:"How does a net help?"},{speaker:"B",line:"We can _____ it to find all face areas."},{speaker:"A",line:"Then sum them?"},{speaker:"B",line:"Yes, that gives the total _____ area."}]}},
+            "statistical questions and distributions": {social:{title:"Data and Statistics",vocabulary:["data","distribution","variable"],script:[{speaker:"A",line:"What's a statistical question?"},{speaker:"B",line:"A question with _____ in the data."},{speaker:"A",line:"Like heights of students?"},{speaker:"B",line:"Perfect! Heights _____ quite a bit."},{speaker:"A",line:"How do we show this?"},{speaker:"B",line:"With a distribution showing where _____ fall."}]},academic:{title:"Distributions",vocabulary:["variability","pattern","center"],script:[{speaker:"A",line:"What does distribution show?"},{speaker:"B",line:"Where the _____ spread across values."},{speaker:"A",line:"What about shape?"},{speaker:"B",line:"Shape describes how data is _____."}]}},
+            "mean median mode range": {social:{title:"Measures",vocabulary:["mean","median","mode","range"],script:[{speaker:"A",line:"What's the mean?"},{speaker:"B",line:"The _____ of all values."},{speaker:"A",line:"Median?"},{speaker:"B",line:"The _____ value when ordered."},{speaker:"A",line:"Mode?"},{speaker:"B",line:"The value appearing _____."}]},academic:{title:"Central Tendency",vocabulary:["average","ordered","frequency"],script:[{speaker:"A",line:"When use median?"},{speaker:"B",line:"When there are _____ affecting the mean."},{speaker:"A",line:"Which is most reliable?"},{speaker:"B",line:"It depends on the data's _____."}]}},
+            "proportional relationships": {social:{title:"Proportions",vocabulary:["proportional","constant","ratio"],script:[{speaker:"A",line:"What makes something proportional?"},{speaker:"B",line:"A _____ ratio between quantities."},{speaker:"A",line:"On a graph?"},{speaker:"B",line:"A straight line through the _____."},{speaker:"A",line:"Why through origin?"},{speaker:"B",line:"Because when x = 0, y = _____."}]},academic:{title:"Proportional Equations",vocabulary:["origin","constant of proportionality","equation"],script:[{speaker:"A",line:"Express proportional relationships."},{speaker:"B",line:"Using y = kx where k is the _____."},{speaker:"A",line:"How find k?"},{speaker:"B",line:"Divide y by x. The _____ is k."}]}},
+            "unit rates and constants of proportionality": {social:{title:"Unit Rates",vocabulary:["unit rate","per","constant"],script:[{speaker:"A",line:"What's a unit rate?"},{speaker:"B",line:"A ratio with 1 in the _____."},{speaker:"A",line:"Like miles per hour?"},{speaker:"B",line:"Yes! _____ per 1 hour."},{speaker:"A",line:"Is it the same as constant of proportionality?"},{speaker:"B",line:"Exactly! Unit rate _____ the slope."}]},academic:{title:"Proportionality Constants",vocabulary:["unit","denominator","slope"],script:[{speaker:"A",line:"Why compare unit rates?"},{speaker:"B",line:"To determine which offers the best _____."},{speaker:"A",line:"How express this?"},{speaker:"B",line:"As y per 1 unit of x, or _____."}]}},
+            "operations with rational numbers": {social:{title:"Rational Operations",vocabulary:["rational","operation","sign"],script:[{speaker:"A",line:"Are all decimals rational?"},{speaker:"B",line:"If they _____ or repeat, yes."},{speaker:"A",line:"How add negatives?"},{speaker:"B",line:"Same rules as integers. Watch the _____."}]},academic:{title:"Rational Arithmetic",vocabulary:["terminating","repeating","algorithm"],script:[{speaker:"A",line:"Define a rational number."},{speaker:"B",line:"Any number written as a _____ of integers."},{speaker:"A",line:"Including repeating decimals?"},{speaker:"B",line:"Yes. 1/3 = 0._____ repeating."}]}},
+            "expressions and equivalent forms": {social:{title:"Equivalent Expressions",vocabulary:["equivalent","simplify","property"],script:[{speaker:"A",line:"How is 2x + 3x equivalent to 5x?"},{speaker:"B",line:"Both have the same _____ for all x."},{speaker:"A",line:"Can I use properties to show this?"},{speaker:"B",line:"Yes! Use the _____ property to factor."}]},academic:{title:"Expression Equivalence",vocabulary:["property","distribute","factor"],script:[{speaker:"A",line:"Show 3(x+2) equals 3x + 6."},{speaker:"B",line:"Using the _____ property: multiply 3 by each term."}]}},
+            "two-step equations and inequalities": {social:{title:"Two-Step Equations",vocabulary:["equation","steps","inverse"],script:[{speaker:"A",line:"How solve 2x + 3 = 11?"},{speaker:"B",line:"First subtract 3 from both _____."},{speaker:"A",line:"That gives 2x = 8?"},{speaker:"B",line:"Yes! Then divide both sides by _____."},{speaker:"A",line:"So x = 4?"},{speaker:"B",line:"Right! Check: 2(4) + 3 = _____."}]},academic:{title:"Multi-Step Solving",vocabulary:["equivalent","inverse operations"],script:[{speaker:"A",line:"Solve 3x - 7 = 14."},{speaker:"B",line:"Add 7: 3x = _____. Then divide by 3."}]}},
+            "scale drawings and scale factor": {social:{title:"Scale Drawings",vocabulary:["scale","factor","ratio"],script:[{speaker:"A",line:"What's a scale factor?"},{speaker:"B",line:"The ratio of drawing size to _____ size."},{speaker:"A",line:"If scale is 1:100?"},{speaker:"B",line:"1 unit on drawing = _____ units in reality."},{speaker:"A",line:"How find actual distance?"},{speaker:"B",line:"Multiply drawing distance by the _____ factor."}]},academic:{title:"Scaling Figures",vocabulary:["scale factor","length","area"],script:[{speaker:"A",line:"If scale factor is 2?"},{speaker:"B",line:"Lengths double, but area increases by _____."},{speaker:"A",line:"Why?"},{speaker:"B",line:"Area scales by the _____ of the linear factor."}]}},
+            "circumference and area of circles": {social:{title:"Circles",vocabulary:["circumference","diameter","radius"],script:[{speaker:"A",line:"What's pi?"},{speaker:"B",line:"The ratio of circumference to _____."},{speaker:"A",line:"Approximately 3.14?"},{speaker:"B",line:"Yes! And circumference = π ×  _____."},{speaker:"A",line:"What about area?"},{speaker:"B",line:"Area = π × radius _____."},{speaker:"A",line:"Why squared?"},{speaker:"B",line:"Because area is a 2D _____."}]},academic:{title:"Circle Properties",vocabulary:["ratio","constant","formula"],script:[{speaker:"A",line:"Why C = πd instead of C = 2πr?"},{speaker:"B",line:"Both are correct! d = 2r, so they're _____."},{speaker:"A",line:"Derive area formula?"},{speaker:"B",line:"Divide circle into sectors; it approaches a _____."}]}},
+            "angle relationships": {social:{title:"Angles",vocabulary:["angle","complementary","supplementary"],script:[{speaker:"A",line:"What's a complementary angle?"},{speaker:"B",line:"Two angles that sum to _____ degrees."},{speaker:"A",line:"Supplementary?"},{speaker:"B",line:"Sum to _____ degrees."},{speaker:"A",line:"Vertical angles?"},{speaker:"B",line:"They're _____ when two lines cross."}]},academic:{title:"Angle Theorems",vocabulary:["degrees","vertical","linear pair"],script:[{speaker:"A",line:"Prove vertical angles equal."},{speaker:"B",line:"They form _____ pairs on both sides."}]}},
+            "probability": {social:{title:"Probability",vocabulary:["probability","outcome","likely"],script:[{speaker:"A",line:"What's probability?"},{speaker:"B",line:"The chance an _____ happens."},{speaker:"A",line:"How calculate it?"},{speaker:"B",line:"Favorable outcomes ÷ _____ outcomes."},{speaker:"A",line:"Ranges 0 to 1?"},{speaker:"B",line:"Yes! 0 is impossible, 1 is _____."}]},academic:{title:"Probability Theory",vocabulary:["theoretical","experimental","outcome"],script:[{speaker:"A",line:"Compare theoretical and experimental."},{speaker:"B",line:"Theoretical is what _____, experimental is what happens."}]}},
+            "random sampling and inferences": {social:{title:"Sampling",vocabulary:["sample","random","inference"],script:[{speaker:"A",line:"What's a random sample?"},{speaker:"B",line:"Every member has equal _____ of selection."},{speaker:"A",line:"Why random?"},{speaker:"B",line:"To avoid _____ and represent population."},{speaker:"A",line:"Can we make inferences?"},{speaker:"B",line:"Yes, sample statistics estimate _____parameters."}]},academic:{title:"Statistical Inference",vocabulary:["bias","representative","population"],script:[{speaker:"A",line:"Why avoid biased samples?"},{speaker:"B",line:"Bias makes inferences _____."}]}},
+            "exponents and scientific notation": {social:{title:"Exponents",vocabulary:["exponent","base","power"],script:[{speaker:"A",line:"What does 2^5 mean?"},{speaker:"B",line:"Multiply 2 five _____ together."},{speaker:"A",line:"Any exponent rules?"},{speaker:"B",line:"Product of powers: a^m × a^n = a^_____."},{speaker:"A",line:"What about scientific notation?"},{speaker:"B",line:"Write large numbers as a × 10^n where a is _____0 and 10."}]},academic:{title:"Exponent Laws",vocabulary:["factor","product","notation"],script:[{speaker:"A",line:"Express 5^3 ÷ 5^2."},{speaker:"B",line:"Using quotient rule: 5^_____."}]}},
+            "square roots and irrational numbers": {social:{title:"Roots",vocabulary:["square root","radical","irrational"],script:[{speaker:"A",line:"What's √9?"},{speaker:"B",line:"The number that squared equals _____."},{speaker:"A",line:"What about √2?"},{speaker:"B",line:"It's irrational; _____ doesn't repeat or end."},{speaker:"A",line:"Approximate value?"},{speaker:"B",line:"About _____."}]},academic:{title:"Irrational Numbers",vocabulary:["irrational","approximation","decimal"],script:[{speaker:"A",line:"Why is √2 irrational?"},{speaker:"B",line:"It can't be written as a _____ of integers."}]}},
+            "linear functions and slope": {social:{title:"Slope",vocabulary:["slope","rise","run"],script:[{speaker:"A",line:"What's slope?"},{speaker:"B",line:"Rise over _____, or vertical over horizontal."},{speaker:"A",line:"How calculate from points?"},{speaker:"B",line:"(y2 - y1) ÷ (x2 - x1), or _____ over run."},{speaker:"A",line:"Negative slope?"},{speaker:"B",line:"Line goes _____ from left to right."}]},academic:{title:"Slope Formula",vocabulary:["rise","run","rate of change"],script:[{speaker:"A",line:"Express slope interpretation."},{speaker:"B",line:"For each unit increase in x, y changes by the _____."}]}},
+            "systems of linear equations": {social:{title:"Systems",vocabulary:["system","equation","solution"],script:[{speaker:"A",line:"What's a system?"},{speaker:"B",line:"Two or more _____ with same variables."},{speaker:"A",line:"How solve graphically?"},{speaker:"B",line:"Graph both; solution is where they _____."},{speaker:"A",line:"What if parallel?"},{speaker:"B",line:"_____ solution exists."}]},academic:{title:"System Solutions",vocabulary:["intersection","consistent","solution"],script:[{speaker:"A",line:"Solve by substitution."},{speaker:"B",line:"Solve one for a variable, _____ into the other."}]}},
+            "solving multi-step equations": {social:{title:"Multi-Step Solving",vocabulary:["combine","simplify","distribute"],script:[{speaker:"A",line:"How solve 3(x + 2) - 5 = 10?"},{speaker:"B",line:"First _____ using distributive property."},{speaker:"A",line:"Then combine like _____ on left?"},{speaker:"B",line:"Yes, then isolate x using _____ operations."}]},academic:{title:"Complex Equations",vocabulary:["distribute","equivalent","solution"],script:[{speaker:"A",line:"Solve 2x - 3 = x + 5."},{speaker:"B",line:"Subtract x from both sides: x - 3 = _____. Then x = _____."}]}},
+            "pythagorean theorem": {social:{title:"Pythagorean Theorem",vocabulary:["pythagorean","hypotenuse","legs"],script:[{speaker:"A",line:"What's a² + b² = c²?"},{speaker:"B",line:"The Pythagorean theorem for _____ triangles."},{speaker:"A",line:"What's c?"},{speaker:"B",line:"The _____, the longest side opposite the right angle."},{speaker:"A",line:"Find missing side?"},{speaker:"B",line:"Substitute known sides and _____."}]},academic:{title:"Right Triangle Relationships",vocabulary:["right angle","legs","hypotenuse"],script:[{speaker:"A",line:"Apply theorem to 3-4-5 triangle."},{speaker:"B",line:"3² + 4² = 9 + 16 = _____ = 5²."}]}},
+            "transformations": {social:{title:"Transformations",vocabulary:["translation","rotation","reflection"],script:[{speaker:"A",line:"What's a translation?"},{speaker:"B",line:"Sliding a figure _____ or down, left or right."},{speaker:"A",line:"What about rotation?"},{speaker:"B",line:"Turning around a _____."},{speaker:"A",line:"And reflection?"},{speaker:"B",line:"Flipping over a _____."}]},academic:{title:"Isometries",vocabulary:["isometry","congruent","preserve"],script:[{speaker:"A",line:"Do transformations preserve size?"},{speaker:"B",line:"Yes, they're _____, preserving distance and angle."}]}},
+            "congruence and similarity": {social:{title:"Congruence and Similarity",vocabulary:["congruent","similar","scale"],script:[{speaker:"A",line:"What's the difference?"},{speaker:"B",line:"Congruent: same _____ and shape. Similar: same shape, different _____."},{speaker:"A",line:"Corresponding angles?"},{speaker:"B",line:"Equal in both _____."},{speaker:"A",line:"Sides?"},{speaker:"B",line:"Proportional in similar _____."}]},academic:{title:"Similarity Criteria",vocabulary:["corresponding","proportional","AA"],script:[{speaker:"A",line:"What's AA criterion?"},{speaker:"B",line:"If two _____ are equal, triangles are similar."}]}},
+            "volume of cylinders cones spheres": {social:{title:"3D Volumes",vocabulary:["cylinder","cone","sphere"],script:[{speaker:"A",line:"Formula for cylinder volume?"},{speaker:"B",line:"π × r² × _____, where r is radius and h is height."},{speaker:"A",line:"Cone?"},{speaker:"B",line:"One-third the cylinder: (1/3) × π × r² × _____."},{speaker:"A",line:"Sphere?"},{speaker:"B",line:"(4/3) × π × r _____."},{speaker:"A",line:"All in cubic units?"},{speaker:"B",line:"Yes, because _____ is 3-dimensional."}]},academic:{title:"Volume Derivations",vocabulary:["base","height","cubic"],script:[{speaker:"A",line:"Why cone = 1/3 cylinder?"},{speaker:"B",line:"Three cones fit in one _____ with same base and height."}]}},
+            "scatter plots and trend lines": {social:{title:"Data Trends",vocabulary:["scatter","trend","correlation"],script:[{speaker:"A",line:"What's a scatter plot?"},{speaker:"B",line:"Plots points for two _____ to show relationships."},{speaker:"A",line:"Trend line?"},{speaker:"B",line:"Best-fit _____ showing the pattern."},{speaker:"A",line:"Predict future values?"},{speaker:"B",line:"Extend the trend _____."}]},academic:{title:"Linear Regression",vocabulary:["bivariate","linear model","prediction"],script:[{speaker:"A",line:"What does strong correlation mean?"},{speaker:"B",line:"Points cluster closely to the _____."}]}},
+            "two-way frequency tables": {social:{title:"Data Tables",vocabulary:["frequency","table","categorical"],script:[{speaker:"A",line:"What does a two-way table show?"},{speaker:"B",line:"Data organized by two _____ variables."},{speaker:"A",line:"How find conditional probability?"},{speaker:"B",line:"Divide favorable outcomes by the _____ for that category."}]},academic:{title:"Contingency Analysis",vocabulary:["joint","marginal","conditional"],script:[{speaker:"A",line:"Define conditional probability."},{speaker:"B",line:"P(A|B) = P(A and B) ÷ P(_____)."}]}}
         };
 
         // ==================== STANDARDS DATABASE ====================
-        const MCA_BENCHMARKS = {
-            'circumference': [
-                { code: '7.3.1.1', desc: 'Calculate perimeter and area of circles (MCA-III)' }
+        // ==================== MCA-III STANDARDS DATABASE (organized by grade) ====================
+        const MCA_STANDARDS = {
+            6: [
+                {code: "6.1.1.1", desc: "Locate, order and compare positive rational numbers on a number line"},
+                {code: "6.1.2.1", desc: "Identify and use ratios to compare quantities"},
+                {code: "6.1.2.2", desc: "Apply the relationship between ratios, equivalent fractions and percents"},
+                {code: "6.1.3.1", desc: "Multiply and divide decimals and fractions"},
+                {code: "6.1.3.2", desc: "Use order of operations including grouping symbols"},
+                {code: "6.1.3.3", desc: "Calculate the percent of a number"},
+                {code: "6.1.3.4", desc: "Solve problems with positive rational numbers using all four operations"},
+                {code: "6.2.1.1", desc: "Understand that a variable can represent an unknown quantity"},
+                {code: "6.2.1.2", desc: "Apply the associative, commutative and distributive properties"},
+                {code: "6.2.3.1", desc: "Represent relationships with tables, verbal descriptions, symbols, and graphs"},
+                {code: "6.2.3.2", desc: "Use variables to represent relationships between quantities"},
+                {code: "6.3.1.1", desc: "Calculate the area of triangles and quadrilaterals"},
+                {code: "6.3.1.2", desc: "Calculate the surface area and volume of prisms"},
+                {code: "6.3.3.1", desc: "Solve problems using the relationships between supplementary, complementary and vertical angles"},
+                {code: "6.4.1.1", desc: "Determine the sample space for an experiment and the probability of each outcome"},
+                {code: "6.4.1.2", desc: "Determine experimental and theoretical probabilities"},
+                {code: "6.4.1.4", desc: "Calculate measures of center (mean, median) and spread (range)"}
             ],
-            'area': [
-                { code: '7.3.1.1', desc: 'Calculate perimeter and area of circles (MCA-III)' },
-                { code: '8.3.1.1', desc: 'Use the Pythagorean theorem with two- and three-dimensional figures' }
+            7: [
+                {code: "7.1.1.1", desc: "Know that every rational number can be written as a ratio of integers"},
+                {code: "7.1.1.2", desc: "Understand that division of integers follows the rules for signs"},
+                {code: "7.1.2.1", desc: "Add, subtract, multiply and divide positive and negative rational numbers"},
+                {code: "7.1.2.2", desc: "Use proportional reasoning to solve real-world and mathematical problems"},
+                {code: "7.2.1.1", desc: "Understand that a relationship is proportional if it can be expressed as y = kx"},
+                {code: "7.2.2.1", desc: "Represent proportional relationships with equations"},
+                {code: "7.2.3.1", desc: "Use properties of algebra to generate equivalent expressions"},
+                {code: "7.2.4.1", desc: "Represent relationships with equations and inequalities involving variables"},
+                {code: "7.3.1.1", desc: "Calculate perimeter and area of circles (MCA-III)"},
+                {code: "7.3.2.1", desc: "Describe the properties of similarity and apply to problem-solving"},
+                {code: "7.3.2.2", desc: "Apply scale factors to solve problems involving similar figures"},
+                {code: "7.3.2.3", desc: "Use proportions and ratios to solve problems involving scale drawings"},
+                {code: "7.4.1.1", desc: "Design and conduct experiments with random sampling"},
+                {code: "7.4.1.2", desc: "Use proportional reasoning with random sampling to make predictions"}
             ],
-            'diameter': [
-                { code: '7.3.1.1', desc: 'Use formulas for circles — circumference = πd, area = πr²' }
-            ],
-            'radius': [
-                { code: '7.3.1.1', desc: 'Use formulas for circles — circumference = πd, area = πr²' }
-            ],
-            'pi': [
-                { code: '7.3.1.1', desc: 'Understand pi as the ratio of circumference to diameter' }
-            ],
-            'proportional': [
-                { code: '7.1.1.1', desc: 'Know that every rational number can be written as a ratio of integers' },
-                { code: '7.1.1.2', desc: 'Understand that division of integers follows the rules for signs' },
-                { code: '7.2.2.1', desc: 'Represent proportional relationships with equations' }
-            ],
-            'percent': [
-                { code: '7.1.1.4', desc: 'Convert between fractions, decimals, and percents' },
-                { code: '7.2.3.1', desc: 'Use proportional reasoning to solve problems with percent' }
-            ],
-            'equation': [
-                { code: '7.2.4.1', desc: 'Represent relationships in various forms (tables, graphs, equations)' },
-                { code: '8.2.4.1', desc: 'Solve multi-step equations in one variable' }
-            ],
-            'slope': [
-                { code: '8.2.1.2', desc: 'Use linear functions to represent relationships' },
-                { code: '8.2.2.1', desc: 'Represent linear functions with tables, graphs, equations' }
-            ],
-            'linear': [
-                { code: '8.2.1.1', desc: 'Understand that a function assigns each input exactly one output' },
-                { code: '8.2.2.1', desc: 'Represent linear functions with tables, graphs, equations' },
-                { code: '8.2.4.4', desc: 'Express linear equations in slope-intercept, point-slope, standard forms' }
-            ],
-            'pythagorean': [
-                { code: '8.3.1.1', desc: 'Use the Pythagorean theorem with two- and three-dimensional figures' },
-                { code: '8.3.1.2', desc: 'Determine distance between two points using Pythagorean theorem' }
-            ],
-            'function': [
-                { code: '8.2.1.1', desc: 'Understand that a function assigns each input exactly one output' },
-                { code: '8.2.1.3', desc: 'Identify graphical properties of functions (linear vs. non-linear)' }
-            ],
-            'quadratic': [
-                { code: '8.EE.A.1', desc: 'Properties of integer exponents and expressions with exponents' }
+            8: [
+                {code: "8.1.1.1", desc: "Classify real numbers as rational or irrational"},
+                {code: "8.1.1.2", desc: "Compare real numbers, locate on number line, and estimate square roots"},
+                {code: "8.1.1.3", desc: "Determine square roots of perfect squares and cube roots of perfect cubes"},
+                {code: "8.1.1.4", desc: "Know and apply properties of positive and negative integer exponents"},
+                {code: "8.1.1.5", desc: "Express numbers in scientific notation"},
+                {code: "8.2.1.1", desc: "Understand that a function assigns exactly one output to each input"},
+                {code: "8.2.1.3", desc: "Identify a function as linear if it can be expressed as y = mx + b"},
+                {code: "8.2.1.4", desc: "Determine slope and y-intercept of a line from equations, tables, and graphs"},
+                {code: "8.2.2.1", desc: "Represent linear functions with tables, verbal descriptions, symbols, equations and graphs"},
+                {code: "8.2.4.1", desc: "Use linear equations to represent and solve real-world and mathematical problems"},
+                {code: "8.2.4.2", desc: "Solve systems of two linear equations in two variables"},
+                {code: "8.3.1.1", desc: "Use the Pythagorean Theorem to solve real-world and mathematical problems"},
+                {code: "8.3.1.2", desc: "Determine the distance between two points on a horizontal or vertical line"},
+                {code: "8.3.2.1", desc: "Understand and apply the definitions of transformations"},
+                {code: "8.3.2.2", desc: "Analyze two-dimensional figures using transformations"},
+                {code: "8.3.2.3", desc: "Know that two figures are congruent if a sequence of rigid motions maps one onto the other"},
+                {code: "8.3.2.4", desc: "Know that two figures are similar if a sequence of transformations maps one onto the other"},
+                {code: "8.3.3.1", desc: "Solve problems involving volumes of cylinders, cones and spheres"},
+                {code: "8.4.1.1", desc: "Collect, organize and display data including scatter plots"},
+                {code: "8.4.1.2", desc: "Use lines of best fit to make predictions from scatter plots"}
             ]
         };
 
@@ -1139,21 +1134,64 @@
 
         // ==================== TOPIC DETECTION ====================
         const TOPIC_PATTERNS = [
-            { topic: 'circumference and area', pattern: /circumference|area|circle/i },
-            { topic: 'diameter', pattern: /diameter/i },
-            { topic: 'radius', pattern: /radius/i },
-            { topic: 'pi', pattern: /\bpi\b|π|3\.14/i },
-            { topic: 'proportional relationships', pattern: /proportional|ratio|unit rate/i },
-            { topic: 'percent', pattern: /percent|%|discount/i },
-            { topic: 'equations', pattern: /equation|solve|linear|balance/i },
-            { topic: 'slope', pattern: /slope|rise over run|gradient/i },
-            { topic: 'linear functions', pattern: /linear function|function|f\(x\)|y = mx/i },
-            { topic: 'pythagorean theorem', pattern: /pythagorean|hypotenuse|right triangle/i },
-            { topic: 'exponent', pattern: /exponent|power|squared|cubed|exponentiation/i }
+            // GRADE 6
+            { topic: 'ratios and rates', pattern: /\bratio\b|rates|unit rate|per|comparison/i },
+            { topic: 'division of fractions', pattern: /divide.*fraction|fraction.*divide|invert|reciprocal/i },
+            { topic: 'positive and negative numbers', pattern: /negative|positive|integers|sign/i },
+            { topic: 'absolute value', pattern: /absolute|value|\||\||distance from zero/i },
+            { topic: 'variables and expressions', pattern: /variable|expression|x|y|unknown/i },
+            { topic: 'one-step equations and inequalities', pattern: /one.?step|equation|solve|inequality/i },
+            { topic: 'area of polygons', pattern: /area|polygon|rectangle|triangle|square/i },
+            { topic: 'surface area and volume', pattern: /surface area|volume|3d|cubic|net/i },
+            { topic: 'statistical questions and distributions', pattern: /statistical|distribution|data|questions/i },
+            { topic: 'mean median mode range', pattern: /mean|median|mode|range|average/i },
+            // GRADE 7
+            { topic: 'proportional relationships', pattern: /proportional|constant of proportionality|y=kx|k is/i },
+            { topic: 'unit rates and constants of proportionality', pattern: /unit rate|constant of proportionality|per 1|k=/i },
+            { topic: 'operations with rational numbers', pattern: /rational|decimal|fraction.*operation|add.*subtract/i },
+            { topic: 'expressions and equivalent forms', pattern: /equivalent.*expression|simplify|distribute|factor|property/i },
+            { topic: 'two-step equations and inequalities', pattern: /two.?step|multi.?step|combine.*term|inverse|operation/i },
+            { topic: 'scale drawings and scale factor', pattern: /scale.*factor|scale.*drawing|scale|ratio of.*to/i },
+            { topic: 'circumference and area of circles', pattern: /circumference|circle.*area|πd|πr|2πr/i },
+            { topic: 'angle relationships', pattern: /angle|complementary|supplementary|vertical|degree/i },
+            { topic: 'probability', pattern: /probability|outcome|likely|chance|favorable/i },
+            { topic: 'random sampling and inferences', pattern: /random.*sample|sampling|inference|population|representative/i },
+            // GRADE 8
+            { topic: 'exponents and scientific notation', pattern: /exponent|power|scientific notation|10\^|a × 10/i },
+            { topic: 'square roots and irrational numbers', pattern: /square root|√|irrational|radical|rational/i },
+            { topic: 'linear functions and slope', pattern: /slope|rise.*run|m=|mx\+b|linear function/i },
+            { topic: 'systems of linear equations', pattern: /system.*equation|solve.*system|intersection|consistent/i },
+            { topic: 'solving multi-step equations', pattern: /multi.?step.*equation|distribute|combine.*like|variable.*both/i },
+            { topic: 'pythagorean theorem', pattern: /pythagorean|a\²\+b\²=c\²|hypotenuse|right triangle|leg|3.4.5/i },
+            { topic: 'transformations', pattern: /transformation|translation|rotation|reflection|slide|turn|flip/i },
+            { topic: 'congruence and similarity', pattern: /congruent|similar|corresponding|aa|sas|sss/i },
+            { topic: 'volume of cylinders cones spheres', pattern: /volume|cylinder|cone|sphere|πr²h|1\/3|4\/3/i },
+            { topic: 'scatter plots and trend lines', pattern: /scatter|trend|correlation|bivariate|linear model/i },
+            { topic: 'two-way frequency tables', pattern: /two.?way.*table|frequency|contingency|categorical|joint|conditional/i }
         ];
 
         // ==================== STATE ====================
         let currentAnalysis = null;
+        let selectedGrade = 7; // Default to Grade 7
+
+        // ==================== GRADE SELECTOR ====================
+        function initializeGradeSelector() {
+            const gradeButtons = document.querySelectorAll('.grade-btn');
+            gradeButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    gradeButtons.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    selectedGrade = parseInt(e.target.dataset.grade);
+                    // Re-display results if analysis exists
+                    if (currentAnalysis) {
+                        displayResults();
+                    }
+                });
+            });
+        }
+
+        // Initialize grade selector on page load
+        document.addEventListener('DOMContentLoaded', initializeGradeSelector);
 
         // ==================== EVENT LISTENERS ====================
         document.getElementById('fileInput').addEventListener('change', handleFileSelect);
@@ -1334,13 +1372,19 @@
             const seenBenchmarks = new Set();
 
             for (const topic of topics) {
-                const topicKey = topic.split(' ')[0].toLowerCase();
-                if (MCA_BENCHMARKS[topicKey]) {
-                    for (const benchmark of MCA_BENCHMARKS[topicKey]) {
-                        const key = benchmark.code;
-                        if (!seenBenchmarks.has(key)) {
-                            standards.set(key, benchmark);
-                            seenBenchmarks.add(key);
+                // Look for matching topic in current grade's standards
+                if (MCA_STANDARDS[selectedGrade]) {
+                    for (const standard of MCA_STANDARDS[selectedGrade]) {
+                        // Check if this standard's description matches the topic
+                        const desc = standard.desc.toLowerCase();
+                        const topicLower = topic.toLowerCase();
+                        // Simple matching - check if topic words appear in description
+                        const topicWords = topicLower.split(/\s+/);
+                        const matches = topicWords.some(word => desc.includes(word));
+
+                        if (matches && !seenBenchmarks.has(standard.code)) {
+                            standards.set(standard.code, standard);
+                            seenBenchmarks.add(standard.code);
                         }
                     }
                 }
@@ -1368,11 +1412,15 @@
             lines.push('#!/usr/bin/env python3');
             lines.push('"""');
             lines.push('Lesson Digester - Auto-generated Build Script');
+            lines.push('Grade Level: ' + selectedGrade);
             lines.push('Rebuilds your lesson with clean slides, standards alignment, and teaching insights');
             lines.push('"""');
             lines.push('');
             lines.push('from pptx import Presentation');
             lines.push('from pptx.util import Pt, Inches');
+            lines.push('');
+            lines.push('# Grade Level');
+            lines.push('grade = ' + selectedGrade);
             lines.push('');
             lines.push('# Initialize presentation');
             lines.push('prs = Presentation()');
@@ -1430,6 +1478,9 @@
         function displayResults() {
             if (!currentAnalysis) return;
 
+            // Re-calculate standards based on selected grade
+            const standards = getStandardsForTopics(currentAnalysis.topics);
+
             // File Info
             document.getElementById('fileInfo').innerHTML = `
                 <div class="file-stat">
@@ -1445,8 +1496,8 @@
                     <div class="stat-value">${currentAnalysis.topics.length}</div>
                 </div>
                 <div class="file-stat">
-                    <div class="stat-label">Standards Aligned</div>
-                    <div class="stat-value">${currentAnalysis.standards.length}</div>
+                    <div class="stat-label">Grade Level</div>
+                    <div class="stat-value">Grade ${selectedGrade}</div>
                 </div>
             `;
 
@@ -1474,9 +1525,9 @@
             }
 
             // Standards
-            if (currentAnalysis.standards.length > 0) {
+            if (standards.length > 0) {
                 document.getElementById('standardsSection').style.display = 'block';
-                document.getElementById('standardsList').innerHTML = currentAnalysis.standards
+                document.getElementById('standardsList').innerHTML = standards
                     .map(std => `
                         <div class="standard-item">
                             <div class="standard-code">${std.code}</div>
@@ -1583,7 +1634,7 @@
             // Slide 1: Title Slide
             let slide = pres.addSlide();
             slide.background = { color: colors.navy };
-            const titleText = "Rebuilt Lesson: " + analysis.topics.join(", ");
+            const titleText = "Grade " + selectedGrade + " - " + analysis.topics.join(", ");
             slide.addText(titleText, {
                 x: 0.5, y: 1.5, w: 9, h: 1.5,
                 fontSize: 44, bold: true, color: colors.white,
