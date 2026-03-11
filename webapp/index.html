@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Lesson Digester - PPTX Analyzer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <style>
         /* ==================== ROOT & UTILITIES ==================== */
         :root {
@@ -555,6 +556,36 @@
             line-height: 1.6;
         }
 
+        /* ==================== GRADE SELECTOR ==================== */
+        .grade-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .grade-btn {
+            background: var(--navy);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .grade-btn:hover {
+            border-color: var(--amber);
+        }
+
+        .grade-btn.active {
+            background: var(--amber);
+            color: var(--navy);
+            border-color: var(--amber);
+        }
+
         /* ==================== BUILD SCRIPT ==================== */
         .script-container {
             background: rgba(0, 0, 0, 0.3);
@@ -598,6 +629,32 @@
 
         .copy-btn.copied {
             background: var(--teal);
+        }
+
+        .download-btn {
+            background: var(--amber);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .download-btn:hover {
+            background: #f0a030;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(212, 135, 15, 0.3);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
         }
 
         .script-panel {
@@ -773,6 +830,7 @@
             <!-- Topics Detected -->
             <div class="results-section delay-3" id="topicsSection">
                 <h2 class="section-heading">🔍 Topics Detected</h2>
+                <div class="grade-selector" id="gradeSelector"></div>
                 <div class="tags-container" id="topicsContainer"></div>
             </div>
 
@@ -799,6 +857,11 @@
                     <div class="script-panel" id="scriptPanel"></div>
                 </div>
             </div>
+
+            <!-- Download Rebuilt Lesson -->
+            <div class="results-section delay-7" id="downloadSection">
+                <button class="download-btn" id="downloadBtn">⬇️ Download Rebuilt Lesson (.pptx)</button>
+            </div>
         </div>
 
         <!-- EMPTY STATE (shown when no file) -->
@@ -812,157 +875,156 @@
     <!-- ==================== JAVASCRIPT ==================== -->
     <script src="js/digester-core.js"></script>
     <script>
+        // ==================== GRADE LEVEL STATE ====================
+        let selectedGrade = null;
+
         // ==================== TEACHING INSIGHTS DATABASE ====================
         const TEACHING_INSIGHTS = {
-            'circumference and area': {
-                misconceptions: [
-                    {
-                        error: 'Confusing diameter with radius',
-                        why: 'Students may use the full diameter when only the radius is needed in formulas',
-                        address: 'Always emphasize that radius = diameter ÷ 2. Use visual models showing the radius clearly marked from center to edge.'
-                    },
-                    {
-                        error: 'Treating pi (π) as a variable to solve for',
-                        why: 'Students may think π is an unknown that needs to be calculated',
-                        address: 'Remind students that π ≈ 3.14 is a constant. It represents the ratio of circumference to diameter.'
-                    },
-                    {
-                        error: 'Mixing up circumference and area formulas',
-                        why: 'Students forget which formula has what exponent or coefficient',
-                        address: 'Create a visual anchor: C = πd (circumference involves diameter, linear). A = πr² (area is squared).'
-                    }
-                ],
-                differentiation: {
-                    emergent: 'Start with hands-on measurement: wrap string around circles, measure the diameter, compare ratios. Use concrete numbers before formulas.',
-                    ell: 'Use visual and kinesthetic models. Provide word problem templates. Allow use of formula sheets. Practice with real-world objects.',
-                    extending: 'Explore the history of π. Calculate area of composite shapes (circles + rectangles). Solve multi-step problems with real-world contexts.'
+            // GRADE 6 TOPICS
+            'ratios and rates': { grade: 6, misconceptions: ['Confusing ratios as fractions', 'Not understanding unit rates in context', 'Mixing ratio and difference'], differentiation: { emergent: 'Use tape diagrams and concrete objects. Compare ratios with visual models.', ell: 'Provide ratio notation templates. Use real-world examples (prices, speeds).', extending: 'Explore ratio tables and equivalent ratios. Solve multi-step ratio problems.' }, essential_understandings: ['A ratio compares two quantities', 'Unit rates show quantity per 1 unit', 'Equivalent ratios represent the same relationship'] },
+            'division of fractions': { grade: 6, misconceptions: ['Forgetting to invert and multiply', 'Not connecting division to multiplication by reciprocal', 'Confusing when to invert'], differentiation: { emergent: 'Model with fraction bars and area diagrams. Use concrete contexts (sharing).', ell: 'Provide step-by-step checklists. Use visuals with grids to show division.', extending: 'Derive why we invert. Solve word problems requiring multiple steps.' }, essential_understandings: ['Dividing by a fraction means multiplying by its reciprocal', 'Division and multiplication are inverse operations', 'The quotient represents how many groups of the divisor fit in the dividend'] },
+            'positive and negative numbers': { grade: 6, misconceptions: ['Thinking negative numbers are "less than" in context', 'Confusing absolute value with negation', 'Struggling with number line placement'], differentiation: { emergent: 'Use number lines and real-world contexts (temperature, elevation, money).', ell: 'Color-code positive and negative on number lines. Use consistent language.', extending: 'Explore integer operations. Model with algebra tiles and coordinate planes.' }, essential_understandings: ['Positive and negative numbers locate positions relative to zero', 'Opposite numbers are equidistant from zero', 'Comparisons depend on context, not magnitude'] },
+            'absolute value': { grade: 6, misconceptions: ['Thinking absolute value always makes numbers positive', 'Confusing absolute value with opposite numbers', 'Not recognizing distance meaning'], differentiation: { emergent: 'Use number line to show distance from zero. Emphasize "distance, not direction".', ell: 'Provide visual models with number lines marked. Use repeated language.', extending: 'Solve absolute value equations. Explore absolute value functions.' }, essential_understandings: ['Absolute value is the distance from zero on a number line', 'Absolute value is always non-negative', '|a| = |-a| because they are equidistant from zero'] },
+            'variables and expressions': { grade: 6, misconceptions: ['Treating variables like unknown specific numbers only', 'Mixing up variables with their values', 'Not simplifying like terms correctly'], differentiation: { emergent: 'Use boxes and manipulatives to represent variables. Build expressions together.', ell: 'Provide sentence frames: "This variable represents ___." Use repeated values.', extending: 'Explore multi-variable expressions. Substitute and simplify complex expressions.' }, essential_understandings: ['Variables are symbols representing unknown or changing quantities', 'Expressions combine variables, numbers, and operations', 'Like terms can be combined by adding coefficients'] },
+            'one-step equations and inequalities': { grade: 6, misconceptions: ['Forgetting to apply operations to both sides', 'Confusing equals with inequality symbols', 'Not checking solutions'], differentiation: { emergent: 'Use balance models and algebra tiles. Start with simple numbers.', ell: 'Provide equation templates. Color-code operations on both sides.', extending: 'Solve multi-variable equations. Explore solution sets of inequalities.' }, essential_understandings: ['Equations and inequalities are balanced or ordered relationships', 'To maintain balance, perform the same operation on both sides', 'Solutions can be checked by substitution'] },
+            'area of polygons': { grade: 6, misconceptions: ['Confusing area with perimeter', 'Applying rectangle formula to all shapes', 'Not decomposing complex shapes'], differentiation: { emergent: 'Use grid paper and tangram pieces. Measure and compare areas with units.', ell: 'Provide formula cards with labeled diagrams. Use repeated measurement.', extending: 'Decompose irregular shapes. Find area with coordinates. Apply to real contexts.' }, essential_understandings: ['Area is the space covered by a 2D figure', 'Area = length × width for rectangles; Area = (1/2) × base × height for triangles', 'Irregular shapes can be decomposed into simpler shapes'] },
+            'surface area and volume': { grade: 6, misconceptions: ['Confusing surface area with volume', 'Applying 2D formulas to 3D figures', 'Not unfolding nets correctly'], differentiation: { emergent: 'Build 3D models with cubes. Use nets to visualize surfaces.', ell: 'Color-code different faces. Provide labeled formulas and diagrams.', extending: 'Decompose complex figures. Calculate surface area and volume of composite shapes.' }, essential_understandings: ['Surface area is the total area of all faces', 'Volume is the amount of space inside a 3D figure', 'V = length × width × height for rectangular prisms'] },
+            'statistical questions and distributions': { grade: 6, misconceptions: ['Confusing data with statistical questions', 'Not recognizing variability in data', 'Misinterpreting distributions'], differentiation: { emergent: 'Collect class data. Create dot plots and frequency tables by hand.', ell: 'Use familiar questions and contexts. Provide templates for recording data.', extending: 'Analyze distributions across groups. Explore shape, center, spread.' }, essential_understandings: ['Statistical questions anticipate data with variability', 'Distributions show how data spreads across values', 'Measures like mean, median describe the center of distributions'] },
+            'mean median mode range': { grade: 6, misconceptions: ['Choosing wrong measure for context', 'Not understanding what each measure represents', 'Calculating incorrectly'], differentiation: { emergent: 'Find measures using manipulatives and concrete data sets.', ell: 'Provide definitions on cards. Use consistent data sets for practice.', extending: 'Determine which measure best describes data. Analyze effects of outliers.' }, essential_understandings: ['Mean is the average; Median is the middle value when ordered; Mode is most frequent; Range is difference between max and min', 'Different measures suit different contexts', 'Outliers affect mean more than median'] },
+            // GRADE 7 TOPICS
+            'proportional relationships': { grade: 7, misconceptions: ['Confusing proportional with any linear', 'Not recognizing non-proportional relationships', 'Not using constant of proportionality'], differentiation: { emergent: 'Use tables and diagrams. Focus on concrete ratios first.', ell: 'Provide sentence stems and comparison tables. Use multiple representations.', extending: 'Distinguish proportional from linear. Solve complex word problems.' }, essential_understandings: ['Proportional relationships pass through the origin', 'The ratio y/x is constant in proportional relationships', 'The equation is y = kx where k is the constant of proportionality'] },
+            'unit rates and constants of proportionality': { grade: 7, misconceptions: ['Treating unit rate as just "divide"', 'Confusing which quantity is the unit', 'Not connecting unit rate to slope'], differentiation: { emergent: 'Use contexts like recipes and shopping. Create ratio tables together.', ell: 'Highlight "per 1 unit" language. Provide unit rate templates.', extending: 'Compare unit rates to determine best value. Solve word problems.' }, essential_understandings: ['Unit rate is the ratio of y per 1 unit of x', 'Unit rate equals the constant of proportionality', 'Unit rates help compare and make decisions'] },
+            'operations with rational numbers': { grade: 7, misconceptions: ['Applying integer rules to decimals and fractions', 'Sign errors in operations', 'Not simplifying or estimating'], differentiation: { emergent: 'Use number lines and area models. Practice with concrete contexts first.', ell: 'Color-code signs and terms. Provide operation algorithms as reference.', extending: 'Work with multiple operations in one expression. Solve complex problems.' }, essential_understandings: ['Rational numbers include fractions, decimals, and integers', 'Operations with negative numbers follow consistent rules', 'Estimation helps check reasonableness'] },
+            'expressions and equivalent forms': { grade: 7, misconceptions: ['Not recognizing equivalent expressions', 'Applying properties incorrectly', 'Forgetting the distributive property'], differentiation: { emergent: 'Use algebra tiles to model equivalence. Build expressions together.', ell: 'Provide property cards with examples. Use color-coding for like terms.', extending: 'Prove expressions equivalent. Simplify complex multi-variable expressions.' }, essential_understandings: ['Equivalent expressions have the same value for all variable values', 'The distributive property: a(b+c) = ab + ac', 'Properties of operations help simplify expressions'] },
+            'two-step equations and inequalities': { grade: 7, misconceptions: ['Reversing operation order', 'Not maintaining inequality direction when multiplying by negatives', 'Forgetting to check solutions'], differentiation: { emergent: 'Use balance models for both steps. Practice with positive numbers first.', ell: 'Provide step-by-step checklists. Highlight inequality direction changes.', extending: 'Solve equations with fractions and decimals. Analyze solution sets.' }, essential_understandings: ['Two-step equations require two inverse operations in reverse order', 'Multiplying/dividing by negative numbers reverses inequality signs', 'Solutions must satisfy the original equation or inequality'] },
+            'scale drawings and scale factor': { grade: 7, misconceptions: ['Confusing scale with ratio', 'Not applying scale factor consistently', 'Mixing up area and length scales'], differentiation: { emergent: 'Use grid paper to enlarge/reduce figures. Compare measurements directly.', ell: 'Provide scale notations with labeled diagrams. Use consistent examples.', extending: 'Find scale factors from measurements. Scale to real-world dimensions.' }, essential_understandings: ['Scale factor relates corresponding lengths in drawings and actual figures', 'Area scales by the square of the linear scale factor', 'Scales help represent large and small figures manageable sizes'] },
+            'circumference and area of circles': { grade: 7, misconceptions: ['Confusing formulas or missing factor of 2', 'Not understanding pi as a ratio', 'Mixing up diameter and radius in formulas'], differentiation: { emergent: 'Wrap string around circles to measure. Connect C = πd directly.', ell: 'Provide formula cards with diagrams. Use π ≈ 3.14 consistently.', extending: 'Explore area derivation. Solve multi-step circle problems.' }, essential_understandings: ['π is the ratio of circumference to diameter: C = πd or C = 2πr', 'Area of circle: A = πr² (requires radius, not diameter)', 'π is irrational but approximated as 3.14'] },
+            'angle relationships': { grade: 7, misconceptions: ['Confusing angle relationships (supplementary vs complementary)', 'Not using angle properties in reasoning', 'Forgetting angle sum in triangles'], differentiation: { emergent: 'Use protractors and visual models. Measure and compare angle pairs.', ell: 'Color-code angle pairs. Provide definitions with diagrams on reference cards.', extending: 'Use angle relationships to find unknown angles in figures.' }, essential_understandings: ['Complementary angles sum to 90°; Supplementary angles sum to 180°', 'Angles in a triangle sum to 180°', 'Vertical angles are equal'] },
+            'probability': { grade: 7, misconceptions: ['Confusing probability with odds', 'Not recognizing equally likely outcomes', 'Overestimating unlikely events'], differentiation: { emergent: 'Use spinners, coins, dice for concrete probability experiments.', ell: 'Provide probability notation and definitions. Use repeated experiments.', extending: 'Explore compound probability. Compare experimental and theoretical.' }, essential_understandings: ['Probability is the ratio of favorable to total possible outcomes', 'Probability ranges from 0 (impossible) to 1 (certain)', 'Experimental probability approaches theoretical with more trials'] },
+            'random sampling and inferences': { grade: 7, misconceptions: ['Biased sampling leading to incorrect inferences', 'Confusing sample with population', 'Not recognizing variability in samples'], differentiation: { emergent: 'Collect random samples from class. Compare to population.', ell: 'Provide sampling methods with examples. Use consistent language.', extending: 'Analyze bias in sampling methods. Make inferences about populations.' }, essential_understandings: ['Random samples are unbiased and representative of populations', 'Sample statistics estimate population parameters', 'Larger samples give more reliable estimates'] },
+            // GRADE 8 TOPICS
+            'exponents and scientific notation': { grade: 8, misconceptions: ['Confusing exponent rules', 'Incorrectly applying PEMDAS with exponents', 'Misplacing decimal in scientific notation'], differentiation: { emergent: 'Use repeated multiplication to show exponents. Build patterns of powers.', ell: 'Provide exponent rules as reference cards. Use concrete number bases first.', extending: 'Apply exponent rules to variables. Convert to/from scientific notation.' }, essential_understandings: ['An exponent tells how many times to multiply the base', 'Product of powers: a^m × a^n = a^(m+n)', 'Scientific notation: a × 10^n where 1 ≤ a < 10'] },
+            'square roots and irrational numbers': { grade: 8, misconceptions: ['Confusing square root with half', 'Thinking all decimals are irrational', 'Not recognizing irrational numbers in context'], differentiation: { emergent: 'Use area models and geometric squares to find square roots.', ell: 'Provide square root notation with examples. Use perfect squares first.', extending: 'Approximate irrational numbers. Solve equations with radicals.' }, essential_understandings: ['The square root of n is the number that when squared equals n', 'Irrational numbers cannot be written as ratios of integers', 'π and √2 are irrational; their decimals don\'t repeat or terminate'] },
+            'linear functions and slope': { grade: 8, misconceptions: ['Confusing slope calculation (rise/run)', 'Not connecting slope to rate of change', 'Misinterpreting negative slopes'], differentiation: { emergent: 'Use slope triangles on graph paper. Calculate rise and run directly.', ell: 'Provide slope calculation templates. Use consistent contexts.', extending: 'Find slope from any two points. Analyze slope in real-world situations.' }, essential_understandings: ['Slope is rise/run: the ratio of vertical to horizontal change', 'Positive slopes increase left to right; negative slopes decrease', 'Slope describes the rate of change in linear relationships'] },
+            'systems of linear equations': { grade: 8, misconceptions: ['Confusing intersection point as invalid solution', 'Using incorrect substitution or elimination techniques', 'Not checking solutions in both equations'], differentiation: { emergent: 'Graph systems on coordinate grids. Find intersection points visually.', ell: 'Provide substitution and elimination steps as checklists.', extending: 'Solve systems algebraically. Analyze systems with no or infinite solutions.' }, essential_understandings: ['A solution to a system must satisfy both equations', 'Systems can be solved by graphing, substitution, or elimination', 'Solutions represent intersection points of lines'] },
+            'solving multi-step equations': { grade: 8, misconceptions: ['Reversing operation order or forgetting steps', 'Distributive property errors', 'Sign errors when moving terms'], differentiation: { emergent: 'Use balance models for each step. Combine like terms with visual aids.', ell: 'Provide step-by-step equation-solving checklists.', extending: 'Solve equations with fractions, variables on both sides.' }, essential_understandings: ['Multi-step equations require combining like terms and using inverse operations', 'The distributive property distributes to all terms in parentheses', 'Check solutions by substitution into the original equation'] },
+            'pythagorean theorem': { grade: 8, misconceptions: ['Applying theorem to non-right triangles', 'Confusing which side is the hypotenuse', 'Forgetting to take square root or making calculation errors'], differentiation: { emergent: 'Use tangram squares to verify geometrically. Build 3-4-5 triangles.', ell: 'Provide labeled diagrams and a² + b² = c² reference cards.', extending: 'Derive theorem. Solve 3D problems using Pythagorean theorem.' }, essential_understandings: ['In right triangles: a² + b² = c² (a, b are legs; c is hypotenuse)', 'The theorem only applies to right triangles', 'Use to find missing side lengths or verify right angles'] },
+            'transformations': { grade: 8, misconceptions: ['Confusing reflection, rotation, and translation', 'Not understanding transformations preserve distance and angle', 'Incorrectly applying transformation rules'], differentiation: { emergent: 'Use tracing paper and manipulatives to perform transformations.', ell: 'Provide transformation definitions with visual examples. Practice each type.', extending: 'Compose transformations. Predict positions after transformations.' }, essential_understandings: ['Translations slide figures; Rotations turn about a point; Reflections flip over a line', 'Transformations preserve size and shape (isometries)', 'Figures can be congruent after transformations'] },
+            'congruence and similarity': { grade: 8, misconceptions: ['Confusing congruent with similar', 'Not identifying corresponding parts correctly', 'Missing criteria for congruence/similarity'], differentiation: { emergent: 'Use transparent overlays to match figures. Compare measurements directly.', ell: 'Provide correspondence statements with marked angles and sides.', extending: 'Use congruence and similarity to solve problems and find missing measures.' }, essential_understandings: ['Congruent figures have the same size and shape; Similarity allows proportional scaling', 'Corresponding angles are equal in similar figures; Sides are proportional', 'AA, SAS, SSS determine congruence; AA determines similarity'] },
+            'volume of cylinders cones spheres': { grade: 8, misconceptions: ['Using area formulas for volume', 'Confusing radius with diameter in formulas', 'Mixing up which formula for which shape'], differentiation: { emergent: 'Build 3D models from nets. Fill with water or sand to explore volume.', ell: 'Provide labeled formula cards with diagrams for each shape.', extending: 'Derive volume formulas. Calculate volume of composite shapes.' }, essential_understandings: ['V_cylinder = πr²h; V_cone = (1/3)πr²h; V_sphere = (4/3)πr³', 'Volume measures space inside a 3D figure', 'Cone volume is 1/3 cylinder volume with same base and height'] },
+            'scatter plots and trend lines': { grade: 8, misconceptions: ['Not recognizing linear patterns in scatter plots', 'Drawing trend lines without considering the pattern', 'Confusing correlation with causation'], differentiation: { emergent: 'Create scatter plots from collected data. Draw best-fit lines by eye.', ell: 'Provide scatter plot templates. Use consistent data contexts.', extending: 'Find equations of trend lines. Use trend lines to make predictions.' }, essential_understandings: ['Scatter plots show relationships between two variables', 'Trend lines model linear relationships in data', 'Strong linear trends allow predictions; causation requires evidence beyond correlation'] },
+            'two-way frequency tables': { grade: 8, misconceptions: ['Not calculating conditional probabilities correctly', 'Confusing rows and columns', 'Not distinguishing relative from absolute frequencies'], differentiation: { emergent: 'Create two-way tables from collected survey data. Find totals together.', ell: 'Provide labeled table templates. Use consistent categorical variables.', extending: 'Calculate conditional and joint probabilities. Analyze associations in data.' }, essential_understandings: ['Two-way tables organize data by two categorical variables', 'Conditional probability: P(A|B) = P(A and B) / P(B)', 'Tables reveal associations between variables'] }
+        };
+
+        // ==================== RISA DIALOGUES DATABASE ====================
+        const RISA_DIALOGUES = {
+            "circumference and area": {
+                social: {
+                    title: "Talking About Circles",
+                    vocabulary: ["circumference", "diameter", "radius", "area", "pi"],
+                    script: [
+                        {speaker: "A", line: "Hi! Can you help me understand circles?"},
+                        {speaker: "B", line: "Of course! What would you like to know?"},
+                        {speaker: "A", line: "What is the difference between circumference and area?"},
+                        {speaker: "B", line: "Well, circumference is the distance _____. Area is the space _____."},
+                        {speaker: "A", line: "How do you find the circumference?"},
+                        {speaker: "B", line: "You use the formula C = _____ times _____."},
+                        {speaker: "A", line: "And area?"},
+                        {speaker: "B", line: "Area uses A = _____ times _____ squared."},
+                        {speaker: "A", line: "So both formulas use _____. Thanks!"},
+                        {speaker: "B", line: "You're welcome! Practice makes it easier."}
+                    ]
                 },
-                essential_understandings: [
-                    'π is a constant ratio that relates a circle\'s circumference to its diameter',
-                    'Radius and diameter have a 1:2 relationship',
-                    'Circumference is the perimeter of a circle (C = πd or C = 2πr)',
-                    'Area measures the space inside a circle (A = πr²)'
-                ]
+                academic: {
+                    title: "Mathematical Discussion: Circumference and Area",
+                    vocabulary: ["circumference", "diameter", "radius", "area", "pi", "constant of proportionality"],
+                    script: [
+                        {speaker: "A", line: "Good morning. How are you today?"},
+                        {speaker: "B", line: "I am doing well, thank you. And you?"},
+                        {speaker: "A", line: "I am well. I would like to discuss the properties of circles."},
+                        {speaker: "B", line: "That sounds interesting. What would you like to know?"},
+                        {speaker: "A", line: "What is the circumference of a circle?"},
+                        {speaker: "B", line: "The circumference is the distance around a circle. The formula is C = π times _____."},
+                        {speaker: "A", line: "What is the constant π?"},
+                        {speaker: "B", line: "π is approximately _____. It is the ratio of circumference to _____."},
+                        {speaker: "A", line: "How is area different from circumference?"},
+                        {speaker: "B", line: "Area measures the space inside. The formula is A = π times _____ squared."},
+                        {speaker: "A", line: "I see. So when you double the radius, the area increases by a factor of _____."},
+                        {speaker: "B", line: "That is correct. Thank you for the discussion."}
+                    ]
+                }
             },
-            'proportional relationships': {
-                misconceptions: [
-                    {
-                        error: 'Thinking proportional means "just add the same amount"',
-                        why: 'Students confuse additive relationships (linear with slope but not through origin) with proportional (multiplicative)',
-                        address: 'Use the "multiplicative" language: each time x multiplies by 2, y must multiply by 2. Show that proportional graphs pass through (0,0).'
-                    },
-                    {
-                        error: 'Not recognizing proportional relationships in different forms',
-                        why: 'Students may not see that y = 2x, y/x = 2, and a table with ratio 2:1 are all the same relationship',
-                        address: 'Show multiple representations side-by-side: equation, table, graph. Highlight the constant ratio.'
-                    },
-                    {
-                        error: 'Confusing slope with unit rate',
-                        why: 'Students may not understand that slope IS the unit rate for proportional relationships',
-                        address: 'Use consistent language. "For every 1 unit of x, y changes by m units. That slope m is our unit rate."'
-                    }
-                ],
-                differentiation: {
-                    emergent: 'Use tape diagrams and area models. Focus on concrete contexts (recipes, ratios of ingredients). Build tables together.',
-                    ell: 'Provide sentence stems: "For every __ units of x, there are __ units of y." Use graphs with grids and labeled points.',
-                    extending: 'Explore non-proportional linear relationships. Work with constants of proportionality as fractions or decimals. Connect to real-world rates.'
+            "proportional relationships": {
+                social: {
+                    title: "Talking About Ratios",
+                    vocabulary: ["proportional", "ratio", "unit rate", "constant", "scale"],
+                    script: [
+                        {speaker: "A", line: "Hey! Can we talk about proportions?"},
+                        {speaker: "B", line: "Sure! What about them?"},
+                        {speaker: "A", line: "What does it mean when something is proportional?"},
+                        {speaker: "B", line: "It means when one thing changes, the other changes by the same _____."},
+                        {speaker: "A", line: "Can you give me an example?"},
+                        {speaker: "B", line: "Sure! If you buy 2 apples for $3, then 4 apples cost _____."},
+                        {speaker: "A", line: "Oh! So the ratio stays the _____."},
+                        {speaker: "B", line: "Exactly! Every time you multiply one side by 2, you multiply the other by _____."},
+                        {speaker: "A", line: "That makes sense. Where do we see this?"},
+                        {speaker: "B", line: "In recipes, maps, and speed! Anywhere with a constant _____."}
+                    ]
                 },
-                essential_understandings: [
-                    'Proportional relationships have a constant unit rate or ratio',
-                    'In a proportional relationship, when one quantity multiplies by a factor, the other multiplies by the same factor',
-                    'The graph of a proportional relationship is a straight line through the origin',
-                    'The equation of a proportional relationship is y = kx, where k is the constant of proportionality'
-                ]
+                academic: {
+                    title: "Mathematical Discussion: Proportional Relationships",
+                    vocabulary: ["proportional", "constant of proportionality", "unit rate", "ratio", "linear"],
+                    script: [
+                        {speaker: "A", line: "Good morning. May I discuss proportional relationships with you?"},
+                        {speaker: "B", line: "Of course. Please proceed."},
+                        {speaker: "A", line: "What is the definition of a proportional relationship?"},
+                        {speaker: "B", line: "A proportional relationship has a constant ratio. The equation is y = _____ times x."},
+                        {speaker: "A", line: "What does the constant represent?"},
+                        {speaker: "B", line: "The constant k is called the constant of _____."},
+                        {speaker: "A", line: "How do we identify it from a table?"},
+                        {speaker: "B", line: "We divide y by x. The result is _____."},
+                        {speaker: "A", line: "And on a graph?"},
+                        {speaker: "B", line: "A proportional relationship is a straight line through the _____."},
+                        {speaker: "A", line: "I see. So the unit rate equals the slope?"},
+                        {speaker: "B", line: "Yes. Thank you for this discussion."}
+                    ]
+                }
             },
-            'pythagorean theorem': {
-                misconceptions: [
-                    {
-                        error: 'Applying Pythagorean theorem to non-right triangles',
-                        why: 'Students forget that the theorem ONLY applies to right triangles',
-                        address: 'Always check for the right angle first. Use the phrase "in a right triangle" consistently. Mark right angles clearly.'
-                    },
-                    {
-                        error: 'Forgetting to take the square root',
-                        why: 'Students calculate a² + b² = c² but forget c² means they need to √ to find c',
-                        address: 'Emphasize: "The theorem gives us c². To find c, we need the square root." Practice with both sides of the equation.'
-                    },
-                    {
-                        error: 'Assigning wrong sides as a, b, or c',
-                        why: 'Students may confuse which sides are legs vs hypotenuse, especially in word problems',
-                        address: 'Reinforce: c is ALWAYS the longest side, opposite the right angle. The legs are the two sides forming the right angle.'
-                    }
-                ],
-                differentiation: {
-                    emergent: 'Use physical models: tangram squares on each side of a right triangle. Count unit squares to verify the theorem.',
-                    ell: 'Provide diagrams with labeled sides. Use step-by-step problem templates. Work with perfect squares first (3-4-5 triangles).',
-                    extending: 'Derive the theorem geometrically. Explore Pythagorean triples. Solve complex multi-step word problems in 3D contexts.'
+            "equations": {
+                social: {
+                    title: "Talking About Solving Equations",
+                    vocabulary: ["variable", "solve", "balance", "solution", "inverse"],
+                    script: [
+                        {speaker: "A", line: "Can you help me solve this equation?"},
+                        {speaker: "B", line: "I would be happy to help!"},
+                        {speaker: "A", line: "What does it mean to solve an equation?"},
+                        {speaker: "B", line: "It means finding the value of x that makes the equation _____."},
+                        {speaker: "A", line: "How do you do that?"},
+                        {speaker: "B", line: "You do the same operation on both _____ to keep it balanced."},
+                        {speaker: "A", line: "Like a balance scale?"},
+                        {speaker: "B", line: "Exactly! Whatever you take from one side, you take from the _____."},
+                        {speaker: "A", line: "What if I have x + 3 = 7?"},
+                        {speaker: "B", line: "Subtract 3 from both sides. So x = _____."}
+                    ]
                 },
-                essential_understandings: [
-                    'The Pythagorean theorem (a² + b² = c²) relates the sides of RIGHT triangles only',
-                    'In a right triangle, the hypotenuse (c) is the side opposite the right angle',
-                    'The legs (a and b) are the two sides that form the right angle',
-                    'To find a missing side, substitute known values and solve'
-                ]
-            },
-            'equations': {
-                misconceptions: [
-                    {
-                        error: 'Forgetting to apply operations to both sides equally',
-                        why: 'Students may subtract from only one side or not distribute operations consistently',
-                        address: 'Use the Balance Beam model: whatever you do to one side, you MUST do to the other. Practice saying this aloud.'
-                    },
-                    {
-                        error: 'Combining unlike terms',
-                        why: 'Students may add or subtract terms that have different variables or exponents',
-                        address: 'Define "like terms" clearly: same variable, same exponent. Color-code or circle like terms before combining.'
-                    },
-                    {
-                        error: 'Sign errors when distributing or combining',
-                        why: 'Students forget negative signs when moving terms or distributing negatives',
-                        address: 'Use a "multiply by -1" mindset. Explicitly write out sign changes. Practice with negative coefficients.'
-                    }
-                ],
-                differentiation: {
-                    emergent: 'Use balance scales or algebra tiles to model equation solving physically. Start with one-step equations.',
-                    ell: 'Provide equation-solving steps as a checklist. Use color-coding for like terms. Work with simpler numbers (no fractions initially).',
-                    extending: 'Solve equations with fractions, decimals, and multiple variables. Explore equivalence and identity. Connect to function notation.'
-                },
-                essential_understandings: [
-                    'An equation is a statement that two expressions are equal',
-                    'To solve an equation, perform the same operation on both sides to maintain balance',
-                    'Combining like terms means adding or subtracting terms with identical variable parts',
-                    'The solution is the value that makes the equation true'
-                ]
-            },
-            'linear functions': {
-                misconceptions: [
-                    {
-                        error: 'Misinterpreting slope as just a number without meaning',
-                        why: 'Students calculate slope but don\'t connect it to rate of change or real-world meaning',
-                        address: 'Always interpret slope: "For each unit increase in x, y increases by m units." Connect to context (e.g., cost per item, miles per hour).'
-                    },
-                    {
-                        error: 'Confusing slope and y-intercept',
-                        why: 'Students may think the y-intercept is part of the slope or vice versa',
-                        address: 'Use the forms: f(x) = mx + b. "m is the slope (rate of change), b is the y-intercept (starting value at x=0)"'
-                    },
-                    {
-                        error: 'Not recognizing functions in different representations',
-                        why: 'A function shown in a table, graph, equation, or verbal form may not be recognized as the "same" function',
-                        address: 'Show all four representations side by side. Practice converting between them. Highlight that they describe the same relationship.'
-                    }
-                ],
-                differentiation: {
-                    emergent: 'Start with real-world linear contexts (phone plans, car rentals). Create tables and graphs together. Use slope triangles on graphs.',
-                    ell: 'Provide sentence frames: "As __ increases by __, __ increases by __." Use color-coded equations: y = (slope)x + (y-intercept).',
-                    extending: 'Compare linear vs non-linear functions. Solve systems of linear functions. Explore piecewise linear functions and real-world modeling.'
-                },
-                essential_understandings: [
-                    'A linear function can be represented as f(x) = mx + b',
-                    'The slope m represents the rate of change (rise over run)',
-                    'The y-intercept b is the output when the input is zero',
-                    'Linear functions model relationships where the change is constant'
-                ]
+                academic: {
+                    title: "Mathematical Discussion: Solving Equations",
+                    vocabulary: ["equation", "variable", "inverse operation", "solution", "equivalence"],
+                    script: [
+                        {speaker: "A", line: "Good morning. May we discuss equation solving?"},
+                        {speaker: "B", line: "Certainly. What aspect interests you?"},
+                        {speaker: "A", line: "What is the fundamental principle of solving equations?"},
+                        {speaker: "B", line: "We maintain equivalence by applying the same operation to both _____."},
+                        {speaker: "A", line: "What are inverse operations?"},
+                        {speaker: "B", line: "Operations that undo each other. Addition and _____ are inverses."},
+                        {speaker: "A", line: "Can you demonstrate with an example?"},
+                        {speaker: "B", line: "Consider 2x + 5 = 13. First subtract 5: 2x = _____."},
+                        {speaker: "A", line: "Then divide by 2?"},
+                        {speaker: "B", line: "Yes. Therefore x = _____. We can verify by substitution."},
+                        {speaker: "A", line: "Thank you. This is very clear now."},
+                        {speaker: "B", line: "You are welcome. Practice strengthens understanding."}
+                    ]
+                }
             }
         };
 
@@ -1498,6 +1560,309 @@
             document.getElementById('resultsPanel').classList.add('visible');
         }
 
+        // ==================== PPTX GENERATOR ====================
+        function buildPresentation(analysis) {
+            // Create presentation using PptxGenJS
+            const pres = new PptxGenJS();
+
+            // Configure layout
+            pres.defineLayout({ name: 'LAYOUT_16x9', width: 10, height: 5.625 });
+            pres.defineLayout({ name: 'LAYOUT_BLANK', width: 10, height: 5.625 });
+
+            const colors = {
+                navy: "1E2761",
+                amber: "D4870F",
+                teal: "0D9488",
+                blue: "3B82F6",
+                pink: "E8436D",
+                bg: "0f1729",
+                white: "FFFFFF",
+                lightGray: "F1F1F1"
+            };
+
+            // Slide 1: Title Slide
+            let slide = pres.addSlide();
+            slide.background = { color: colors.navy };
+            const titleText = "Rebuilt Lesson: " + analysis.topics.join(", ");
+            slide.addText(titleText, {
+                x: 0.5, y: 1.5, w: 9, h: 1.5,
+                fontSize: 44, bold: true, color: colors.white,
+                align: "center", breakOnSpace: true
+            });
+            slide.addText("Standards-Aligned • Group Based Learning", {
+                x: 0.5, y: 3.2, w: 9, h: 0.6,
+                fontSize: 24, color: colors.amber,
+                align: "center"
+            });
+            // Amber accent bar at bottom
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 5, w: 10, h: 0.625,
+                fill: { color: colors.amber }
+            });
+
+            // Slide 2: Learning Target
+            slide = pres.addSlide();
+            slide.background = { color: colors.white };
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 0, w: 10, h: 0.7,
+                fill: { color: colors.navy }
+            });
+            slide.addText("Learning Target", {
+                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
+                fontSize: 28, bold: true, color: colors.white,
+                align: "left"
+            });
+            // Teal accent line
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 0.7, w: 10, h: 0.05,
+                fill: { color: colors.teal }
+            });
+
+            let yPos = 1.2;
+            const targetTexts = analysis.topics.map(topic =>
+                "I can " + topic + " using mathematical reasoning"
+            );
+            for (const target of targetTexts) {
+                slide.addText(target, {
+                    x: 0.5, y: yPos, w: 9, h: 0.5,
+                    fontSize: 16, color: colors.navy,
+                    align: "left"
+                });
+                yPos += 0.55;
+            }
+
+            // Standards at bottom
+            if (analysis.standards.length > 0) {
+                const standardsText = analysis.standards.map(s => s.code).join(" • ");
+                slide.addText(standardsText, {
+                    x: 0.5, y: 5, w: 9, h: 0.5,
+                    fontSize: 10, color: colors.lightGray,
+                    align: "center"
+                });
+            }
+
+            // Slide 3: Vocabulary Cards
+            slide = pres.addSlide();
+            slide.background = { color: colors.white };
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 0, w: 10, h: 0.7,
+                fill: { color: colors.navy }
+            });
+            slide.addText("Key Vocabulary", {
+                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
+                fontSize: 28, bold: true, color: colors.white,
+                align: "left"
+            });
+
+            yPos = 1.2;
+            for (const topic of analysis.topics) {
+                const insight = analysis.insights[topic];
+                if (insight && insight.essential_understandings) {
+                    slide.addText(topic.toUpperCase(), {
+                        x: 0.5, y: yPos, w: 9, h: 0.3,
+                        fontSize: 14, bold: true, color: colors.amber
+                    });
+                    yPos += 0.35;
+
+                    for (const understanding of insight.essential_understandings.slice(0, 3)) {
+                        slide.addText(understanding, {
+                            x: 0.7, y: yPos, w: 8.8, h: 0.4,
+                            fontSize: 12, color: colors.navy,
+                            bullet: true
+                        });
+                        yPos += 0.45;
+                        if (yPos > 5.2) break;
+                    }
+                    if (yPos > 5.2) break;
+                }
+            }
+
+            // Slide 4: Misconceptions
+            slide = pres.addSlide();
+            slide.background = { color: colors.white };
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 0, w: 10, h: 0.7,
+                fill: { color: colors.pink }
+            });
+            slide.addText("Common Misconceptions", {
+                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
+                fontSize: 28, bold: true, color: colors.white,
+                align: "left"
+            });
+
+            yPos = 1.2;
+            for (const topic of analysis.topics) {
+                const insight = analysis.insights[topic];
+                if (insight && insight.misconceptions) {
+                    for (const misconception of insight.misconceptions) {
+                        const bulletText = misconception.error;
+                        slide.addText(bulletText, {
+                            x: 0.5, y: yPos, w: 9, h: 0.5,
+                            fontSize: 13, color: colors.navy,
+                            bullet: true
+                        });
+                        yPos += 0.55;
+                        if (yPos > 5.0) break;
+                    }
+                    if (yPos > 5.0) break;
+                }
+            }
+
+            // Slide 5: Differentiation Strategies
+            slide = pres.addSlide();
+            slide.background = { color: colors.white };
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 0, w: 10, h: 0.7,
+                fill: { color: colors.teal }
+            });
+            slide.addText("Differentiation Strategies", {
+                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
+                fontSize: 28, bold: true, color: colors.white,
+                align: "left"
+            });
+
+            yPos = 1.2;
+            for (const topic of analysis.topics) {
+                const insight = analysis.insights[topic];
+                if (insight && insight.differentiation) {
+                    const diff = insight.differentiation;
+
+                    slide.addText("🌱 Emergent", {
+                        x: 0.5, y: yPos, w: 9, h: 0.3,
+                        fontSize: 12, bold: true, color: colors.teal
+                    });
+                    yPos += 0.35;
+                    slide.addText(diff.emergent, {
+                        x: 0.7, y: yPos, w: 8.8, h: 0.6,
+                        fontSize: 11, color: colors.navy,
+                        wrap: true
+                    });
+                    yPos += 0.75;
+
+                    slide.addText("🌍 ELL Support", {
+                        x: 0.5, y: yPos, w: 9, h: 0.3,
+                        fontSize: 12, bold: true, color: colors.teal
+                    });
+                    yPos += 0.35;
+                    slide.addText(diff.ell, {
+                        x: 0.7, y: yPos, w: 8.8, h: 0.6,
+                        fontSize: 11, color: colors.navy,
+                        wrap: true
+                    });
+                    yPos += 0.75;
+
+                    if (yPos > 4.5) break;
+                }
+            }
+
+            // Slide 6: RISA Social Dialogue
+            slide = pres.addSlide();
+            slide.background = { color: colors.white };
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 0, w: 10, h: 0.7,
+                fill: { color: colors.navy }
+            });
+            slide.addText("RISA Oral Interaction: Social", {
+                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
+                fontSize: 28, bold: true, color: colors.white,
+                align: "left"
+            });
+
+            yPos = 1.2;
+            const socialTopic = analysis.topics[0];
+            if (socialTopic && RISA_DIALOGUES[socialTopic] && RISA_DIALOGUES[socialTopic].social) {
+                const socialScript = RISA_DIALOGUES[socialTopic].social.script;
+                for (const dialogue of socialScript.slice(0, 10)) {
+                    const speakerColor = dialogue.speaker === "A" ? colors.teal : colors.amber;
+                    const dialogueLine = dialogue.speaker + ": " + dialogue.line;
+
+                    slide.addText(dialogueLine, {
+                        x: 0.5, y: yPos, w: 9, h: 0.4,
+                        fontSize: 12, color: speakerColor,
+                        align: "left"
+                    });
+                    yPos += 0.45;
+                    if (yPos > 4.8) break;
+                }
+            }
+
+            // RISA footer
+            slide.addText("RISA: Routine • Integrated • Structured • Academic", {
+                x: 0.5, y: 5.3, w: 9, h: 0.3,
+                fontSize: 9, color: colors.lightGray,
+                align: "center"
+            });
+
+            // Slide 7: RISA Academic Dialogue
+            slide = pres.addSlide();
+            slide.background = { color: colors.white };
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 0, w: 10, h: 0.7,
+                fill: { color: colors.navy }
+            });
+            slide.addText("RISA Oral Interaction: Academic", {
+                x: 0.3, y: 0.1, w: 9.4, h: 0.5,
+                fontSize: 28, bold: true, color: colors.white,
+                align: "left"
+            });
+
+            yPos = 1.2;
+            if (socialTopic && RISA_DIALOGUES[socialTopic] && RISA_DIALOGUES[socialTopic].academic) {
+                const academicScript = RISA_DIALOGUES[socialTopic].academic.script;
+                for (const dialogue of academicScript.slice(0, 10)) {
+                    const speakerColor = dialogue.speaker === "A" ? colors.teal : colors.amber;
+                    const dialogueLine = dialogue.speaker + ": " + dialogue.line;
+
+                    slide.addText(dialogueLine, {
+                        x: 0.5, y: yPos, w: 9, h: 0.4,
+                        fontSize: 12, color: speakerColor,
+                        align: "left"
+                    });
+                    yPos += 0.45;
+                    if (yPos > 4.8) break;
+                }
+            }
+
+            // RISA footer
+            slide.addText("RISA: Routine • Integrated • Structured • Academic", {
+                x: 0.5, y: 5.3, w: 9, h: 0.3,
+                fontSize: 9, color: colors.lightGray,
+                align: "center"
+            });
+
+            // Slide 8: Closure
+            slide = pres.addSlide();
+            slide.background = { color: colors.navy };
+            slide.addText("Reflection & Closure", {
+                x: 0.5, y: 1.5, w: 9, h: 1,
+                fontSize: 44, bold: true, color: colors.white,
+                align: "center"
+            });
+            slide.addText("What did you learn today?", {
+                x: 0.5, y: 2.8, w: 9, h: 0.6,
+                fontSize: 24, color: colors.amber,
+                align: "center"
+            });
+            slide.addText("Share with your team.", {
+                x: 0.5, y: 3.5, w: 9, h: 0.6,
+                fontSize: 24, color: colors.amber,
+                align: "center"
+            });
+            // Teal bottom bar
+            slide.addShape(pres.ShapeType.rect, {
+                x: 0, y: 5.2, w: 10, h: 0.425,
+                fill: { color: colors.teal }
+            });
+
+            // Generate filename
+            const filename = analysis.filename
+                .replace('.pptx', '')
+                .replace(/[^a-z0-9]/gi, '_') + '_rebuilt.pptx';
+
+            // Save presentation
+            pres.save({ fileName: filename });
+        }
+
         // ==================== UTILITY FUNCTIONS ====================
         function updateProgress(percent, label) {
             const progressBar = document.getElementById('progressBar');
@@ -1534,6 +1899,14 @@
             };
             return text.replace(/[&<>"']/g, m => map[m]);
         }
+
+        // ==================== EVENT LISTENERS ====================
+        document.getElementById('copyBtn')?.addEventListener('click', copyBuildScript);
+        document.getElementById('downloadBtn')?.addEventListener('click', () => {
+            if (currentAnalysis) {
+                buildPresentation(currentAnalysis);
+            }
+        });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
