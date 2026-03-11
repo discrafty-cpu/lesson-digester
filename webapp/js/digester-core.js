@@ -117,6 +117,14 @@ const Digester = {
     DIFFERENTIATION: {
       icon: '🎚️',
       label: 'Differentiation'
+    },
+    RISA_SOCIAL: {
+      icon: '💬',
+      label: 'RISA Social Dialogue'
+    },
+    RISA_ACADEMIC: {
+      icon: '🎓',
+      label: 'RISA Academic Dialogue'
     }
   },
 

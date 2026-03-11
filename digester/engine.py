@@ -3,7 +3,7 @@
 THE LESSON DIGESTER — Drummond Design System Engine
 Built with python-pptx
 
-Chews up cluttered CPM lesson decks and spits out clean, standards-aligned,
+Chews up cluttered group-based learning lesson decks and spits out clean, standards-aligned,
 story-driven presentations with embedded collaborative roles.
 
 Usage:
@@ -512,7 +512,7 @@ def build_activity_launch(prs, data):
     # Teams Complete card
     add_shape(slide, 0.3, 0.8, 5.5, 1.8, fill_color=C.white)
     add_textbox(slide, 2.0, 0.85, 1.5, 0.4,
-                text="CPM", font_size=18, font_name=FONT_TITLE,
+                text="Group-Based Learning", font_size=18, font_name=FONT_TITLE,
                 color=C.teal, bold=True, align=PP_ALIGN.CENTER)
     add_textbox(slide, 0.5, 1.3, 5, 0.8,
                 text=f"Teams Complete:\n{data.get('ref', 'Unit - Lesson: Problems')}",
@@ -980,7 +980,7 @@ def build_would_you_rather(prs, data):
 
 
 def build_notice_wonder(prs, data):
-    """NOTICE_WONDER: 'What Do You Notice? What Do You Wonder?' — classic CPM routine.
+    """NOTICE_WONDER: 'What Do You Notice? What Do You Wonder?' — classic group-based learning routine.
     data keys:
         title (str), image (str, optional path), context (str),
         notice_starter (str), wonder_starter (str),
@@ -1503,6 +1503,118 @@ def build_differentiation_slide(prs, data):
         add_textbox(slide, 0.3, 5.28, 9.4, 0.32,
                     text=f"MCA-III: {tag_text} — Source: MN StemTC Frameworks",
                     font_size=12, color=C.white, bold=True)
+
+    return slide
+
+
+def build_risa_dialogue(prs, data):
+    """RISA ORAL INTERACTION: Routine, Integrated, Structured, Academic dialogue.
+
+    Students practice information already learned through scripted partner conversations.
+    Two versions: Social (accessible, everyday language) and Academic (professional tone).
+
+    data keys:
+        type (str): "social" or "academic"
+        title (str): dialogue title
+        vocabulary (list of str): target vocabulary words
+        script (list of dicts): conversation with speaker and line keys
+        topic (str): the math topic being discussed
+
+    Design: Two-column layout with dialogue script on left, vocabulary on right.
+    """
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_bg(slide, C.surface)
+
+    dialogue_type = data.get("type", "social")
+    title = data.get("title", "RISA Dialogue")
+    vocabulary = data.get("vocabulary", [])
+    script = data.get("script", [])
+    topic = data.get("topic", "")
+
+    # Title bar (navy background)
+    add_shape(slide, 0, 0, 10, 0.65, fill_color=C.navy)
+    add_textbox(slide, 0.3, 0.1, 9, 0.45,
+                text=title, font_size=24, font_name=FONT_TITLE,
+                color=C.white, bold=True)
+
+    # Subtitle: "RISA Oral Interaction — Social/Academic"
+    add_shape(slide, 0, 0.65, 10, 0.3, fill_color=C.white)
+    risa_label = "RISA Oral Interaction — " + ("Social & Accessible" if dialogue_type == "social" else "Academic & Professional")
+    add_textbox(slide, 0.3, 0.68, 9, 0.25,
+                text=risa_label, font_size=13, color=C.amber, bold=True)
+
+    # Two-column layout
+    # Left: Script (dialogue)
+    script_left = 0.3
+    script_top = 1.0
+    script_width = 6.2
+    script_height = 3.9
+
+    # Right: Vocabulary box
+    vocab_left = 6.7
+    vocab_top = 1.0
+    vocab_width = 3.0
+    vocab_height = 3.9
+
+    # Script section background
+    add_shape(slide, script_left, script_top, script_width, script_height,
+              fill_color=C.white)
+
+    # Vocabulary section background
+    add_shape(slide, vocab_left, vocab_top, vocab_width, vocab_height,
+              fill_color=RGBColor(0xF5, 0xF5, 0xF5))
+
+    # Script header
+    add_textbox(slide, script_left + 0.15, script_top + 0.15, script_width - 0.3, 0.25,
+                text="Dialogue", font_size=14, font_name=FONT_HEADING,
+                bold=True, color=C.navy)
+
+    # Build script text with alternating colors for A (teal) and B (amber)
+    script_y = script_top + 0.45
+    line_height = 0.25
+
+    for item in script:
+        speaker = item.get("speaker", "")
+        line = item.get("line", "")
+
+        if speaker == "A":
+            color = C.teal
+            prefix = "A: "
+        else:
+            color = C.amber
+            prefix = "B: "
+
+        # Fit text within the script box
+        text_to_display = prefix + line
+
+        add_textbox(slide, script_left + 0.15, script_y, script_width - 0.3, line_height,
+                    text=text_to_display, font_size=11, color=color, bold=True)
+
+        script_y += line_height
+
+        # Stop if we've filled the space
+        if script_y > script_top + script_height - 0.2:
+            break
+
+    # Vocabulary section header
+    add_textbox(slide, vocab_left + 0.15, vocab_top + 0.15, vocab_width - 0.3, 0.25,
+                text="Target Vocabulary", font_size=13, font_name=FONT_HEADING,
+                bold=True, color=C.teal)
+
+    # Vocabulary list
+    vocab_y = vocab_top + 0.5
+    vocab_item_height = 0.28
+
+    for word in vocabulary:
+        add_textbox(slide, vocab_left + 0.15, vocab_y, vocab_width - 0.3, vocab_item_height,
+                    text="• " + word, font_size=11, bold=True, color=C.charcoal)
+        vocab_y += vocab_item_height
+
+    # Bottom RISA principles bar
+    add_shape(slide, 0, 5.0, 10, 0.625, fill_color=C.navy)
+    risa_text = "R.I.S.A. = Routine • Integrated • Structured • Academic"
+    add_textbox(slide, 0.3, 5.05, 9.4, 0.525,
+                text=risa_text, font_size=11, color=C.white, italic=True)
 
     return slide
 

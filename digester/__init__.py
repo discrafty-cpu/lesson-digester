@@ -1,7 +1,7 @@
 """
 The Lesson Digester
 ====================
-Chews up cluttered CPM math lesson decks and spits out clean,
+Chews up cluttered group-based learning math lesson decks and spits out clean,
 standards-aligned, story-driven presentations.
 
 Modules:

@@ -1,7 +1,7 @@
 # The Lesson Digester
 
 ## Purpose
-The Lesson Digester chews up cluttered, inconsistent CPM math lesson presentations and spits out clean, modern, visually stunning slide decks following the "Drummond Design System" — a card-based, story-driven aesthetic with professional typography, relevant AI-generated images, and consistent color theming.
+The Lesson Digester chews up cluttered, inconsistent group-based learning math lesson presentations and spits out clean, modern, visually stunning slide decks following the "Drummond Design System" — a card-based, story-driven aesthetic with professional typography, relevant AI-generated images, and consistent color theming.
 
 ## Core Philosophy: Roles Embedded, Not Bolted On
 
@@ -278,7 +278,7 @@ Every rebuilt deck should:
 - Team role assignment table (Computers, Calculators, Read 1st Q, Responds 1st)
 - Need section with supply icons
 
-**Recognizing this slide**: "DO:", "Teams Complete:", CPM problem numbers, role assignments
+**Recognizing this slide**: "DO:", "Teams Complete:", group-based learning problem numbers, role assignments
 
 ---
 
@@ -460,7 +460,7 @@ Day 2:
 ## Important Notes
 
 - **Bilingual content**: Many slides include Spanish translations. PRESERVE these.
-- **CPM references**: Keep exact problem numbers (7-2, 7-3, etc.) — these map to the textbook
+- **Problem references**: Keep exact problem numbers (7-2, 7-3, etc.) — these map to the textbook
 - **Team roles**: The 4-role structure (Facilitator, Task Manager, Resource Manager, Recorder/Reporter) is standard — always include
 - **Sentence frames**: These are critical scaffolds for English learners — always include them
 - **Focus skills**: These are warm-up review problems, not the main lesson — keep them distinct

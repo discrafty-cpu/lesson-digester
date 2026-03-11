@@ -6,7 +6,7 @@ Mathematics Test Specifications for Grades 7, 8
 
 This module provides:
 1. Complete benchmark database with descriptions, vocabulary, and cognitive complexity
-2. Topic-to-standard mapping for CPM lesson alignment
+2. Topic-to-standard mapping for group-based learning lesson alignment
 3. Vocabulary extraction for embedding in slide discussions
 4. Gap analysis to flag missing standards coverage
 5. Standards-based quiz/assessment item generator
@@ -532,7 +532,7 @@ GRADE_8 = {
 }
 
 # ─── TOPIC → STANDARD MAPPING ──────────────────────────────────
-# Maps CPM lesson topics / keywords to relevant MCA-III benchmarks
+# Maps group-based learning lesson topics / keywords to relevant MCA-III benchmarks
 TOPIC_MAP = {
     # --- Grade 7 Topics ---
     "distance rate time": ["7.2.1.1", "7.2.1.2", "7.2.2.1", "7.2.2.2", "7.2.4.1"],
@@ -2048,6 +2048,382 @@ TEACHING_INSIGHTS = {
         "vignette_summary": "Students fold a piece of paper repeatedly, predicting thickness. After 42 folds (theoretical), it would reach the moon. This demonstrates exponential growth and motivates scientific notation.",
     },
 }
+
+
+RISA_DIALOGUES = {
+    "circumference and area": {
+        "social": {
+            "title": "Talking About Circles",
+            "vocabulary": ["circumference", "diameter", "radius", "area", "pi"],
+            "script": [
+                {"speaker": "A", "line": "Hi! Can you help me understand circles?"},
+                {"speaker": "B", "line": "Of course! What would you like to know?"},
+                {"speaker": "A", "line": "What is the difference between circumference and area?"},
+                {"speaker": "B", "line": "Well, circumference is the distance _____. Area is the space _____."},
+                {"speaker": "A", "line": "What do we use to measure circumference?"},
+                {"speaker": "B", "line": "We use the formula _____ with pi and the _____."},
+                {"speaker": "A", "line": "And what about area?"},
+                {"speaker": "B", "line": "Area uses the formula _____ with pi and the _____."},
+                {"speaker": "A", "line": "I see! Thanks for explaining that!"},
+                {"speaker": "B", "line": "You're welcome!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Circles",
+            "vocabulary": ["circumference", "diameter", "radius", "area", "pi"],
+            "script": [
+                {"speaker": "A", "line": "Hello. I have a question about circle measurements."},
+                {"speaker": "B", "line": "I am happy to help. What is it?"},
+                {"speaker": "A", "line": "What is the circumference of a _____?"},
+                {"speaker": "B", "line": "I think circumference is a type of _____."},
+                {"speaker": "A", "line": "What features make you say that?"},
+                {"speaker": "B", "line": "Well, circumference measures the _____ of a shape. A _____ is around, not inside."},
+                {"speaker": "A", "line": "Why else is circumference different from area?"},
+                {"speaker": "B", "line": "Area measures the _____ inside a shape. A _____ uses a different formula."},
+                {"speaker": "A", "line": "Very interesting. So circumference and area are both types of _____ properties?"},
+                {"speaker": "B", "line": "Yes, they are both used to describe _____."},
+                {"speaker": "A", "line": "I see. So circles have circumference and area. Thanks!"},
+                {"speaker": "B", "line": "You're welcome."},
+            ]
+        }
+    },
+    "proportional relationships": {
+        "social": {
+            "title": "Talking About Proportions",
+            "vocabulary": ["proportional", "ratio", "scale factor", "relationship"],
+            "script": [
+                {"speaker": "A", "line": "Hey, can you help me with proportions?"},
+                {"speaker": "B", "line": "Sure, I can help. What do you need?"},
+                {"speaker": "A", "line": "What does it mean when two things are _____?"},
+                {"speaker": "B", "line": "It means that when one thing _____, the other _____ in the same way."},
+                {"speaker": "A", "line": "Can you give me an example?"},
+                {"speaker": "B", "line": "Sure! If you have _____, then you also have _____."},
+                {"speaker": "A", "line": "Oh, I think I get it!"},
+                {"speaker": "B", "line": "Great! The key is finding the _____ between the two."},
+                {"speaker": "A", "line": "Thanks for explaining!"},
+                {"speaker": "B", "line": "Anytime!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Proportional Relationships",
+            "vocabulary": ["proportional", "ratio", "scale factor", "constant"],
+            "script": [
+                {"speaker": "A", "line": "Good morning. I have a problem understanding proportions."},
+                {"speaker": "B", "line": "I will do my best to assist."},
+                {"speaker": "A", "line": "What kind of relationship is _____ to _____?"},
+                {"speaker": "B", "line": "I classified that as a _____ relationship."},
+                {"speaker": "A", "line": "What features make that a proportional relationship?"},
+                {"speaker": "B", "line": "When you _____, the other _____ at the same rate. The _____ is always the same."},
+                {"speaker": "A", "line": "That is true. But not all relationships work that way. Are there other features?"},
+                {"speaker": "B", "line": "Yes. A proportional relationship always _____ through the origin when graphed."},
+                {"speaker": "A", "line": "Now I understand why _____ and _____ are proportional. Only true proportional relationships have a _____ ratio. You are great at classifying!"},
+                {"speaker": "B", "line": "It is easy when you know what to look for."},
+            ]
+        }
+    },
+    "integer operations": {
+        "social": {
+            "title": "Talking About Integer Operations",
+            "vocabulary": ["positive", "negative", "integer", "sum", "product"],
+            "script": [
+                {"speaker": "A", "line": "Hi! Can you help me with integer operations?"},
+                {"speaker": "B", "line": "Yes, what do you need help with?"},
+                {"speaker": "A", "line": "When I add a positive and a negative number, what happens?"},
+                {"speaker": "B", "line": "You _____, and the answer is _____."},
+                {"speaker": "A", "line": "What about multiplication?"},
+                {"speaker": "B", "line": "If you multiply a positive and a negative, you get a _____."},
+                {"speaker": "A", "line": "What if both are negative?"},
+                {"speaker": "B", "line": "Then you get a _____."},
+                {"speaker": "A", "line": "That makes sense!"},
+                {"speaker": "B", "line": "I'm glad that helped!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Integer Operations",
+            "vocabulary": ["positive", "negative", "sum", "product", "absolute value"],
+            "script": [
+                {"speaker": "A", "line": "Hello. Can you help me with an integer problem?"},
+                {"speaker": "B", "line": "I am happy to help. What is it?"},
+                {"speaker": "A", "line": "What is the result of _____ and _____?"},
+                {"speaker": "B", "line": "I think the sum is _____."},
+                {"speaker": "A", "line": "What features make you say that?"},
+                {"speaker": "B", "line": "Well, _____ means you move toward _____. The distance is _____."},
+                {"speaker": "A", "line": "Why else would that be the answer?"},
+                {"speaker": "B", "line": "When you add integers, you can think of it as _____ on a number line."},
+                {"speaker": "A", "line": "I see. So _____ and _____ give the sum _____ because of how the signs work. That is very helpful!"},
+                {"speaker": "B", "line": "You're welcome."},
+            ]
+        }
+    },
+    "linear functions": {
+        "social": {
+            "title": "Talking About Linear Functions",
+            "vocabulary": ["function", "linear", "slope", "y-intercept", "pattern"],
+            "script": [
+                {"speaker": "A", "line": "Hi! Can you help me understand linear functions?"},
+                {"speaker": "B", "line": "Sure! What do you want to know?"},
+                {"speaker": "A", "line": "What is a linear function?"},
+                {"speaker": "B", "line": "It is a relationship where _____ changes at a _____ rate."},
+                {"speaker": "A", "line": "What is the slope?"},
+                {"speaker": "B", "line": "The slope is _____, and the y-intercept is _____."},
+                {"speaker": "A", "line": "How do I use those?"},
+                {"speaker": "B", "line": "You use them to _____ the line or to _____ values."},
+                {"speaker": "A", "line": "Great! That helps a lot!"},
+                {"speaker": "B", "line": "Happy to help!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Linear Functions",
+            "vocabulary": ["function", "linear", "slope", "y-intercept", "rate of change"],
+            "script": [
+                {"speaker": "A", "line": "Good morning. I need to discuss linear functions."},
+                {"speaker": "B", "line": "I am happy to help. What is your question?"},
+                {"speaker": "A", "line": "What kind of function is y = _____ x + _____?"},
+                {"speaker": "B", "line": "I classified that as a _____ function."},
+                {"speaker": "A", "line": "What features make it linear?"},
+                {"speaker": "B", "line": "The _____ is constant. When x changes by _____, y changes by _____."},
+                {"speaker": "A", "line": "That is true. But exponential relationships also show change. What else makes it linear?"},
+                {"speaker": "B", "line": "When graphed, a linear function makes a _____, not a curve."},
+                {"speaker": "A", "line": "Now I understand. y = _____ x + _____ is linear because the slope is constant and it graphs as a line. You explained that very well!"},
+                {"speaker": "B", "line": "Thank you. It makes sense when you see the pattern."},
+            ]
+        }
+    },
+    "pythagorean theorem": {
+        "social": {
+            "title": "Talking About the Pythagorean Theorem",
+            "vocabulary": ["pythagorean theorem", "hypotenuse", "right triangle", "sides", "formula"],
+            "script": [
+                {"speaker": "A", "line": "Hi! Do you understand the Pythagorean Theorem?"},
+                {"speaker": "B", "line": "Yes, I can help you with it."},
+                {"speaker": "A", "line": "What is it used for?"},
+                {"speaker": "B", "line": "It is used to find the _____ of a _____."},
+                {"speaker": "A", "line": "What is the formula?"},
+                {"speaker": "B", "line": "The formula is a² + b² = _____."},
+                {"speaker": "A", "line": "What do a and b represent?"},
+                {"speaker": "B", "line": "They are the _____ of the right triangle."},
+                {"speaker": "A", "line": "And what is c?"},
+                {"speaker": "B", "line": "c is the _____, which is the longest side. Thanks for asking!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Pythagorean Theorem",
+            "vocabulary": ["pythagorean theorem", "hypotenuse", "right triangle", "legs"],
+            "script": [
+                {"speaker": "A", "line": "Hello. I have a question about right triangles."},
+                {"speaker": "B", "line": "I am happy to help. What is it?"},
+                {"speaker": "A", "line": "If a triangle has sides _____, _____, and _____, what kind of triangle is it?"},
+                {"speaker": "B", "line": "I think it is a _____ triangle."},
+                {"speaker": "A", "line": "What features make you say that?"},
+                {"speaker": "B", "line": "Well, when I apply the Pythagorean Theorem, _____ + _____ = _____."},
+                {"speaker": "A", "line": "Why else would it be a right triangle?"},
+                {"speaker": "B", "line": "Right triangles have one _____ angle, and the Pythagorean Theorem always works for them."},
+                {"speaker": "A", "line": "I see. So _____, _____, and _____ form a right triangle because _____ + _____ = _____. Excellent!"},
+                {"speaker": "B", "line": "It's easy when you use the theorem correctly."},
+            ]
+        }
+    },
+    "equations": {
+        "social": {
+            "title": "Talking About Equations",
+            "vocabulary": ["variable", "solve", "equation", "equal", "inverse operations"],
+            "script": [
+                {"speaker": "A", "line": "Hey! Can you help me solve an equation?"},
+                {"speaker": "B", "line": "Sure, I can help. What's the equation?"},
+                {"speaker": "A", "line": "I need to find the _____. The equation is x + _____ = _____."},
+                {"speaker": "B", "line": "Okay. What do you do first?"},
+                {"speaker": "A", "line": "I use _____ operations to isolate the _____."},
+                {"speaker": "B", "line": "Right. So you _____ from both sides."},
+                {"speaker": "A", "line": "And then x = _____?"},
+                {"speaker": "B", "line": "Yes! You found the solution. Great job!"},
+                {"speaker": "A", "line": "Thanks for the help!"},
+                {"speaker": "B", "line": "Anytime!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Solving Equations",
+            "vocabulary": ["equation", "variable", "solution", "inverse operations", "isolate"],
+            "script": [
+                {"speaker": "A", "line": "Good morning. I need help solving an equation."},
+                {"speaker": "B", "line": "I am happy to help. What is the equation?"},
+                {"speaker": "A", "line": "What is the solution to _____ = _____?"},
+                {"speaker": "B", "line": "I found the solution by using _____."},
+                {"speaker": "A", "line": "What features of equations make you use that method?"},
+                {"speaker": "B", "line": "When the _____ is added, I use subtraction. When it is _____, I use division."},
+                {"speaker": "A", "line": "That is logical. But other equations might need different steps. Why that method here?"},
+                {"speaker": "B", "line": "The _____ are the _____ of the operations used in the equation."},
+                {"speaker": "A", "line": "So for _____ = _____, I use _____ to isolate the variable, and the solution is x = _____. You explained that perfectly!"},
+                {"speaker": "B", "line": "It's easy when you know what operations to undo."},
+            ]
+        }
+    },
+    "percent": {
+        "social": {
+            "title": "Talking About Percents",
+            "vocabulary": ["percent", "part", "whole", "decimal", "fraction"],
+            "script": [
+                {"speaker": "A", "line": "Hi! Can you help me with percents?"},
+                {"speaker": "B", "line": "Of course! What do you need?"},
+                {"speaker": "A", "line": "What does 25% mean?"},
+                {"speaker": "B", "line": "It means _____ out of _____."},
+                {"speaker": "A", "line": "How do I write that as a fraction?"},
+                {"speaker": "B", "line": "You write it as _____."},
+                {"speaker": "A", "line": "What about as a decimal?"},
+                {"speaker": "B", "line": "As a decimal, it is _____."},
+                {"speaker": "A", "line": "That makes sense!"},
+                {"speaker": "B", "line": "Percents, fractions, and decimals are all different ways to show the same _____."},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Percents",
+            "vocabulary": ["percent", "part", "whole", "proportion"],
+            "script": [
+                {"speaker": "A", "line": "Hello. I have a question about percents."},
+                {"speaker": "B", "line": "I am happy to help. What is it?"},
+                {"speaker": "A", "line": "What is _____ % of _____?"},
+                {"speaker": "B", "line": "I calculated it as _____."},
+                {"speaker": "A", "line": "What features make you use that method?"},
+                {"speaker": "B", "line": "I set up a _____ with the percent. The _____ is what I'm looking for."},
+                {"speaker": "A", "line": "That is true. But there are other ways to find percents. Why use proportion here?"},
+                {"speaker": "B", "line": "A proportion works because _____ and _____ have a proportional relationship."},
+                {"speaker": "A", "line": "I see. So _____ % of _____ equals _____ because the proportion works. Thank you!"},
+                {"speaker": "B", "line": "You're welcome."},
+            ]
+        }
+    },
+    "similarity": {
+        "social": {
+            "title": "Talking About Similar Figures",
+            "vocabulary": ["similar", "corresponding angles", "proportional sides", "scale factor"],
+            "script": [
+                {"speaker": "A", "line": "Hi! Are these shapes similar?"},
+                {"speaker": "B", "line": "Let me check. What do you notice about them?"},
+                {"speaker": "A", "line": "Well, they look like they have the same _____..."},
+                {"speaker": "B", "line": "Right! They have _____ that match."},
+                {"speaker": "A", "line": "What about the sides?"},
+                {"speaker": "B", "line": "The sides are _____ to each other. That means the sides are _____."},
+                {"speaker": "A", "line": "So they are similar because...?"},
+                {"speaker": "B", "line": "They have the same shape but different _____. We say they are similar!"},
+                {"speaker": "A", "line": "Great! Now I understand!"},
+                {"speaker": "B", "line": "Similar shapes are all around you!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Similarity",
+            "vocabulary": ["similar", "corresponding angles", "proportional sides", "scale factor"],
+            "script": [
+                {"speaker": "A", "line": "Good morning. I need help with similarity."},
+                {"speaker": "B", "line": "I am happy to help. What is your question?"},
+                {"speaker": "A", "line": "Are these two figures _____ to each other?"},
+                {"speaker": "B", "line": "I think they are _____ figures."},
+                {"speaker": "A", "line": "What features make them similar?"},
+                {"speaker": "B", "line": "The _____ are equal, and the _____ are proportional."},
+                {"speaker": "A", "line": "That is true. But congruent figures also have equal angles. What else proves similarity?"},
+                {"speaker": "B", "line": "Congruent figures have sides that are equal, but similar figures have sides that are _____ by a scale factor."},
+                {"speaker": "A", "line": "Now I understand! These figures are similar because the angles are _____ and the sides are _____ in ratio. Excellent work!"},
+                {"speaker": "B", "line": "Thank you. The definitions help me remember the difference."},
+            ]
+        }
+    },
+    "scatterplot": {
+        "social": {
+            "title": "Talking About Scatterplots",
+            "vocabulary": ["scatterplot", "correlation", "trend", "points", "relationship"],
+            "script": [
+                {"speaker": "A", "line": "Hi! What does this scatterplot show?"},
+                {"speaker": "B", "line": "It shows the relationship between two _____."},
+                {"speaker": "A", "line": "How do you know?"},
+                {"speaker": "B", "line": "By looking at the _____ on the graph. If they go up, there is a _____."},
+                {"speaker": "A", "line": "What if they go down?"},
+                {"speaker": "B", "line": "Then the relationship is _____."},
+                {"speaker": "A", "line": "What if the points are scattered all over?"},
+                {"speaker": "B", "line": "Then there is _____ or very little relationship between the _____."},
+                {"speaker": "A", "line": "That makes sense!"},
+                {"speaker": "B", "line": "Scatterplots help us see patterns quickly!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Scatterplots",
+            "vocabulary": ["scatterplot", "correlation", "trend", "positive", "negative"],
+            "script": [
+                {"speaker": "A", "line": "Hello. I have a question about this scatterplot."},
+                {"speaker": "B", "line": "I am happy to help. What would you like to know?"},
+                {"speaker": "A", "line": "What kind of correlation is shown by the points _____?"},
+                {"speaker": "B", "line": "I think this is a _____ correlation."},
+                {"speaker": "A", "line": "What features make you say that?"},
+                {"speaker": "B", "line": "As the x-values increase, the y-values _____. The points form an _____."},
+                {"speaker": "A", "line": "That is true. But other data can also show trends. What else shows this correlation?"},
+                {"speaker": "B", "line": "A _____ correlation means the values move in the same _____, and the _____ is close to the points."},
+                {"speaker": "A", "line": "I see. So because the points show _____ and the line is _____, this is a strong positive correlation. Thank you!"},
+                {"speaker": "B", "line": "You're welcome."},
+            ]
+        }
+    },
+    "exponents and scientific notation": {
+        "social": {
+            "title": "Talking About Exponents",
+            "vocabulary": ["exponent", "base", "power", "scientific notation", "standard form"],
+            "script": [
+                {"speaker": "A", "line": "Hi! Can you help me with exponents?"},
+                {"speaker": "B", "line": "Sure! What do you want to know?"},
+                {"speaker": "A", "line": "What does 2³ mean?"},
+                {"speaker": "B", "line": "It means 2 times itself _____ times, which equals _____."},
+                {"speaker": "A", "line": "What is scientific notation?"},
+                {"speaker": "B", "line": "It is a way to write very large or very small numbers using a _____ and an _____."},
+                {"speaker": "A", "line": "Can you give an example?"},
+                {"speaker": "B", "line": "Sure! _____ written in scientific notation is _____."},
+                {"speaker": "A", "line": "Oh! That's much easier to write!"},
+                {"speaker": "B", "line": "Yes! Scientific notation is really useful for big numbers!"},
+            ]
+        },
+        "academic": {
+            "title": "Mathematical Discussion: Exponents and Scientific Notation",
+            "vocabulary": ["exponent", "base", "power", "scientific notation"],
+            "script": [
+                {"speaker": "A", "line": "Good morning. I need help with exponents."},
+                {"speaker": "B", "line": "I am happy to help. What is your question?"},
+                {"speaker": "A", "line": "What is the value of _____?"},
+                {"speaker": "B", "line": "I calculated it as _____."},
+                {"speaker": "A", "line": "What features make you compute it that way?"},
+                {"speaker": "B", "line": "The _____ tells me how many times to multiply the _____. So I multiply _____ by itself _____ times."},
+                {"speaker": "A", "line": "That is logical. But multiplication can show repeated operations. Why use exponent notation?"},
+                {"speaker": "B", "line": "Exponent notation is _____ and clearer when the numbers are very _____."},
+                {"speaker": "A", "line": "I see. So _____ equals _____ because the exponent _____ means multiply by itself that many times. Very helpful!"},
+                {"speaker": "B", "line": "It makes calculations clearer and more efficient."},
+            ]
+        }
+    }
+}
+
+
+def get_risa_dialogues(topic_keywords):
+    """
+    Match topic keywords to RISA dialogues. Returns dict with 'social' and 'academic' keys, or empty dict.
+
+    Args:
+        topic_keywords: list of topic strings to search for (e.g., ["area of circle"])
+
+    Returns:
+        dict with 'social' and 'academic' dialogue dicts, or empty dict if no match found
+    """
+    if not topic_keywords:
+        return {}
+
+    # Strategy 1: Try exact match with lower case
+    for kw in topic_keywords:
+        kw_lower = kw.lower().strip()
+        if kw_lower in RISA_DIALOGUES:
+            return RISA_DIALOGUES[kw_lower]
+
+    # Strategy 2: Partial match with key words
+    for kw in topic_keywords:
+        kw_lower = kw.lower().strip()
+        for dialogue_key in RISA_DIALOGUES:
+            if kw_lower in dialogue_key or dialogue_key in kw_lower:
+                return RISA_DIALOGUES[dialogue_key]
+
+    # Strategy 3: Return empty dict if no match
+    return {}
 
 
 def get_teaching_insights(topic_keywords):

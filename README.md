@@ -1,6 +1,6 @@
 # The Lesson Digester
 
-**Chews up cluttered CPM math lesson decks. Spits out clean, standards-aligned, story-driven presentations.**
+**Chews up cluttered group-based learning math lesson decks. Spits out clean, standards-aligned, story-driven presentations.**
 
 Built on the **Drummond Design System** — card-based layouts, navy/amber/teal palette, embedded collaborative roles, and MCA-III standards alignment baked into every slide.
 
@@ -8,10 +8,10 @@ Built on the **Drummond Design System** — card-based layouts, navy/amber/teal 
 
 ## What It Does
 
-Drop in a 50+ slide CPM lesson PowerPoint. Get back a focused 20-25 slide deck that:
+Drop in a 50+ slide group-based learning lesson PowerPoint. Get back a focused 20-25 slide deck that:
 
 - Follows a **real-world story arc** (not just "here's math")
-- Embeds **CPM collaborative roles** (Facilitator, Resource Manager, Task Manager, Recorder Reporter) as natural conversation prompts — not standalone slides
+- Embeds **collaborative group-based learning roles** (Facilitator, Resource Manager, Task Manager, Recorder Reporter) as natural conversation prompts — not standalone slides
 - Tags every slide with **MCA-III benchmarks** (Minnesota state standards)
 - Weaves in **vocabulary** with sentence frames and discussion prompts
 - Generates **standards-based assessment items** for exit tickets

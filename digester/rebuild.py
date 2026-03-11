@@ -35,6 +35,7 @@ from standards import (
     get_teaching_insights,
     get_misconceptions_for_topic,
     generate_leveled_problems,
+    get_risa_dialogues,
 )
 
 # ─── SLIDE TYPE CLASSIFICATION ──────────────────────────────────
@@ -284,6 +285,9 @@ def analyze_lesson(pptx_path, grade=7):
     # Leveled problems at 4 proficiency tiers
     leveled_problems = generate_leveled_problems(topics, grade)
 
+    # RISA dialogues (oral interaction)
+    risa_dialogues = get_risa_dialogues(topics)
+
     result = {
         "source_file": pptx_path,
         "grade": grade,
@@ -301,6 +305,7 @@ def analyze_lesson(pptx_path, grade=7):
         "sentence_frames": sentence_frames,
         "teaching_insights": teaching_insights,
         "leveled_problems": leveled_problems,
+        "risa_dialogues": risa_dialogues,
         "report": report,
     }
 
@@ -366,7 +371,7 @@ def generate_build_script(analysis):
     lines.append('    build_activity_launch, build_problem, build_group_discussion,')
     lines.append('    build_closure, build_homework, build_exit_ticket,')
     lines.append('    build_misconceptions_slide, build_differentiation_slide,')
-    lines.append('    build_leveled_problems, build_leveled_answer_key,')
+    lines.append('    build_leveled_problems, build_leveled_answer_key, build_risa_dialogue,')
     lines.append(')')
     lines.append('')
     lines.append('')
@@ -528,15 +533,37 @@ def generate_build_script(analysis):
         lines.append('    })')
         lines.append('')
 
-    # ── 12. CLOSURE ──
-    lines.append('    # ── 12. CLOSURE ──')
+    # ── 12. RISA ORAL INTERACTION DIALOGUES ──
+    if risa_dialogues:
+        lines.append('    # ── 12. RISA ORAL INTERACTION — Social Dialogue ──')
+        lines.append('    build_risa_dialogue(prs, {')
+        lines.append(f'        "type": "social",')
+        lines.append(f'        "title": {repr(risa_dialogues.get("social", {}).get("title", "Talking About " + topics[0].title()))},')
+        lines.append(f'        "vocabulary": {repr(risa_dialogues.get("social", {}).get("vocabulary", []))},')
+        lines.append(f'        "script": {repr(risa_dialogues.get("social", {}).get("script", []))},')
+        lines.append(f'        "topic": {repr(topics[0] if topics else "")},')
+        lines.append('    })')
+        lines.append('')
+
+        lines.append('    # ── 12b. RISA ORAL INTERACTION — Academic Dialogue ──')
+        lines.append('    build_risa_dialogue(prs, {')
+        lines.append(f'        "type": "academic",')
+        lines.append(f'        "title": {repr(risa_dialogues.get("academic", {}).get("title", "Mathematical Discussion: " + topics[0].title()))},')
+        lines.append(f'        "vocabulary": {repr(risa_dialogues.get("academic", {}).get("vocabulary", []))},')
+        lines.append(f'        "script": {repr(risa_dialogues.get("academic", {}).get("script", []))},')
+        lines.append(f'        "topic": {repr(topics[0] if topics else "")},')
+        lines.append('    })')
+        lines.append('')
+
+    # ── 13. CLOSURE ──
+    lines.append('    # ── 13. CLOSURE ──')
     lines.append('    build_closure(prs, {')
     lines.append(f'        "prompt": "Discuss: What are the key ideas about {", ".join(topics[:2])}?",')
     lines.append('    })')
     lines.append('')
 
-    # ── 13. HOMEWORK ──
-    lines.append('    # ── 13. HOMEWORK ──')
+    # ── 14. HOMEWORK ──
+    lines.append('    # ── 14. HOMEWORK ──')
     if problem_refs:
         hw_ref = problem_refs[-1] if problem_refs else ""
         lines.append(f'    build_homework(prs, {{"ref": "Problems after {hw_ref}"}})')
@@ -564,7 +591,7 @@ def generate_build_script(analysis):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Analyze a CPM lesson PPTX for rebuild")
+    parser = argparse.ArgumentParser(description="Analyze a group-based learning lesson PPTX for rebuild")
     parser.add_argument("pptx", help="Path to the input PPTX file")
     parser.add_argument("--grade", type=int, default=7, help="Grade level (7 or 8)")
     parser.add_argument("--output", "-o", help="Output JSON file path")
@@ -640,6 +667,13 @@ if __name__ == "__main__":
         differentiation = result.get("teaching_insights", {}).get("differentiation", [])
         if differentiation:
             slide_summary.append(f"  {slide_idx}. DIFFERENTIATION ({len(differentiation)} strategies)")
+            slide_idx += 1
+
+        risa_dialogues = result.get("risa_dialogues", {})
+        if risa_dialogues:
+            slide_summary.append(f"  {slide_idx}. RISA_SOCIAL (Oral Interaction - Accessible)")
+            slide_idx += 1
+            slide_summary.append(f"  {slide_idx}. RISA_ACADEMIC (Oral Interaction - Professional)")
             slide_idx += 1
 
         slide_summary.append(f"  {slide_idx}. CLOSURE / EXIT_TICKET")
