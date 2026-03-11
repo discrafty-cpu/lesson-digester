@@ -1612,7 +1612,7 @@
         }
 
         // ==================== PPTX GENERATOR ====================
-        function buildPresentation(analysis) {
+        async function buildPresentation(analysis) {
             // Create presentation using PptxGenJS
             const pres = new PptxGenJS();
 
@@ -1646,7 +1646,7 @@
                 align: "center"
             });
             // Amber accent bar at bottom
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 5, w: 10, h: 0.625,
                 fill: { color: colors.amber }
             });
@@ -1654,7 +1654,7 @@
             // Slide 2: Learning Target
             slide = pres.addSlide();
             slide.background = { color: colors.white };
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 0, w: 10, h: 0.7,
                 fill: { color: colors.navy }
             });
@@ -1664,7 +1664,7 @@
                 align: "left"
             });
             // Teal accent line
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 0.7, w: 10, h: 0.05,
                 fill: { color: colors.teal }
             });
@@ -1695,7 +1695,7 @@
             // Slide 3: Vocabulary Cards
             slide = pres.addSlide();
             slide.background = { color: colors.white };
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 0, w: 10, h: 0.7,
                 fill: { color: colors.navy }
             });
@@ -1731,7 +1731,7 @@
             // Slide 4: Misconceptions
             slide = pres.addSlide();
             slide.background = { color: colors.white };
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 0, w: 10, h: 0.7,
                 fill: { color: colors.pink }
             });
@@ -1762,7 +1762,7 @@
             // Slide 5: Differentiation Strategies
             slide = pres.addSlide();
             slide.background = { color: colors.white };
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 0, w: 10, h: 0.7,
                 fill: { color: colors.teal }
             });
@@ -1809,7 +1809,7 @@
             // Slide 6: RISA Social Dialogue
             slide = pres.addSlide();
             slide.background = { color: colors.white };
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 0, w: 10, h: 0.7,
                 fill: { color: colors.navy }
             });
@@ -1847,7 +1847,7 @@
             // Slide 7: RISA Academic Dialogue
             slide = pres.addSlide();
             slide.background = { color: colors.white };
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 0, w: 10, h: 0.7,
                 fill: { color: colors.navy }
             });
@@ -1900,7 +1900,7 @@
                 align: "center"
             });
             // Teal bottom bar
-            slide.addShape(pres.ShapeType.rect, {
+            slide.addShape(pres.shapes.RECTANGLE, {
                 x: 0, y: 5.2, w: 10, h: 0.425,
                 fill: { color: colors.teal }
             });
@@ -1910,8 +1910,9 @@
                 .replace('.pptx', '')
                 .replace(/[^a-z0-9]/gi, '_') + '_rebuilt.pptx';
 
-            // Save presentation
-            pres.save({ fileName: filename });
+            // Save presentation (writeFile triggers browser download)
+            await pres.writeFile({ fileName: filename });
+            return filename;
         }
 
         // ==================== UTILITY FUNCTIONS ====================
@@ -1953,9 +1954,27 @@
 
         // ==================== EVENT LISTENERS ====================
         document.getElementById('copyBtn')?.addEventListener('click', copyBuildScript);
-        document.getElementById('downloadBtn')?.addEventListener('click', () => {
+        document.getElementById('downloadBtn')?.addEventListener('click', async () => {
             if (currentAnalysis) {
-                buildPresentation(currentAnalysis);
+                const btn = document.getElementById('downloadBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ Building presentation...';
+                btn.disabled = true;
+                try {
+                    const filename = await buildPresentation(currentAnalysis);
+                    btn.textContent = '✅ Downloaded: ' + filename;
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }, 3000);
+                } catch (err) {
+                    console.error('PPTX generation error:', err);
+                    btn.textContent = '❌ Error: ' + err.message;
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }, 4000);
+                }
             }
         });
 
