@@ -940,44 +940,12 @@
 
     <!-- ==================== JAVASCRIPT ==================== -->
     <script src="js/digester-core.js"></script>
+    <script src="js/teaching-insights-data.js"></script>
+    <script src="js/rubric-descriptors.js"></script>
     <script>
         // ==================== TEACHING INSIGHTS DATABASE ====================
-        const TEACHING_INSIGHTS = {
-            // GRADE 6 TOPICS
-            'ratios and rates': { grade: 6, misconceptions: ['Confusing ratios as fractions', 'Not understanding unit rates in context', 'Mixing ratio and difference'], differentiation: { emergent: 'Use tape diagrams and concrete objects. Compare ratios with visual models.', ell: 'Provide ratio notation templates. Use real-world examples (prices, speeds).', extending: 'Explore ratio tables and equivalent ratios. Solve multi-step ratio problems.' }, essential_understandings: ['A ratio compares two quantities', 'Unit rates show quantity per 1 unit', 'Equivalent ratios represent the same relationship'] },
-            'division of fractions': { grade: 6, misconceptions: ['Forgetting to invert and multiply', 'Not connecting division to multiplication by reciprocal', 'Confusing when to invert'], differentiation: { emergent: 'Model with fraction bars and area diagrams. Use concrete contexts (sharing).', ell: 'Provide step-by-step checklists. Use visuals with grids to show division.', extending: 'Derive why we invert. Solve word problems requiring multiple steps.' }, essential_understandings: ['Dividing by a fraction means multiplying by its reciprocal', 'Division and multiplication are inverse operations', 'The quotient represents how many groups of the divisor fit in the dividend'] },
-            'positive and negative numbers': { grade: 6, misconceptions: ['Thinking negative numbers are "less than" in context', 'Confusing absolute value with negation', 'Struggling with number line placement'], differentiation: { emergent: 'Use number lines and real-world contexts (temperature, elevation, money).', ell: 'Color-code positive and negative on number lines. Use consistent language.', extending: 'Explore integer operations. Model with algebra tiles and coordinate planes.' }, essential_understandings: ['Positive and negative numbers locate positions relative to zero', 'Opposite numbers are equidistant from zero', 'Comparisons depend on context, not magnitude'] },
-            'absolute value': { grade: 6, misconceptions: ['Thinking absolute value always makes numbers positive', 'Confusing absolute value with opposite numbers', 'Not recognizing distance meaning'], differentiation: { emergent: 'Use number line to show distance from zero. Emphasize "distance, not direction".', ell: 'Provide visual models with number lines marked. Use repeated language.', extending: 'Solve absolute value equations. Explore absolute value functions.' }, essential_understandings: ['Absolute value is the distance from zero on a number line', 'Absolute value is always non-negative', '|a| = |-a| because they are equidistant from zero'] },
-            'variables and expressions': { grade: 6, misconceptions: ['Treating variables like unknown specific numbers only', 'Mixing up variables with their values', 'Not simplifying like terms correctly'], differentiation: { emergent: 'Use boxes and manipulatives to represent variables. Build expressions together.', ell: 'Provide sentence frames: "This variable represents ___." Use repeated values.', extending: 'Explore multi-variable expressions. Substitute and simplify complex expressions.' }, essential_understandings: ['Variables are symbols representing unknown or changing quantities', 'Expressions combine variables, numbers, and operations', 'Like terms can be combined by adding coefficients'] },
-            'one-step equations and inequalities': { grade: 6, misconceptions: ['Forgetting to apply operations to both sides', 'Confusing equals with inequality symbols', 'Not checking solutions'], differentiation: { emergent: 'Use balance models and algebra tiles. Start with simple numbers.', ell: 'Provide equation templates. Color-code operations on both sides.', extending: 'Solve multi-variable equations. Explore solution sets of inequalities.' }, essential_understandings: ['Equations and inequalities are balanced or ordered relationships', 'To maintain balance, perform the same operation on both sides', 'Solutions can be checked by substitution'] },
-            'area of polygons': { grade: 6, misconceptions: ['Confusing area with perimeter', 'Applying rectangle formula to all shapes', 'Not decomposing complex shapes'], differentiation: { emergent: 'Use grid paper and tangram pieces. Measure and compare areas with units.', ell: 'Provide formula cards with labeled diagrams. Use repeated measurement.', extending: 'Decompose irregular shapes. Find area with coordinates. Apply to real contexts.' }, essential_understandings: ['Area is the space covered by a 2D figure', 'Area = length × width for rectangles; Area = (1/2) × base × height for triangles', 'Irregular shapes can be decomposed into simpler shapes'] },
-            'surface area and volume': { grade: 6, misconceptions: ['Confusing surface area with volume', 'Applying 2D formulas to 3D figures', 'Not unfolding nets correctly'], differentiation: { emergent: 'Build 3D models with cubes. Use nets to visualize surfaces.', ell: 'Color-code different faces. Provide labeled formulas and diagrams.', extending: 'Decompose complex figures. Calculate surface area and volume of composite shapes.' }, essential_understandings: ['Surface area is the total area of all faces', 'Volume is the amount of space inside a 3D figure', 'V = length × width × height for rectangular prisms'] },
-            'statistical questions and distributions': { grade: 6, misconceptions: ['Confusing data with statistical questions', 'Not recognizing variability in data', 'Misinterpreting distributions'], differentiation: { emergent: 'Collect class data. Create dot plots and frequency tables by hand.', ell: 'Use familiar questions and contexts. Provide templates for recording data.', extending: 'Analyze distributions across groups. Explore shape, center, spread.' }, essential_understandings: ['Statistical questions anticipate data with variability', 'Distributions show how data spreads across values', 'Measures like mean, median describe the center of distributions'] },
-            'mean median mode range': { grade: 6, misconceptions: ['Choosing wrong measure for context', 'Not understanding what each measure represents', 'Calculating incorrectly'], differentiation: { emergent: 'Find measures using manipulatives and concrete data sets.', ell: 'Provide definitions on cards. Use consistent data sets for practice.', extending: 'Determine which measure best describes data. Analyze effects of outliers.' }, essential_understandings: ['Mean is the average; Median is the middle value when ordered; Mode is most frequent; Range is difference between max and min', 'Different measures suit different contexts', 'Outliers affect mean more than median'] },
-            // GRADE 7 TOPICS
-            'proportional relationships': { grade: 7, misconceptions: ['Confusing proportional with any linear', 'Not recognizing non-proportional relationships', 'Not using constant of proportionality'], differentiation: { emergent: 'Use tables and diagrams. Focus on concrete ratios first.', ell: 'Provide sentence stems and comparison tables. Use multiple representations.', extending: 'Distinguish proportional from linear. Solve complex word problems.' }, essential_understandings: ['Proportional relationships pass through the origin', 'The ratio y/x is constant in proportional relationships', 'The equation is y = kx where k is the constant of proportionality'] },
-            'unit rates and constants of proportionality': { grade: 7, misconceptions: ['Treating unit rate as just "divide"', 'Confusing which quantity is the unit', 'Not connecting unit rate to slope'], differentiation: { emergent: 'Use contexts like recipes and shopping. Create ratio tables together.', ell: 'Highlight "per 1 unit" language. Provide unit rate templates.', extending: 'Compare unit rates to determine best value. Solve word problems.' }, essential_understandings: ['Unit rate is the ratio of y per 1 unit of x', 'Unit rate equals the constant of proportionality', 'Unit rates help compare and make decisions'] },
-            'operations with rational numbers': { grade: 7, misconceptions: ['Applying integer rules to decimals and fractions', 'Sign errors in operations', 'Not simplifying or estimating'], differentiation: { emergent: 'Use number lines and area models. Practice with concrete contexts first.', ell: 'Color-code signs and terms. Provide operation algorithms as reference.', extending: 'Work with multiple operations in one expression. Solve complex problems.' }, essential_understandings: ['Rational numbers include fractions, decimals, and integers', 'Operations with negative numbers follow consistent rules', 'Estimation helps check reasonableness'] },
-            'expressions and equivalent forms': { grade: 7, misconceptions: ['Not recognizing equivalent expressions', 'Applying properties incorrectly', 'Forgetting the distributive property'], differentiation: { emergent: 'Use algebra tiles to model equivalence. Build expressions together.', ell: 'Provide property cards with examples. Use color-coding for like terms.', extending: 'Prove expressions equivalent. Simplify complex multi-variable expressions.' }, essential_understandings: ['Equivalent expressions have the same value for all variable values', 'The distributive property: a(b+c) = ab + ac', 'Properties of operations help simplify expressions'] },
-            'two-step equations and inequalities': { grade: 7, misconceptions: ['Reversing operation order', 'Not maintaining inequality direction when multiplying by negatives', 'Forgetting to check solutions'], differentiation: { emergent: 'Use balance models for both steps. Practice with positive numbers first.', ell: 'Provide step-by-step checklists. Highlight inequality direction changes.', extending: 'Solve equations with fractions and decimals. Analyze solution sets.' }, essential_understandings: ['Two-step equations require two inverse operations in reverse order', 'Multiplying/dividing by negative numbers reverses inequality signs', 'Solutions must satisfy the original equation or inequality'] },
-            'scale drawings and scale factor': { grade: 7, misconceptions: ['Confusing scale with ratio', 'Not applying scale factor consistently', 'Mixing up area and length scales'], differentiation: { emergent: 'Use grid paper to enlarge/reduce figures. Compare measurements directly.', ell: 'Provide scale notations with labeled diagrams. Use consistent examples.', extending: 'Find scale factors from measurements. Scale to real-world dimensions.' }, essential_understandings: ['Scale factor relates corresponding lengths in drawings and actual figures', 'Area scales by the square of the linear scale factor', 'Scales help represent large and small figures manageable sizes'] },
-            'circumference and area of circles': { grade: 7, misconceptions: ['Confusing formulas or missing factor of 2', 'Not understanding pi as a ratio', 'Mixing up diameter and radius in formulas'], differentiation: { emergent: 'Wrap string around circles to measure. Connect C = πd directly.', ell: 'Provide formula cards with diagrams. Use π ≈ 3.14 consistently.', extending: 'Explore area derivation. Solve multi-step circle problems.' }, essential_understandings: ['π is the ratio of circumference to diameter: C = πd or C = 2πr', 'Area of circle: A = πr² (requires radius, not diameter)', 'π is irrational but approximated as 3.14'] },
-            'angle relationships': { grade: 7, misconceptions: ['Confusing angle relationships (supplementary vs complementary)', 'Not using angle properties in reasoning', 'Forgetting angle sum in triangles'], differentiation: { emergent: 'Use protractors and visual models. Measure and compare angle pairs.', ell: 'Color-code angle pairs. Provide definitions with diagrams on reference cards.', extending: 'Use angle relationships to find unknown angles in figures.' }, essential_understandings: ['Complementary angles sum to 90°; Supplementary angles sum to 180°', 'Angles in a triangle sum to 180°', 'Vertical angles are equal'] },
-            'probability': { grade: 7, misconceptions: ['Confusing probability with odds', 'Not recognizing equally likely outcomes', 'Overestimating unlikely events'], differentiation: { emergent: 'Use spinners, coins, dice for concrete probability experiments.', ell: 'Provide probability notation and definitions. Use repeated experiments.', extending: 'Explore compound probability. Compare experimental and theoretical.' }, essential_understandings: ['Probability is the ratio of favorable to total possible outcomes', 'Probability ranges from 0 (impossible) to 1 (certain)', 'Experimental probability approaches theoretical with more trials'] },
-            'random sampling and inferences': { grade: 7, misconceptions: ['Biased sampling leading to incorrect inferences', 'Confusing sample with population', 'Not recognizing variability in samples'], differentiation: { emergent: 'Collect random samples from class. Compare to population.', ell: 'Provide sampling methods with examples. Use consistent language.', extending: 'Analyze bias in sampling methods. Make inferences about populations.' }, essential_understandings: ['Random samples are unbiased and representative of populations', 'Sample statistics estimate population parameters', 'Larger samples give more reliable estimates'] },
-            // GRADE 8 TOPICS
-            'exponents and scientific notation': { grade: 8, misconceptions: ['Confusing exponent rules', 'Incorrectly applying PEMDAS with exponents', 'Misplacing decimal in scientific notation'], differentiation: { emergent: 'Use repeated multiplication to show exponents. Build patterns of powers.', ell: 'Provide exponent rules as reference cards. Use concrete number bases first.', extending: 'Apply exponent rules to variables. Convert to/from scientific notation.' }, essential_understandings: ['An exponent tells how many times to multiply the base', 'Product of powers: a^m × a^n = a^(m+n)', 'Scientific notation: a × 10^n where 1 ≤ a < 10'] },
-            'square roots and irrational numbers': { grade: 8, misconceptions: ['Confusing square root with half', 'Thinking all decimals are irrational', 'Not recognizing irrational numbers in context'], differentiation: { emergent: 'Use area models and geometric squares to find square roots.', ell: 'Provide square root notation with examples. Use perfect squares first.', extending: 'Approximate irrational numbers. Solve equations with radicals.' }, essential_understandings: ['The square root of n is the number that when squared equals n', 'Irrational numbers cannot be written as ratios of integers', 'π and √2 are irrational; their decimals don\'t repeat or terminate'] },
-            'linear functions and slope': { grade: 8, misconceptions: ['Confusing slope calculation (rise/run)', 'Not connecting slope to rate of change', 'Misinterpreting negative slopes'], differentiation: { emergent: 'Use slope triangles on graph paper. Calculate rise and run directly.', ell: 'Provide slope calculation templates. Use consistent contexts.', extending: 'Find slope from any two points. Analyze slope in real-world situations.' }, essential_understandings: ['Slope is rise/run: the ratio of vertical to horizontal change', 'Positive slopes increase left to right; negative slopes decrease', 'Slope describes the rate of change in linear relationships'] },
-            'systems of linear equations': { grade: 8, misconceptions: ['Confusing intersection point as invalid solution', 'Using incorrect substitution or elimination techniques', 'Not checking solutions in both equations'], differentiation: { emergent: 'Graph systems on coordinate grids. Find intersection points visually.', ell: 'Provide substitution and elimination steps as checklists.', extending: 'Solve systems algebraically. Analyze systems with no or infinite solutions.' }, essential_understandings: ['A solution to a system must satisfy both equations', 'Systems can be solved by graphing, substitution, or elimination', 'Solutions represent intersection points of lines'] },
-            'solving multi-step equations': { grade: 8, misconceptions: ['Reversing operation order or forgetting steps', 'Distributive property errors', 'Sign errors when moving terms'], differentiation: { emergent: 'Use balance models for each step. Combine like terms with visual aids.', ell: 'Provide step-by-step equation-solving checklists.', extending: 'Solve equations with fractions, variables on both sides.' }, essential_understandings: ['Multi-step equations require combining like terms and using inverse operations', 'The distributive property distributes to all terms in parentheses', 'Check solutions by substitution into the original equation'] },
-            'pythagorean theorem': { grade: 8, misconceptions: ['Applying theorem to non-right triangles', 'Confusing which side is the hypotenuse', 'Forgetting to take square root or making calculation errors'], differentiation: { emergent: 'Use tangram squares to verify geometrically. Build 3-4-5 triangles.', ell: 'Provide labeled diagrams and a² + b² = c² reference cards.', extending: 'Derive theorem. Solve 3D problems using Pythagorean theorem.' }, essential_understandings: ['In right triangles: a² + b² = c² (a, b are legs; c is hypotenuse)', 'The theorem only applies to right triangles', 'Use to find missing side lengths or verify right angles'] },
-            'transformations': { grade: 8, misconceptions: ['Confusing reflection, rotation, and translation', 'Not understanding transformations preserve distance and angle', 'Incorrectly applying transformation rules'], differentiation: { emergent: 'Use tracing paper and manipulatives to perform transformations.', ell: 'Provide transformation definitions with visual examples. Practice each type.', extending: 'Compose transformations. Predict positions after transformations.' }, essential_understandings: ['Translations slide figures; Rotations turn about a point; Reflections flip over a line', 'Transformations preserve size and shape (isometries)', 'Figures can be congruent after transformations'] },
-            'congruence and similarity': { grade: 8, misconceptions: ['Confusing congruent with similar', 'Not identifying corresponding parts correctly', 'Missing criteria for congruence/similarity'], differentiation: { emergent: 'Use transparent overlays to match figures. Compare measurements directly.', ell: 'Provide correspondence statements with marked angles and sides.', extending: 'Use congruence and similarity to solve problems and find missing measures.' }, essential_understandings: ['Congruent figures have the same size and shape; Similarity allows proportional scaling', 'Corresponding angles are equal in similar figures; Sides are proportional', 'AA, SAS, SSS determine congruence; AA determines similarity'] },
-            'volume of cylinders cones spheres': { grade: 8, misconceptions: ['Using area formulas for volume', 'Confusing radius with diameter in formulas', 'Mixing up which formula for which shape'], differentiation: { emergent: 'Build 3D models from nets. Fill with water or sand to explore volume.', ell: 'Provide labeled formula cards with diagrams for each shape.', extending: 'Derive volume formulas. Calculate volume of composite shapes.' }, essential_understandings: ['V_cylinder = πr²h; V_cone = (1/3)πr²h; V_sphere = (4/3)πr³', 'Volume measures space inside a 3D figure', 'Cone volume is 1/3 cylinder volume with same base and height'] },
-            'scatter plots and trend lines': { grade: 8, misconceptions: ['Not recognizing linear patterns in scatter plots', 'Drawing trend lines without considering the pattern', 'Confusing correlation with causation'], differentiation: { emergent: 'Create scatter plots from collected data. Draw best-fit lines by eye.', ell: 'Provide scatter plot templates. Use consistent data contexts.', extending: 'Find equations of trend lines. Use trend lines to make predictions.' }, essential_understandings: ['Scatter plots show relationships between two variables', 'Trend lines model linear relationships in data', 'Strong linear trends allow predictions; causation requires evidence beyond correlation'] },
-            'two-way frequency tables': { grade: 8, misconceptions: ['Not calculating conditional probabilities correctly', 'Confusing rows and columns', 'Not distinguishing relative from absolute frequencies'], differentiation: { emergent: 'Create two-way tables from collected survey data. Find totals together.', ell: 'Provide labeled table templates. Use consistent categorical variables.', extending: 'Calculate conditional and joint probabilities. Analyze associations in data.' }, essential_understandings: ['Two-way tables organize data by two categorical variables', 'Conditional probability: P(A|B) = P(A and B) / P(B)', 'Tables reveal associations between variables'] }
-        };
+        // TEACHING_INSIGHTS is now loaded from js/teaching-insights-data.js
+        // Contains 43 topics across Grades 6-8 with real SciMath framework data
 
         // ==================== RISA DIALOGUES DATABASE ====================
         const RISA_DIALOGUES = {
@@ -1134,40 +1102,61 @@
 
         // ==================== TOPIC DETECTION ====================
         const TOPIC_PATTERNS = [
-            // GRADE 6
-            { topic: 'ratios and rates', pattern: /\bratio\b|rates|unit rate|per|comparison/i },
-            { topic: 'division of fractions', pattern: /divide.*fraction|fraction.*divide|invert|reciprocal/i },
-            { topic: 'positive and negative numbers', pattern: /negative|positive|integers|sign/i },
-            { topic: 'absolute value', pattern: /absolute|value|\||\||distance from zero/i },
-            { topic: 'variables and expressions', pattern: /variable|expression|x|y|unknown/i },
-            { topic: 'one-step equations and inequalities', pattern: /one.?step|equation|solve|inequality/i },
-            { topic: 'area of polygons', pattern: /area|polygon|rectangle|triangle|square/i },
-            { topic: 'surface area and volume', pattern: /surface area|volume|3d|cubic|net/i },
-            { topic: 'statistical questions and distributions', pattern: /statistical|distribution|data|questions/i },
-            { topic: 'mean median mode range', pattern: /mean|median|mode|range|average/i },
-            // GRADE 7
-            { topic: 'proportional relationships', pattern: /proportional|constant of proportionality|y=kx|k is/i },
-            { topic: 'unit rates and constants of proportionality', pattern: /unit rate|constant of proportionality|per 1|k=/i },
-            { topic: 'operations with rational numbers', pattern: /rational|decimal|fraction.*operation|add.*subtract/i },
-            { topic: 'expressions and equivalent forms', pattern: /equivalent.*expression|simplify|distribute|factor|property/i },
-            { topic: 'two-step equations and inequalities', pattern: /two.?step|multi.?step|combine.*term|inverse|operation/i },
-            { topic: 'scale drawings and scale factor', pattern: /scale.*factor|scale.*drawing|scale|ratio of.*to/i },
-            { topic: 'circumference and area of circles', pattern: /circumference|circle.*area|πd|πr|2πr/i },
-            { topic: 'angle relationships', pattern: /angle|complementary|supplementary|vertical|degree/i },
-            { topic: 'probability', pattern: /probability|outcome|likely|chance|favorable/i },
-            { topic: 'random sampling and inferences', pattern: /random.*sample|sampling|inference|population|representative/i },
-            // GRADE 8
-            { topic: 'exponents and scientific notation', pattern: /exponent|power|scientific notation|10\^|a × 10/i },
-            { topic: 'square roots and irrational numbers', pattern: /square root|√|irrational|radical|rational/i },
-            { topic: 'linear functions and slope', pattern: /slope|rise.*run|m=|mx\+b|linear function/i },
-            { topic: 'systems of linear equations', pattern: /system.*equation|solve.*system|intersection|consistent/i },
-            { topic: 'solving multi-step equations', pattern: /multi.?step.*equation|distribute|combine.*like|variable.*both/i },
-            { topic: 'pythagorean theorem', pattern: /pythagorean|a\²\+b\²=c\²|hypotenuse|right triangle|leg|3.4.5/i },
-            { topic: 'transformations', pattern: /transformation|translation|rotation|reflection|slide|turn|flip/i },
-            { topic: 'congruence and similarity', pattern: /congruent|similar|corresponding|aa|sas|sss/i },
-            { topic: 'volume of cylinders cones spheres', pattern: /volume|cylinder|cone|sphere|πr²h|1\/3|4\/3/i },
-            { topic: 'scatter plots and trend lines', pattern: /scatter|trend|correlation|bivariate|linear model/i },
-            { topic: 'two-way frequency tables', pattern: /two.?way.*table|frequency|contingency|categorical|joint|conditional/i }
+            // GRADE 6 - Number & Operation
+            { topic: 'locate and compare numbers', pattern: /locate.*number|compare.*number|number line.*fraction|order.*rational|compare.*decimal/i },
+            { topic: 'equivalence and representations', pattern: /equivalen|fraction.*decimal.*percent|convert.*percent|represent.*fraction/i },
+            { topic: 'factors primes gcf lcm', pattern: /factor|prime|gcf|lcm|greatest common|least common|divisib/i },
+            { topic: 'ratios and rates', pattern: /\bratio\b|rates|unit rate|per\b|comparison/i },
+            { topic: 'multiplication and division of fractions', pattern: /multiply.*fraction|divide.*fraction|fraction.*divide|invert|reciprocal/i },
+            { topic: 'percent', pattern: /percent|%|discount|markup|tax|tip/i },
+            { topic: 'problem solving and estimation', pattern: /problem.?solving|estimat|reasonableness|real.?world/i },
+            // GRADE 6 - Algebra
+            { topic: 'variables and representations', pattern: /variable|independent|dependent|input.?output|represent.*relationship/i },
+            { topic: 'properties and equivalent expressions', pattern: /order of operation|commutative|associative|distributive|equivalent.*express|simplify.*express/i },
+            { topic: 'represent and solve equations', pattern: /solve.*equation|equation.*solve|equal sign|balance|pan balance/i },
+            // GRADE 6 - Geometry & Measurement
+            { topic: 'measurement of polygons and prisms', pattern: /area.*polygon|surface area|volume.*prism|perimeter|net.*prism/i },
+            { topic: 'angles and intersecting lines', pattern: /intersect.*line|supplementary|complementary|vertical angle|adjacent angle/i },
+            { topic: 'angles in geometric figures', pattern: /angle.*polygon|interior angle|angle sum|decompos.*triangle/i },
+            { topic: 'converting and estimating measurements', pattern: /convert.*measure|metric|customary|estimat.*measure|benchmark.*measure/i },
+            // GRADE 6 - Data Analysis & Probability
+            { topic: 'sample space', pattern: /sample space|tree diagram|possible outcome|counting principle/i },
+            { topic: 'probability and experiments', pattern: /probability.*experiment|experimental.*probability|theoretical.*probability|likelihood/i },
+            // GRADE 7 - Number & Operation
+            { topic: 'rational numbers', pattern: /rational number|terminat|repeating decimal|irrational/i },
+            { topic: 'representing and comparing rational numbers', pattern: /compar.*rational|order.*rational|number line.*negative|represent.*rational/i },
+            { topic: 'applying rational numbers', pattern: /absolute value|operat.*integer|add.*negative|subtract.*negative|positive.*negative/i },
+            { topic: 'problem solving with rational numbers', pattern: /percent.*number|simple interest|compound interest|scale.*recipe|proportional.*percent/i },
+            // GRADE 7 - Algebra
+            { topic: 'proportional relationships', pattern: /proportional|constant of proportionality|y\s*=\s*kx/i },
+            { topic: 'represent proportional relationships', pattern: /represent.*proportional|graph.*proportional|table.*proportional|unit rate.*slope/i },
+            { topic: 'problem solving with proportions', pattern: /solve.*proportion|percent.*change|percent.*increase|percent.*decrease/i },
+            { topic: 'equations and inequalities', pattern: /inequalit|at least|at most|greater than|less than/i },
+            { topic: 'numerical and algebraic expressions', pattern: /order of operations|PEMDAS|distribut.*property|evaluat.*express/i },
+            { topic: 'represent and solve equations grade 7', pattern: /solve.*equation|two.?step|multi.?step|balance.*equation/i },
+            // GRADE 7 - Geometry & Measurement
+            { topic: 'circumference and area of circles', pattern: /circumference|circle.*area|πd|πr|2πr|pi.*radius|sector/i },
+            { topic: 'volume and surface area of cylinders', pattern: /cylinder|lateral.*surface|net.*cylinder|volume.*cylinder/i },
+            { topic: 'similarity and scaling', pattern: /similar|scale factor|scale drawing|enlarge|reduce|proportion.*figure/i },
+            { topic: 'translations and reflections', pattern: /translat|reflect|coordinate grid|prime notation|transform.*coordinate/i },
+            // GRADE 7 - Data Analysis & Probability
+            { topic: 'mean median and range', pattern: /mean|median|range|average|measure.*center/i },
+            { topic: 'circle graphs and histograms', pattern: /histogram|circle graph|pie chart|frequency|bar graph/i },
+            { topic: 'probability and proportionality', pattern: /probability.*proportion|odds|experimental.*theoretical|relative frequency/i },
+            // GRADE 8 - Number & Operation
+            { topic: 'rational irrational and real numbers', pattern: /real number|irrational|square root|√|perfect square/i },
+            { topic: 'integer exponents and scientific notation', pattern: /exponent|power|scientific notation|10\^|standard form/i },
+            // GRADE 8 - Algebra
+            { topic: 'linear and nonlinear functions', pattern: /linear.*function|nonlinear|f\(x\)|function.*notation|function.*machine/i },
+            { topic: 'sequences and linear functions', pattern: /sequence|arithmetic.*sequence|geometric.*sequence|y.?intercept|slope.*intercept/i },
+            { topic: 'algebraic expressions', pattern: /algebraic.*express|like terms|unlike terms|combine.*terms|distribut/i },
+            { topic: 'representations of linear equations', pattern: /standard form|slope.?intercept|point.?slope|linear.*represent|Ax\s*\+\s*By/i },
+            { topic: 'solve equations inequalities and systems', pattern: /system.*equation|solve.*system|substitut|eliminat|inequalit.*system/i },
+            // GRADE 8 - Geometry & Measurement
+            { topic: 'pythagorean theorem', pattern: /pythagorean|a²\s*\+\s*b²|hypotenuse|right triangle|leg.*triangle/i },
+            { topic: 'slope parallel and perpendicular lines', pattern: /parallel.*line|perpendicular.*line|negative reciprocal|same slope/i },
+            // GRADE 8 - Data Analysis
+            { topic: 'scatterplots and lines of best fit', pattern: /scatter|trend|line of best fit|correlation|bivariate|regression/i }
         ];
 
         // ==================== STATE ====================
@@ -1552,19 +1541,25 @@
                             <div style="margin-bottom: 20px;">
                                 <h4 style="color: var(--text); margin-bottom: 12px; font-weight: 700;">Common Misconceptions</h4>
                                 <div class="misconceptions-list">
-                                    ${insight.misconceptions.map(m => `
-                                        <div class="misconception-card">
+                                    ${insight.misconceptions.map(m => {
+                                        // Handle both string and object formats
+                                        if (typeof m === 'string') {
+                                            return `<div class="misconception-card">
+                                                <div class="misconception-title">❌ ${m}</div>
+                                            </div>`;
+                                        }
+                                        return `<div class="misconception-card">
                                             <div class="misconception-title">❌ ${m.error}</div>
-                                            <div class="misconception-item">
+                                            ${m.why ? `<div class="misconception-item">
                                                 <span class="insight-label">Why:</span>
                                                 <span class="insight-text">${m.why}</span>
-                                            </div>
-                                            <div class="misconception-item">
+                                            </div>` : ''}
+                                            ${m.address ? `<div class="misconception-item">
                                                 <span class="insight-label">How to Address:</span>
                                                 <span class="insight-text">${m.address}</span>
-                                            </div>
-                                        </div>
-                                    `).join('')}
+                                            </div>` : ''}
+                                        </div>`;
+                                    }).join('')}
                                 </div>
                             </div>
 
@@ -1746,7 +1741,7 @@
                 const insight = analysis.insights[topic];
                 if (insight && insight.misconceptions) {
                     for (const misconception of insight.misconceptions) {
-                        const bulletText = misconception.error;
+                        const bulletText = typeof misconception === 'string' ? misconception : misconception.error;
                         slide.addText(bulletText, {
                             x: 0.5, y: yPos, w: 9, h: 0.5,
                             fontSize: 13, color: colors.navy,
