@@ -1641,31 +1641,66 @@
             return Array.from(topics);
         }
 
-        // ==================== STANDARDS MATCHING ====================
+        // ==================== STANDARDS MATCHING (Strength-of-Alignment) ====================
+        // Scores each standard against all detected topics, returns only the top 3 strongest matches.
+        // This prevents a "ratios" lesson from pulling in 10+ loosely related standards.
+        const STOP_WORDS = new Set(['and','or','the','of','to','a','an','in','on','for','with','is','are','can','be','by','as','it','at','do','that','this','from','all','has','have','use','using']);
+
         function getStandardsForTopics(topics) {
-            const standards = new Map();
-            const seenBenchmarks = new Set();
+            if (!MCA_STANDARDS[selectedGrade]) return [];
 
-            for (const topic of topics) {
-                // Look for matching topic in current grade's standards
-                if (MCA_STANDARDS[selectedGrade]) {
-                    for (const standard of MCA_STANDARDS[selectedGrade]) {
-                        // Check if this standard's description matches the topic
-                        const desc = standard.desc.toLowerCase();
-                        const topicLower = topic.toLowerCase();
-                        // Simple matching - check if topic words appear in description
-                        const topicWords = topicLower.split(/\s+/);
-                        const matches = topicWords.some(word => desc.includes(word));
+            const scored = [];
 
-                        if (matches && !seenBenchmarks.has(standard.code)) {
-                            standards.set(standard.code, standard);
-                            seenBenchmarks.add(standard.code);
+            for (const standard of MCA_STANDARDS[selectedGrade]) {
+                const desc = standard.desc.toLowerCase();
+                const descWords = desc.split(/\s+/).filter(w => !STOP_WORDS.has(w) && w.length > 2);
+                let totalScore = 0;
+
+                for (const topic of topics) {
+                    const topicLower = topic.toLowerCase();
+                    const topicWords = topicLower.split(/\s+/).filter(w => !STOP_WORDS.has(w) && w.length > 2);
+
+                    // ── Full phrase match (strongest: +10) ──
+                    if (desc.includes(topicLower)) {
+                        totalScore += 10;
+                        continue;
+                    }
+
+                    // ── Bigram match (pairs of consecutive topic words found in desc: +4 each) ──
+                    for (let i = 0; i < topicWords.length - 1; i++) {
+                        const bigram = topicWords[i] + ' ' + topicWords[i + 1];
+                        if (desc.includes(bigram)) totalScore += 4;
+                    }
+
+                    // ── Individual meaningful word match (+1 each, words > 3 chars) ──
+                    // Uses stem matching: "proportion" matches "proportional", "proportions", etc.
+                    let wordHits = 0;
+                    for (const tw of topicWords) {
+                        if (tw.length > 3) {
+                            const stem = tw.length > 6 ? tw.substring(0, tw.length - 2) : tw;
+                            if (descWords.some(dw => dw.includes(stem) || stem.includes(dw.substring(0, dw.length > 6 ? dw.length - 2 : dw.length)))) {
+                                wordHits++;
+                            }
                         }
                     }
+                    // Only count if at least 2 words match (avoids single-word noise)
+                    if (wordHits >= 2) {
+                        totalScore += wordHits;
+                    } else if (wordHits === 1 && topicWords.length <= 2) {
+                        // Single-word topic like "percent" — still count it but lower
+                        totalScore += 1;
+                    }
+                }
+
+                if (totalScore > 0) {
+                    scored.push({ standard, score: totalScore });
                 }
             }
 
-            return Array.from(standards.values());
+            // Sort by score descending, take top 3
+            scored.sort((a, b) => b.score - a.score);
+            const MAX_STANDARDS = 3;
+            return scored.slice(0, MAX_STANDARDS).map(s => s.standard);
         }
 
         // ==================== TEACHING INSIGHTS ====================
