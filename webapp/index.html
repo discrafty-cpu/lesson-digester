@@ -1107,6 +1107,7 @@
             <!-- Download Rebuilt Lesson -->
             <div class="results-section delay-8" id="downloadSection">
                 <button class="download-btn" id="downloadBtn">⬇️ Download Rebuilt Lesson (.pptx)</button>
+                <button class="download-btn" id="notesBtn" style="background: var(--teal); margin-left: 12px;">📝 Download Student Notes</button>
             </div>
         </div>
 
@@ -2533,24 +2534,50 @@
                 buildContentSlide(s, null, C.amber);
             }
 
-            // ─── Problem Slides (ALL — the actual math, with generated visuals) ───
+            // ─── Problem Slides (ALL — math, visuals, role prompts, benchmark footers) ───
             const problemSlides = [...(slideGroups['PROBLEM_SLIDE'] || []), ...(slideGroups['EQUATION_SOLVE'] || [])];
             let frameIdx = 0;
             let visualIdx = 0;
+            const roleNames = ['Facilitator', 'Resource Mgr', 'Task Mgr', 'Recorder'];
+            const roleKeys = ['facilitator', 'resource_manager', 'task_manager', 'recorder_reporter'];
+            const roleColors = { facilitator: C.teal, resource_manager: C.blue, task_manager: C.amber, recorder_reporter: C.pink };
+            // Pre-build benchmark footer string
+            const benchmarkFooter = analysis.standards.length > 0
+                ? analysis.standards.map(s => s.code).join('  •  ')
+                : '';
             for (const s of problemSlides) {
                 const vis = topicVisuals.length > 0 ? topicVisuals[visualIdx % topicVisuals.length] : null;
                 const sl = buildContentSlide(s, "Problem — Slide " + s.num, C.navy, vis);
                 visualIdx++;
-                // Add sentence frame hint at the bottom
+                // ── Role prompt callout (rotates through roles) ──
+                if (typeof TEAM_ROLE_PROMPTS !== 'undefined') {
+                    const rIdx = frameIdx % 4;
+                    const rKey = roleKeys[rIdx];
+                    const rName = roleNames[rIdx];
+                    const prompts = TEAM_ROLE_PROMPTS.problem_launch[rKey];
+                    if (prompts && prompts.length > 0) {
+                        const prompt = prompts[frameIdx % prompts.length];
+                        sl.addText(rName + ':  "' + prompt + '"', {
+                            x: 0.5, y: 4.6, w: 9, h: 0.28,
+                            fontSize: 9, bold: false, color: roleColors[rKey],
+                            italic: true
+                        });
+                    }
+                }
+                // ── Sentence frame hint ──
                 if (typeof SENTENCE_FRAMES !== 'undefined') {
                     const frames = SENTENCE_FRAMES.problem_solving;
                     const hint = frames[frameIdx % frames.length];
                     sl.addText('"' + hint + '"', {
-                        x: 0.6, y: 5.0, w: 8.8, h: 0.25,
-                        fontSize: 9, italic: true, color: C.teal
+                        x: 0.6, y: 4.9, w: 8.8, h: 0.22,
+                        fontSize: 8, italic: true, color: C.teal
                     });
-                    frameIdx++;
                 }
+                // ── MCA-III benchmark footer ──
+                if (benchmarkFooter) {
+                    footer(sl, benchmarkFooter);
+                }
+                frameIdx++;
             }
 
             // ─── Day Dividers (ALL) ───
@@ -2564,15 +2591,32 @@
                 footer(sl, "Original slide " + s.num + "  •  Day Divider");
             }
 
-            // ─── Group Discussion (ALL) ───
+            // ─── Group Discussion (ALL — with role prompts + sentence frames) ───
+            let discIdx = 0;
             for (const s of (slideGroups['GROUP_DISCUSSION'] || [])) {
                 const sl = buildContentSlide(s, null, C.amber);
+                // ── Discussion role prompt (rotates) ──
+                if (typeof TEAM_ROLE_PROMPTS !== 'undefined') {
+                    const rIdx = discIdx % 4;
+                    const rKey = roleKeys[rIdx];
+                    const rName = roleNames[rIdx];
+                    const prompts = TEAM_ROLE_PROMPTS.discussion[rKey];
+                    if (prompts && prompts.length > 0) {
+                        const prompt = prompts[discIdx % prompts.length];
+                        sl.addText(rName + ':  "' + prompt + '"', {
+                            x: 0.5, y: 4.6, w: 9, h: 0.28,
+                            fontSize: 9, italic: true, color: roleColors[rKey]
+                        });
+                    }
+                }
                 if (typeof SENTENCE_FRAMES !== 'undefined') {
-                    sl.addText('"' + SENTENCE_FRAMES.explaining[0] + '"', {
-                        x: 0.6, y: 5.0, w: 8.8, h: 0.25,
-                        fontSize: 9, italic: true, color: C.teal
+                    const eIdx = discIdx % SENTENCE_FRAMES.explaining.length;
+                    sl.addText('"' + SENTENCE_FRAMES.explaining[eIdx] + '"', {
+                        x: 0.6, y: 4.9, w: 8.8, h: 0.22,
+                        fontSize: 8, italic: true, color: C.teal
                     });
                 }
+                discIdx++;
             }
 
             // ─── RISA Academic Dialogue ───
@@ -2807,9 +2851,10 @@
                     { key: 'exemplary',  label: 'Exemplary (10)',  color: '0D9488' },
                     { key: 'proficient', label: 'Proficient (8.5)', color: '3B82F6' },
                     { key: 'developing', label: 'Developing (7.5)', color: 'D4870F' },
-                    { key: 'beginning',  label: 'Beginning (6.5)',  color: 'E8436D' }
+                    { key: 'beginning',  label: 'Beginning (6.5)',  color: 'E8436D' },
+                    { key: 'noEvidence', label: 'No Evidence (5)',  color: '94A3B8' }
                 ];
-                const maxBenchmarks = Math.min(rubricCodes.length, 6);
+                const maxBenchmarks = rubricCodes.length; // no cap — include ALL matched benchmarks
                 for (let startIdx = 0; startIdx < maxBenchmarks; startIdx += 2) {
                     slide = pres.addSlide();
                     header(slide, "RMS Proficiency Rubric");
@@ -2840,7 +2885,7 @@
                             x: 0.3, y: ry, w: 9.4,
                             colW: [1.3, 8.1],
                             border: { pt: 0.5, color: C.border },
-                            rowH: [0.2, 0.38, 0.38, 0.38, 0.38],
+                            rowH: [0.2, 0.32, 0.32, 0.32, 0.32, 0.32],
                             autoPage: false
                         });
                         ry += 1.9;
@@ -2931,8 +2976,422 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
+        // ==================== STUDENT NOTES GENERATOR ====================
+        // Generates a scaffolded, printable student notes handout as HTML
+        function generateStudentNotes(analysis) {
+            const topics = analysis.topics;
+            const standards = analysis.standards;
+            const insights = analysis.insights;
+            const grade = selectedGrade;
+
+            // ── Collect all learning targets from original slides ──
+            const ltSlides = analysis.slides.filter(s => s.type === 'LEARNING_TARGET');
+            const ltText = ltSlides.length > 0
+                ? ltSlides.map(s => s.text).join('\n')
+                : topics.map(t => 'I can ' + t + ' using mathematical reasoning.').join('\n');
+
+            // ── Collect vocabulary from original slides ──
+            const vocabSlides = analysis.slides.filter(s => s.type === 'VOCABULARY_CARDS');
+            const vocabText = vocabSlides.map(s => s.text).join('\n');
+
+            // ── Build essential understandings (simplified) ──
+            const essentials = [];
+            for (const topic of topics) {
+                if (insights[topic] && insights[topic].essential_understandings) {
+                    for (const eu of insights[topic].essential_understandings) {
+                        essentials.push(eu);
+                    }
+                }
+            }
+
+            // ── Generate SVG visuals as data URIs ──
+            const visuals = [];
+            for (const topic of topics) {
+                const tvs = MathVisuals.getVisualsForTopic(topic);
+                for (const v of tvs.slice(0, 2)) {
+                    visuals.push(v);
+                }
+            }
+
+            // ── Get sentence frames ──
+            const frames = typeof SENTENCE_FRAMES !== 'undefined' ? SENTENCE_FRAMES : {};
+
+            // ── Get toolbox links ──
+            const tLinks = [];
+            for (const topic of topics) {
+                const links = MathToolbox.getLinksForTopic(topic);
+                for (const l of links) {
+                    if (!tLinks.find(x => x.path === l.path)) tLinks.push(l);
+                }
+            }
+
+            // ── Collect problem slides for "Try It" section ──
+            const problemSlides = analysis.slides.filter(s => s.type === 'PROBLEM_SLIDE' || s.type === 'EQUATION_SOLVE');
+
+            // ── Build the HTML ──
+            let html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">';
+            html += '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+            html += '<title>Student Notes - Grade ' + grade + ' - ' + topics.join(', ') + '</title>';
+            html += '<style>';
+            html += '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }';
+            html += 'body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #1E293B; max-width: 8.5in; margin: 0 auto; padding: 0.5in; }';
+            html += '@media print { body { padding: 0.3in; font-size: 12px; } .no-print { display: none !important; } .page-break { page-break-before: always; } }';
+            html += 'h1 { font-size: 1.6em; color: #1E2761; border-bottom: 3px solid #0D9488; padding-bottom: 6px; margin-bottom: 12px; }';
+            html += 'h2 { font-size: 1.2em; color: #1E2761; margin: 18px 0 8px 0; padding: 4px 10px; background: #F0FDFA; border-left: 4px solid #0D9488; }';
+            html += 'h3 { font-size: 1.05em; color: #D4870F; margin: 12px 0 6px 0; }';
+            html += '.header-bar { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }';
+            html += '.grade-badge { background: #1E2761; color: white; padding: 3px 12px; border-radius: 4px; font-size: 0.9em; font-weight: 600; }';
+            html += '.standards { font-size: 0.8em; color: #475569; margin-bottom: 12px; }';
+            html += '.learning-target { background: #FFFBEB; border: 2px solid #D4870F; border-radius: 8px; padding: 12px 16px; margin: 10px 0; font-size: 1.05em; }';
+            html += '.learning-target::before { content: "Learning Target: "; font-weight: 700; color: #D4870F; }';
+            html += '.concept-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; margin: 8px 0; }';
+            html += '.concept-box p { margin: 4px 0; }';
+            html += '.key-idea { background: #F0FDF4; border-left: 4px solid #0D9488; padding: 8px 14px; margin: 8px 0; font-weight: 500; }';
+            html += '.vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }';
+            html += '.vocab-card { border: 1.5px solid #3B82F6; border-radius: 6px; padding: 8px 12px; background: #EFF6FF; }';
+            html += '.vocab-card .word { font-weight: 700; color: #1E2761; font-size: 1.05em; }';
+            html += '.vocab-card .space { border-bottom: 1px dashed #94A3B8; min-height: 24px; margin-top: 4px; }';
+            html += '.visual-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 12px 0; }';
+            html += '.visual-row img { max-width: 280px; height: auto; border: 1px solid #E2E8F0; border-radius: 6px; }';
+            html += '.example-box { background: #FEFCE8; border: 1.5px solid #D4870F; border-radius: 8px; padding: 12px 16px; margin: 8px 0; }';
+            html += '.example-box .label { font-weight: 700; color: #D4870F; margin-bottom: 4px; }';
+            html += '.try-it { background: #FFF7ED; border: 2px dashed #D4870F; border-radius: 8px; padding: 12px 16px; margin: 10px 0; }';
+            html += '.try-it .problem { margin: 6px 0; padding: 6px 0; border-bottom: 1px dotted #CBD5E1; }';
+            html += '.work-space { border: 1.5px solid #E2E8F0; border-radius: 8px; min-height: 80px; margin: 6px 0; padding: 8px; background: white; }';
+            html += '.work-space::before { content: "Show your work here:"; font-size: 0.8em; color: #94A3B8; }';
+            html += '.sentence-frame { background: #F0FDFA; border: 1px solid #0D9488; border-radius: 6px; padding: 8px 14px; margin: 5px 0; font-style: italic; color: #0F766E; }';
+            html += '.sentence-frame::before { content: "\\1F4AC "; }';
+            html += '.reflection-box { background: #FDF2F8; border: 2px solid #E8436D; border-radius: 8px; padding: 12px 16px; margin: 10px 0; }';
+            html += '.reflection-box .prompt { margin: 6px 0; }';
+            html += '.write-line { border-bottom: 1px solid #CBD5E1; min-height: 28px; margin: 4px 0; }';
+            html += '.toolbox-links { background: #F0FDFA; border-radius: 8px; padding: 10px 16px; margin: 10px 0; }';
+            html += '.toolbox-links a { color: #0D9488; font-weight: 600; text-decoration: none; display: block; margin: 3px 0; }';
+            html += '.footer { text-align: center; font-size: 0.75em; color: #94A3B8; margin-top: 20px; padding-top: 8px; border-top: 1px solid #E2E8F0; }';
+            html += '.print-btn { position: fixed; top: 12px; right: 12px; background: #0D9488; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }';
+            html += '.print-btn:hover { background: #0F766E; }';
+            html += '</style></head><body>';
+
+            // ── Print button ──
+            html += '<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>';
+
+            // ── Header ──
+            html += '<div class="header-bar">';
+            html += '<h1>' + topics.join(' &amp; ') + '</h1>';
+            html += '<span class="grade-badge">Grade ' + grade + '</span>';
+            html += '</div>';
+            html += '<div class="standards">Name: _________________________________ &nbsp;&nbsp; Date: ________________';
+            if (standards.length > 0) {
+                html += ' &nbsp;&nbsp; Standards: ' + standards.map(s => s.code).join(', ');
+            }
+            html += '</div>';
+
+            // ── Learning Target ──
+            html += '<div class="learning-target">' + escapeHTML(ltText).replace(/\n/g, '<br>') + '</div>';
+
+            // ── Key Ideas (Essential Understandings, simplified) ──
+            if (essentials.length > 0) {
+                html += '<h2>Key Ideas</h2>';
+                for (const eu of essentials) {
+                    html += '<div class="key-idea">' + escapeHTML(eu) + '</div>';
+                }
+            }
+
+            // ── Visuals ──
+            if (visuals.length > 0) {
+                html += '<h2>Math Models</h2>';
+                html += '<div class="visual-row">';
+                for (const v of visuals.slice(0, 4)) {
+                    html += '<img src="' + v.img + '" alt="' + escapeHTML(v.caption) + '" title="' + escapeHTML(v.caption) + '">';
+                }
+                html += '</div>';
+            }
+
+            // ── Vocabulary ──
+            html += '<h2>Vocabulary</h2>';
+            if (vocabText.length > 10) {
+                html += '<div class="concept-box"><p>' + escapeHTML(vocabText).replace(/\n/g, '</p><p>') + '</p></div>';
+            }
+            // Add blank vocab cards for students to fill in
+            const vocabWords = [];
+            for (const topic of topics) {
+                const t = topic.toLowerCase();
+                if (t.includes('fraction')) vocabWords.push('Numerator', 'Denominator', 'Equivalent');
+                if (t.includes('ratio') || t.includes('rate')) vocabWords.push('Ratio', 'Rate', 'Proportion');
+                if (t.includes('percent')) vocabWords.push('Percent', 'Decimal', 'Fraction');
+                if (t.includes('equation') || t.includes('solve')) vocabWords.push('Variable', 'Coefficient', 'Solution');
+                if (t.includes('area') || t.includes('circumference')) vocabWords.push('Area', 'Perimeter', 'Radius');
+                if (t.includes('pythagor')) vocabWords.push('Hypotenuse', 'Leg', 'Right Triangle');
+                if (t.includes('factor') || t.includes('prime')) vocabWords.push('Factor', 'Multiple', 'Prime');
+                if (t.includes('mean') || t.includes('median')) vocabWords.push('Mean', 'Median', 'Range');
+                if (t.includes('rational') || t.includes('irrational')) vocabWords.push('Rational', 'Irrational', 'Integer');
+                if (t.includes('similar') || t.includes('scal')) vocabWords.push('Similar', 'Scale Factor', 'Proportion');
+                if (t.includes('number line') || t.includes('compar')) vocabWords.push('Absolute Value', 'Opposite', 'Integer');
+            }
+            // Deduplicate
+            const uniqueVocab = [...new Set(vocabWords)].slice(0, 8);
+            if (uniqueVocab.length > 0) {
+                html += '<div class="vocab-grid">';
+                for (const word of uniqueVocab) {
+                    html += '<div class="vocab-card"><div class="word">' + word + '</div><div class="space"></div></div>';
+                }
+                html += '</div>';
+            }
+
+            // ── Worked Example with Easy Numbers ──
+            html += '<h2>Example — Step by Step</h2>';
+            for (const topic of topics.slice(0, 2)) {
+                html += '<div class="example-box">';
+                html += '<div class="label">Example: ' + escapeHTML(topic) + '</div>';
+                html += getSimpleExample(topic);
+                html += '</div>';
+            }
+
+            // ── Try It (problems from original lesson + sentence frames) ──
+            html += '<h2>Try It!</h2>';
+            if (problemSlides.length > 0) {
+                html += '<div class="try-it">';
+                for (const ps of problemSlides.slice(0, 4)) {
+                    html += '<div class="problem">' + escapeHTML(ps.text).substring(0, 200) + '</div>';
+                    html += '<div class="work-space"></div>';
+                }
+                html += '</div>';
+            } else {
+                // Generate simple practice problems from DOK data
+                html += '<div class="try-it">';
+                if (typeof getLeveledProblems === 'function') {
+                    const leveled = getLeveledProblems(topics);
+                    for (const item of leveled.slice(0, 1)) {
+                        if (item.problems.dok1) {
+                            for (const p of item.problems.dok1.slice(0, 2)) {
+                                html += '<div class="problem">' + escapeHTML(p.stem) + '</div>';
+                                html += '<div class="work-space"></div>';
+                            }
+                        }
+                        if (item.problems.dok2) {
+                            for (const p of item.problems.dok2.slice(0, 1)) {
+                                html += '<div class="problem">' + escapeHTML(p.stem) + '</div>';
+                                html += '<div class="work-space"></div>';
+                            }
+                        }
+                    }
+                }
+                html += '</div>';
+            }
+
+            // ── Sentence Frames ──
+            if (frames.problem_solving || frames.explaining) {
+                html += '<h2>How to Talk About Math</h2>';
+                if (frames.problem_solving) {
+                    html += '<h3>When solving a problem...</h3>';
+                    for (const f of frames.problem_solving.slice(0, 3)) {
+                        html += '<div class="sentence-frame">' + escapeHTML(f) + '</div>';
+                    }
+                }
+                if (frames.explaining) {
+                    html += '<h3>When explaining your thinking...</h3>';
+                    for (const f of frames.explaining.slice(0, 3)) {
+                        html += '<div class="sentence-frame">' + escapeHTML(f) + '</div>';
+                    }
+                }
+                if (frames.comparing) {
+                    html += '<h3>When comparing...</h3>';
+                    for (const f of frames.comparing.slice(0, 2)) {
+                        html += '<div class="sentence-frame">' + escapeHTML(f) + '</div>';
+                    }
+                }
+            }
+
+            // ── Team Talk — Role Prompts ──
+            if (typeof TEAM_ROLE_PROMPTS !== 'undefined') {
+                html += '<h2>Team Talk</h2>';
+                html += '<p style="margin-bottom:8px;color:#475569;">Each team member has a job. Here are some things you can say:</p>';
+                const noteRoles = [
+                    { key: 'facilitator', name: 'Facilitator', color: '#0D9488', job: 'keeps the team on track' },
+                    { key: 'resource_manager', name: 'Resource Manager', color: '#3B82F6', job: 'gets what the team needs' },
+                    { key: 'task_manager', name: 'Task Manager', color: '#D4870F', job: 'watches the time and steps' },
+                    { key: 'recorder_reporter', name: 'Recorder / Reporter', color: '#E8436D', job: 'writes and shares the work' }
+                ];
+                html += '<div class="vocab-grid">';
+                for (const role of noteRoles) {
+                    html += '<div class="vocab-card" style="border-color:' + role.color + ';background:white;">';
+                    html += '<div class="word" style="color:' + role.color + ';">' + role.name + '</div>';
+                    html += '<div style="font-size:0.85em;color:#475569;margin-bottom:4px;">' + role.job + '</div>';
+                    const prompts = TEAM_ROLE_PROMPTS.problem_launch[role.key];
+                    if (prompts && prompts[0]) {
+                        html += '<div style="font-style:italic;font-size:0.9em;">"' + escapeHTML(prompts[0]) + '"</div>';
+                    }
+                    html += '</div>';
+                }
+                html += '</div>';
+            }
+
+            // ── How Am I Doing? — Rubric Summary ──
+            if (typeof RUBRIC_DESCRIPTORS !== 'undefined' && standards.length > 0) {
+                const noteRubricCodes = standards.map(s => s.code);
+                const noteRubrics = getRubricsForStandards(noteRubricCodes);
+                const noteRubricKeys = Object.keys(noteRubrics);
+                if (noteRubricKeys.length > 0) {
+                    html += '<h2>How Am I Doing?</h2>';
+                    html += '<p style="margin-bottom:8px;color:#475569;">Your teacher uses this rubric to see how well you understand:</p>';
+                    for (const code of noteRubricKeys.slice(0, 3)) {
+                        const rb = noteRubrics[code];
+                        html += '<div class="concept-box" style="margin-bottom:10px;">';
+                        html += '<p style="font-weight:700;color:#1E2761;">' + code + ': ' + escapeHTML(rb.benchmark) + '</p>';
+                        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">';
+                        const lvls = [
+                            { key: 'exemplary', label: 'Exemplary', bg: '#F0FDFA', border: '#0D9488' },
+                            { key: 'proficient', label: 'Proficient', bg: '#EFF6FF', border: '#3B82F6' },
+                            { key: 'developing', label: 'Developing', bg: '#FFFBEB', border: '#D4870F' },
+                            { key: 'beginning', label: 'Beginning', bg: '#FDF2F8', border: '#E8436D' }
+                        ];
+                        for (const lv of lvls) {
+                            const desc = rb.descriptors[lv.key] || '';
+                            const short = desc.length > 60 ? desc.substring(0, 57) + '...' : desc;
+                            html += '<div style="flex:1;min-width:120px;border:1.5px solid ' + lv.border + ';border-radius:6px;padding:4px 8px;background:' + lv.bg + ';">';
+                            html += '<div style="font-weight:600;font-size:0.8em;color:' + lv.border + ';">' + lv.label + '</div>';
+                            html += '<div style="font-size:0.75em;color:#475569;">' + escapeHTML(short) + '</div>';
+                            html += '</div>';
+                        }
+                        html += '</div></div>';
+                    }
+                }
+            }
+
+            // ── Reflection ──
+            html += '<div class="page-break"></div>';
+            html += '<h2>Reflection</h2>';
+            html += '<div class="reflection-box">';
+            html += '<div class="prompt"><strong>What I learned today:</strong></div>';
+            html += '<div class="write-line"></div><div class="write-line"></div><div class="write-line"></div>';
+            html += '<div class="prompt"><strong>I used to think ___. Now I know ___.</strong></div>';
+            html += '<div class="write-line"></div><div class="write-line"></div>';
+            html += '<div class="prompt"><strong>One question I still have:</strong></div>';
+            html += '<div class="write-line"></div><div class="write-line"></div>';
+            html += '<div class="prompt"><strong>Rate your understanding (circle one):</strong> &nbsp; 1 &nbsp; 2 &nbsp; 3 &nbsp; 4 &nbsp; 5</div>';
+            html += '</div>';
+
+            // ── Math Toolbox Links ──
+            if (tLinks.length > 0) {
+                html += '<h2>Explore More</h2>';
+                html += '<div class="toolbox-links">';
+                html += '<p style="margin-bottom:6px;">Try these interactive math tools:</p>';
+                for (const tool of tLinks) {
+                    const url = MathToolbox.getUrl(tool);
+                    html += '<a href="' + url + '" target="_blank">' + tool.label + ' &rarr;</a>';
+                }
+                html += '</div>';
+            }
+
+            // ── Footer ──
+            html += '<div class="footer">Generated by The Lesson Digester &bull; Grade ' + grade + ' &bull; ' + topics.join(', ') + '</div>';
+
+            html += '</body></html>';
+            return html;
+        }
+
+        // ── Simple worked examples with compatible numbers for each topic ──
+        function getSimpleExample(topic) {
+            const t = topic.toLowerCase();
+            if (t.includes('fraction') && t.includes('multipli')) {
+                return '<p><strong>Problem:</strong> What is 1/2 &times; 3/4?</p>'
+                    + '<p><strong>Step 1:</strong> Multiply the numerators: 1 &times; 3 = 3</p>'
+                    + '<p><strong>Step 2:</strong> Multiply the denominators: 2 &times; 4 = 8</p>'
+                    + '<p><strong>Answer:</strong> 3/8</p>';
+            }
+            if (t.includes('fraction') || t.includes('equivalen')) {
+                return '<p><strong>Problem:</strong> Are 2/4 and 1/2 equivalent?</p>'
+                    + '<p><strong>Step 1:</strong> Simplify 2/4 — divide top and bottom by 2</p>'
+                    + '<p><strong>Step 2:</strong> 2 &divide; 2 = 1, and 4 &divide; 2 = 2</p>'
+                    + '<p><strong>Answer:</strong> Yes! 2/4 = 1/2</p>';
+            }
+            if (t.includes('ratio') || t.includes('rate') || t.includes('proportion')) {
+                return '<p><strong>Problem:</strong> If 3 apples cost $6, how much do 9 apples cost?</p>'
+                    + '<p><strong>Step 1:</strong> Find the unit rate: $6 &divide; 3 = $2 per apple</p>'
+                    + '<p><strong>Step 2:</strong> Multiply: $2 &times; 9 = $18</p>'
+                    + '<p><strong>Answer:</strong> 9 apples cost $18</p>';
+            }
+            if (t.includes('percent')) {
+                return '<p><strong>Problem:</strong> What is 25% of 80?</p>'
+                    + '<p><strong>Step 1:</strong> Convert 25% to a decimal: 25% = 0.25</p>'
+                    + '<p><strong>Step 2:</strong> Multiply: 0.25 &times; 80 = 20</p>'
+                    + '<p><strong>Answer:</strong> 25% of 80 is 20</p>';
+            }
+            if (t.includes('equation') || t.includes('solve')) {
+                return '<p><strong>Problem:</strong> Solve: x + 5 = 12</p>'
+                    + '<p><strong>Step 1:</strong> Get x alone — subtract 5 from both sides</p>'
+                    + '<p><strong>Step 2:</strong> x + 5 - 5 = 12 - 5</p>'
+                    + '<p><strong>Answer:</strong> x = 7</p>';
+            }
+            if (t.includes('area') || t.includes('circumference') || t.includes('circle')) {
+                return '<p><strong>Problem:</strong> Find the area of a rectangle: length = 10, width = 5</p>'
+                    + '<p><strong>Step 1:</strong> Use the formula: Area = length &times; width</p>'
+                    + '<p><strong>Step 2:</strong> Area = 10 &times; 5 = 50</p>'
+                    + '<p><strong>Answer:</strong> 50 square units</p>';
+            }
+            if (t.includes('pythagor')) {
+                return '<p><strong>Problem:</strong> A right triangle has legs of 3 and 4. Find the hypotenuse.</p>'
+                    + '<p><strong>Step 1:</strong> Use a&sup2; + b&sup2; = c&sup2;</p>'
+                    + '<p><strong>Step 2:</strong> 9 + 16 = 25, so c = &radic;25 = 5</p>'
+                    + '<p><strong>Answer:</strong> The hypotenuse is 5</p>';
+            }
+            if (t.includes('factor') || t.includes('prime') || t.includes('gcf') || t.includes('lcm')) {
+                return '<p><strong>Problem:</strong> Find the GCF of 12 and 18</p>'
+                    + '<p><strong>Step 1:</strong> Factors of 12: 1, 2, 3, 4, 6, 12</p>'
+                    + '<p><strong>Step 2:</strong> Factors of 18: 1, 2, 3, 6, 9, 18</p>'
+                    + '<p><strong>Answer:</strong> GCF = 6 (the biggest number in both lists)</p>';
+            }
+            if (t.includes('mean') || t.includes('median') || t.includes('range')) {
+                return '<p><strong>Problem:</strong> Find the mean of: 4, 6, 8, 10, 12</p>'
+                    + '<p><strong>Step 1:</strong> Add them up: 4 + 6 + 8 + 10 + 12 = 40</p>'
+                    + '<p><strong>Step 2:</strong> Divide by how many numbers: 40 &divide; 5 = 8</p>'
+                    + '<p><strong>Answer:</strong> The mean is 8</p>';
+            }
+            if (t.includes('rational') || t.includes('irrational') || t.includes('number line') || t.includes('compar')) {
+                return '<p><strong>Problem:</strong> Put these in order from least to greatest: -3, 1, -1, 0, 2</p>'
+                    + '<p><strong>Step 1:</strong> Think of the number line — negatives go left</p>'
+                    + '<p><strong>Step 2:</strong> -3 is farthest left, then -1, 0, 1, 2</p>'
+                    + '<p><strong>Answer:</strong> -3, -1, 0, 1, 2</p>';
+            }
+            if (t.includes('similar') || t.includes('scal')) {
+                return '<p><strong>Problem:</strong> A triangle has sides 2, 3, 4. Scale factor is 3. Find the new sides.</p>'
+                    + '<p><strong>Step 1:</strong> Multiply each side by 3</p>'
+                    + '<p><strong>Step 2:</strong> 2&times;3=6, 3&times;3=9, 4&times;3=12</p>'
+                    + '<p><strong>Answer:</strong> New sides: 6, 9, 12</p>';
+            }
+            // Default
+            return '<p><strong>Problem:</strong> 10 + 15 = ?</p>'
+                + '<p><strong>Step 1:</strong> Break it apart: 10 + 10 + 5</p>'
+                + '<p><strong>Step 2:</strong> 10 + 10 = 20, then 20 + 5 = 25</p>'
+                + '<p><strong>Answer:</strong> 25</p>';
+        }
+
         // ==================== EVENT LISTENERS ====================
         document.getElementById('copyBtn')?.addEventListener('click', copyBuildScript);
+        document.getElementById('notesBtn')?.addEventListener('click', () => {
+            if (currentAnalysis) {
+                const btn = document.getElementById('notesBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ Building notes...';
+                btn.disabled = true;
+                try {
+                    const notesHtml = generateStudentNotes(currentAnalysis);
+                    const blob = new Blob([notesHtml], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = currentAnalysis.filename.replace('.pptx', '') + '_student_notes.html';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    btn.textContent = '✅ Notes Downloaded!';
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3000);
+                } catch (err) {
+                    console.error('Notes generation error:', err);
+                    btn.textContent = '❌ Error: ' + err.message;
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 4000);
+                }
+            }
+        });
+
         document.getElementById('downloadBtn')?.addEventListener('click', async () => {
             if (currentAnalysis) {
                 const btn = document.getElementById('downloadBtn');
