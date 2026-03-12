@@ -2180,16 +2180,19 @@
 
         // ==================== MATH-TOOLBOX LINKS ====================
         // Generates hyperlinks to interactive math tools
+        // ── Math Toolbox: links to real, working interactive math tools ──
+        // Uses free tools from Math Learning Center, Desmos, GeoGebra, Toy Theater
         const MathToolbox = {
-            baseUrl: 'https://discrafty-cpu.github.io/math-toolbox',
             tools: {
-                'number-line': { label: 'Interactive Number Line', path: '/number-line' },
-                'fraction-bars': { label: 'Fraction Bar Explorer', path: '/fraction-bars' },
-                'area-model': { label: 'Area Model Builder', path: '/area-model' },
-                'ratio-table': { label: 'Ratio Table Tool', path: '/ratio-table' },
-                'percent-bar': { label: 'Percent Bar Model', path: '/percent-bar' },
-                'graphing': { label: 'Coordinate Graphing', path: '/graphing' },
-                'equation-balance': { label: 'Equation Balance', path: '/equation-balance' }
+                'number-line': { label: 'Number Line (Math Learning Center)', url: 'https://apps.mathlearningcenter.org/number-line/' },
+                'fraction-bars': { label: 'Fraction Bars (Math Learning Center)', url: 'https://apps.mathlearningcenter.org/fractions/' },
+                'area-model': { label: 'Area Model (Math Learning Center)', url: 'https://apps.mathlearningcenter.org/area-model/' },
+                'ratio-table': { label: 'Ratio & Proportion (GeoGebra)', url: 'https://www.geogebra.org/m/RMRbxy2a' },
+                'percent-bar': { label: 'Percent Bar Model (Math Learning Center)', url: 'https://apps.mathlearningcenter.org/number-pieces/' },
+                'graphing': { label: 'Graphing Calculator (Desmos)', url: 'https://www.desmos.com/calculator' },
+                'equation-balance': { label: 'Algebra Balance (PhET)', url: 'https://phet.colorado.edu/sims/html/equality-explorer/latest/equality-explorer_all.html' },
+                'geometry': { label: 'Geometry Tool (GeoGebra)', url: 'https://www.geogebra.org/geometry' },
+                'number-pieces': { label: 'Number Pieces (Math Learning Center)', url: 'https://apps.mathlearningcenter.org/number-pieces/' }
             },
 
             getLinksForTopic: function(topic) {
@@ -2199,22 +2202,26 @@
                     links.push(this.tools['number-line']);
                 if (t.includes('fraction') || t.includes('equivalen'))
                     links.push(this.tools['fraction-bars']);
-                if (t.includes('area') || t.includes('multipli') || t.includes('circumference'))
+                if (t.includes('area') || t.includes('multipli') || t.includes('circumference') || t.includes('circle'))
                     links.push(this.tools['area-model']);
                 if (t.includes('ratio') || t.includes('rate') || t.includes('proportion'))
                     links.push(this.tools['ratio-table']);
                 if (t.includes('percent'))
                     links.push(this.tools['percent-bar']);
-                if (t.includes('equation') || t.includes('solve') || t.includes('system'))
+                if (t.includes('equation') || t.includes('solve') || t.includes('system') || t.includes('inequalit'))
                     links.push(this.tools['equation-balance']);
                 if (t.includes('pythagor') || t.includes('graph') || t.includes('coordinate'))
                     links.push(this.tools['graphing']);
+                if (t.includes('similar') || t.includes('scal') || t.includes('geometry') || t.includes('angle'))
+                    links.push(this.tools['geometry']);
+                if (t.includes('factor') || t.includes('prime') || t.includes('gcf') || t.includes('lcm'))
+                    links.push(this.tools['number-pieces']);
                 if (links.length === 0) links.push(this.tools['number-line']);
                 return links;
             },
 
             getUrl: function(tool) {
-                return this.baseUrl + tool.path;
+                return tool.url;
             }
         };
 
@@ -3021,23 +3028,51 @@
 
             // ── Collect all learning targets from original slides ──
             const ltSlides = analysis.slides.filter(s => s.type === 'LEARNING_TARGET');
-            const ltText = ltSlides.length > 0
-                ? ltSlides.map(s => s.text).join('\n')
-                : topics.map(t => 'I can ' + t + ' using mathematical reasoning.').join('\n');
+            let ltText;
+            if (ltSlides.length > 0) {
+                ltText = ltSlides.map(s => s.text).join('\n');
+            } else {
+                // Generate learning targets with appropriate action verbs based on topic
+                ltText = topics.map(t => {
+                    const tl = t.toLowerCase();
+                    let verb = 'understand';
+                    if (tl.includes('solve') || tl.includes('equation')) verb = 'solve problems involving';
+                    else if (tl.includes('compar') || tl.includes('order')) verb = 'compare and order';
+                    else if (tl.includes('represent') || tl.includes('graph') || tl.includes('plot')) verb = 'represent';
+                    else if (tl.includes('identif') || tl.includes('classify')) verb = 'identify and classify';
+                    else if (tl.includes('calculat') || tl.includes('comput') || tl.includes('evaluat')) verb = 'calculate';
+                    else if (tl.includes('convert') || tl.includes('equivalen')) verb = 'convert between equivalent forms of';
+                    else if (tl.includes('apply') || tl.includes('use')) verb = 'apply';
+                    else if (tl.includes('explain') || tl.includes('describ')) verb = 'explain';
+                    else if (tl.includes('measur') || tl.includes('area') || tl.includes('volume')) verb = 'find the';
+                    else if (tl.includes('ratio') || tl.includes('rate') || tl.includes('proportion')) verb = 'use';
+                    else if (tl.includes('fraction') || tl.includes('decimal') || tl.includes('percent')) verb = 'work with';
+                    else if (tl.includes('factor') || tl.includes('prime')) verb = 'determine';
+                    return 'I can ' + verb + ' ' + t + ' using mathematical reasoning.';
+                }).join('\n');
+            }
 
             // ── Collect vocabulary from original slides ──
             const vocabSlides = analysis.slides.filter(s => s.type === 'VOCABULARY_CARDS');
             const vocabText = vocabSlides.map(s => s.text).join('\n');
 
-            // ── Build essential understandings (simplified) ──
+            // ── Build essential understandings (simplified, student-facing only) ──
             const essentials = [];
+            const teacherPrefixes = ['teachers ', 'teacher ', 'the teacher ', 'teachers should', 'design lessons', 'allow time', 'ask students to'];
             for (const topic of topics) {
                 if (insights[topic] && insights[topic].essential_understandings) {
                     for (const eu of insights[topic].essential_understandings) {
-                        essentials.push(eu);
+                        const euLower = eu.toLowerCase().trim();
+                        // Filter out teacher-directed items
+                        const isTeacherItem = teacherPrefixes.some(prefix => euLower.startsWith(prefix));
+                        if (!isTeacherItem && !essentials.includes(eu)) {
+                            essentials.push(eu);
+                        }
                     }
                 }
             }
+            // Cap at 7 key ideas to keep notes focused
+            const cappedEssentials = essentials.slice(0, 7);
 
             // ── Generate SVG visuals as data URIs ──
             const visuals = [];
@@ -3056,7 +3091,7 @@
             for (const topic of topics) {
                 const links = MathToolbox.getLinksForTopic(topic);
                 for (const l of links) {
-                    if (!tLinks.find(x => x.path === l.path)) tLinks.push(l);
+                    if (!tLinks.find(x => x.url === l.url)) tLinks.push(l);
                 }
             }
 
@@ -3124,9 +3159,9 @@
             html += '<div class="learning-target">' + escapeHTML(ltText).replace(/\n/g, '<br>') + '</div>';
 
             // ── Key Ideas (Essential Understandings, simplified) ──
-            if (essentials.length > 0) {
+            if (cappedEssentials.length > 0) {
                 html += '<h2>Key Ideas</h2>';
-                for (const eu of essentials) {
+                for (const eu of cappedEssentials) {
                     html += '<div class="key-idea">' + escapeHTML(eu) + '</div>';
                 }
             }
@@ -3277,7 +3312,8 @@
                             { key: 'exemplary', label: 'Exemplary', bg: '#F0FDFA', border: '#0D9488' },
                             { key: 'proficient', label: 'Proficient', bg: '#EFF6FF', border: '#3B82F6' },
                             { key: 'developing', label: 'Developing', bg: '#FFFBEB', border: '#D4870F' },
-                            { key: 'beginning', label: 'Beginning', bg: '#FDF2F8', border: '#E8436D' }
+                            { key: 'beginning', label: 'Beginning', bg: '#FDF2F8', border: '#E8436D' },
+                            { key: 'noEvidence', label: 'No Evidence', bg: '#F8FAFC', border: '#6B7280' }
                         ];
                         for (const lv of lvls) {
                             const desc = rb.descriptors[lv.key] || '';

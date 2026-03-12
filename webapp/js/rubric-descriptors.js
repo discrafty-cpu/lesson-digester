@@ -25,11 +25,11 @@ const RUBRIC_DESCRIPTORS = {
         benchmark: 'Locate, order and compare positive rational numbers on a number line',
         dok: 2,
         descriptors: {
-            exemplary: 'Recognizes when factoring is appropriate and applies it in problem-solving situations. Translates efficiently between fraction, decimal, and percent forms to solve problems. Compares ratios and understands their relationship to fractions. Recognizes ratios in context.',
-            proficient: 'Understands the concept of factors and factoring by composing and decomposing numbers. Determines equivalences among fractions, decimals, and percents but may revert to one representation to solve problems. Creates ratios to represent situations when given key words in context. Understands the concept of ratio.',
-            developing: 'Names pairs of factors of numbers. Recognizes equivalences among common fractions, decimals, and percents. Recognizes ratios only in numeric form. Solves unit rate problems in straightforward contexts using division.',
-            beginning: 'Can only name common pairs of factors of a given number. Uses decimals to separate numbers rather than as decimal notation. Sees decimals only in money context. Solves ratio or rate problems using basic multiplication and division.',
-            noEvidence: 'Shows no engagement with factors, fractions, decimals, percents, or ratios. Does not attempt to identify factors or compare positive rational numbers.'
+            exemplary: 'Locates, orders, and compares positive rational numbers (fractions, decimals, percents) on a number line fluently. Places numbers in multiple forms and explains relative position using mathematical reasoning.',
+            proficient: 'Locates and compares positive rational numbers on a number line. Correctly positions fractions, decimals, and percents and determines which is greater or less.',
+            developing: 'Locates simple fractions and decimals on a number line but may struggle with less common values or comparing mixed forms.',
+            beginning: 'Locates only whole numbers and simple fractions (like 1/2) on a number line. Cannot compare fractions and decimals on the same line.',
+            noEvidence: 'Shows no engagement with number lines or comparing positive rational numbers. Does not attempt to locate or order values.'
         }
     },
     '6.1.1.2': {
