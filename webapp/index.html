@@ -1124,6 +1124,7 @@
     <script src="js/teaching-insights-data.js"></script>
     <script src="js/rubric-descriptors.js"></script>
     <script src="js/leveled-problems-data.js"></script>
+    <script src="js/lesson-components-data.js"></script>
     <script>
         // ==================== TEACHING INSIGHTS DATABASE ====================
         // TEACHING_INSIGHTS is now loaded from js/teaching-insights-data.js
@@ -2306,7 +2307,7 @@
             for (const topic of analysis.topics) {
                 const tLinks = MathToolbox.getLinksForTopic(topic);
                 for (const tl of tLinks) {
-                    if (!toolboxLinks.find(l => l.path === tl.path)) toolboxLinks.push(tl);
+                    if (!toolboxLinks.find(l => l.url === tl.url)) toolboxLinks.push(tl);
                 }
             }
 
@@ -2437,6 +2438,62 @@
             }
             slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.1, w: 10, h: 0.525, fill: { color: C.teal } });
 
+            // ─── FOCUS SKILL (opening slide students see when they walk in) ───
+            // Auto-detected from lesson content; includes scaffolds and two practice problems
+            if (typeof getPrerequisites === 'function') {
+                const prereqData = getPrerequisites(analysis.topics);
+                if (prereqData.length > 0) {
+                    const focusData = prereqData[0].data; // Use first matched topic
+                    slide = pres.addSlide();
+                    slide.background = { color: C.lightBg };
+                    header(slide, "Focus Skill — Start Here!", C.amber);
+                    // Scaffold section: prerequisite reminder
+                    const topPrereqs = focusData.prerequisites.slice(-2); // Most recent grade-level prereqs
+                    yPos = 0.9;
+                    slide.addText("Warm Up Your Brain", {
+                        x: 0.5, y: yPos, w: 4.5, h: 0.3,
+                        fontSize: 12, bold: true, color: C.teal
+                    });
+                    yPos += 0.35;
+                    for (const p of topPrereqs) {
+                        slide.addText("Grade " + p.grade + ":  " + p.scaffold, {
+                            x: 0.6, y: yPos, w: 4.3, h: 0.55,
+                            fontSize: 10, color: C.textDark, wrap: true, valign: 'top', bullet: true
+                        });
+                        yPos += 0.6;
+                    }
+                    // Two focus problems on the right
+                    slide.addText("Try These:", {
+                        x: 5.3, y: 0.9, w: 4.2, h: 0.3,
+                        fontSize: 12, bold: true, color: C.navy
+                    });
+                    let fpY = 1.25;
+                    for (let fi = 0; fi < Math.min(2, focusData.focusProblems.length); fi++) {
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: 5.3, y: fpY, w: 4.2, h: 1.2,
+                            fill: { color: C.white },
+                            line: { color: C.navy, width: 1.5 },
+                            rectRadius: 0.1
+                        });
+                        slide.addText((fi + 1) + ".  " + focusData.focusProblems[fi], {
+                            x: 5.45, y: fpY + 0.08, w: 3.9, h: 1.0,
+                            fontSize: 10, color: C.textDark, wrap: true, valign: 'top'
+                        });
+                        fpY += 1.35;
+                    }
+                    // Bottom strip with topic visual if available
+                    if (topicVisuals.length > 0) {
+                        try {
+                            slide.addImage({
+                                data: topicVisuals[0].img, x: 0.5, y: 4.1, w: 4.5, h: 1.1,
+                                sizing: { type: 'contain', w: 4.5, h: 1.1 }
+                            });
+                        } catch (e) {}
+                    }
+                    footer(slide, "Focus Skill  •  Start when you sit down  •  Work quietly on your own");
+                }
+            }
+
             // ─── Intro / Agenda (ALL) ───
             for (const s of (slideGroups['INTRO_AGENDA'] || [])) {
                 buildContentSlide(s, "What We Need Today");
@@ -2453,7 +2510,9 @@
                 buildContentSlide(s, "Commitment", C.teal);
             }
 
-            // ─── Learning Targets (ALL original, then generated if none) ───
+            // ─── Learning Targets + Success Criteria (ALL original, then generated) ───
+            // getVerbForTopic() is now a shared utility defined outside buildPresentation
+
             const ltSlides = slideGroups['LEARNING_TARGET'] || [];
             if (ltSlides.length > 0) {
                 for (const s of ltSlides) {
@@ -2463,9 +2522,10 @@
                 slide = pres.addSlide();
                 header(slide, "Learning Targets");
                 yPos = 1.0;
-                for (const topic of analysis.topics) {
+                for (const topic of analysis.topics.slice(0, 3)) {
                     if (yPos > 4.5) break;
-                    slide.addText("I can " + topic + " using mathematical reasoning.", {
+                    const verb = getVerbForTopic(topic);
+                    slide.addText("I can " + verb + " " + topic + " using mathematical reasoning.", {
                         x: 0.6, y: yPos, w: 8.8, h: 0.4,
                         fontSize: 14, color: C.navy, bullet: true
                     });
@@ -2474,6 +2534,86 @@
                 if (analysis.standards.length > 0) {
                     footer(slide, analysis.standards.map(s => s.code).join("  •  "));
                 }
+            }
+
+            // ─── Success Criteria (auto-generated from learning targets) ───
+            if (typeof generateSuccessCriteria === 'function') {
+                slide = pres.addSlide();
+                header(slide, "Success Criteria", C.teal);
+                slide.addText("How will I know I've learned it?", {
+                    x: 0.5, y: 0.85, w: 9, h: 0.3,
+                    fontSize: 12, italic: true, color: C.textMid
+                });
+                yPos = 1.2;
+                for (const topic of analysis.topics.slice(0, 2)) {
+                    if (yPos > 4.6) break;
+                    const verb = getVerbForTopic(topic);
+                    const criteria = generateSuccessCriteria(verb, topic);
+                    slide.addText(topic.toUpperCase(), {
+                        x: 0.5, y: yPos, w: 9, h: 0.22,
+                        fontSize: 10, bold: true, color: C.amber
+                    });
+                    yPos += 0.28;
+                    for (const c of criteria.slice(0, 3)) {
+                        if (yPos > 5.0) break;
+                        slide.addText(c, {
+                            x: 0.7, y: yPos, w: 8.6, h: 0.36,
+                            fontSize: 11, color: C.textDark, bullet: { type: 'number' }
+                        });
+                        yPos += 0.38;
+                    }
+                    yPos += 0.15;
+                }
+                footer(slide, "Success Criteria  •  Check your understanding against these goals");
+            }
+
+            // ─── Relevance — Why This Matters (career + real-life + progression) ───
+            if (typeof getRelevance === 'function') {
+                const rel = getRelevance(analysis.topics);
+                slide = pres.addSlide();
+                header(slide, "Why This Matters", C.amber);
+                // Left column: Who Uses This Math?
+                slide.addText("Who Uses This Math?", {
+                    x: 0.5, y: 0.9, w: 4.5, h: 0.3,
+                    fontSize: 12, bold: true, color: C.teal
+                });
+                yPos = 1.25;
+                for (const career of rel.careers.slice(0, 3)) {
+                    slide.addText(career, {
+                        x: 0.6, y: yPos, w: 4.3, h: 0.38,
+                        fontSize: 10, color: C.textDark, bullet: true, wrap: true
+                    });
+                    yPos += 0.42;
+                }
+                // Right column: In Your Life
+                slide.addText("In Your Life", {
+                    x: 5.3, y: 0.9, w: 4.2, h: 0.3,
+                    fontSize: 12, bold: true, color: C.navy
+                });
+                yPos = 1.25;
+                for (const rl of rel.realLife.slice(0, 3)) {
+                    slide.addText(rl, {
+                        x: 5.4, y: yPos, w: 4.1, h: 0.38,
+                        fontSize: 10, color: C.textDark, bullet: true, wrap: true
+                    });
+                    yPos += 0.42;
+                }
+                // Bottom: Where This Leads (progression)
+                slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.5, y: 3.6, w: 9, h: 0.85,
+                    fill: { color: 'F0FDFA' },
+                    line: { color: C.teal, width: 1 },
+                    rectRadius: 0.1
+                });
+                slide.addText("Where This Leads", {
+                    x: 0.7, y: 3.65, w: 8.6, h: 0.22,
+                    fontSize: 10, bold: true, color: C.teal
+                });
+                slide.addText(rel.progression, {
+                    x: 0.7, y: 3.9, w: 8.6, h: 0.45,
+                    fontSize: 9, color: C.textDark, wrap: true
+                });
+                footer(slide, "Relevance  •  Connecting math to the real world");
             }
 
             // ─── Vocabulary (ALL original + essential understandings, with visuals) ───
@@ -3018,6 +3158,24 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
+        // ==================== SHARED UTILITY: ACTION VERB FOR TOPIC ====================
+        function getVerbForTopic(topic) {
+            const tl = topic.toLowerCase();
+            if (tl.includes('solve') || tl.includes('equation')) return 'solve problems involving';
+            if (tl.includes('compar') || tl.includes('order')) return 'compare and order';
+            if (tl.includes('represent') || tl.includes('graph') || tl.includes('plot')) return 'represent';
+            if (tl.includes('identif') || tl.includes('classify')) return 'identify and classify';
+            if (tl.includes('calculat') || tl.includes('comput') || tl.includes('evaluat')) return 'calculate';
+            if (tl.includes('convert') || tl.includes('equivalen')) return 'convert between equivalent forms of';
+            if (tl.includes('apply') || tl.includes('use')) return 'apply';
+            if (tl.includes('explain') || tl.includes('describ')) return 'explain';
+            if (tl.includes('measur') || tl.includes('area') || tl.includes('volume')) return 'find the';
+            if (tl.includes('ratio') || tl.includes('rate') || tl.includes('proportion')) return 'use';
+            if (tl.includes('fraction') || tl.includes('decimal') || tl.includes('percent')) return 'work with';
+            if (tl.includes('factor') || tl.includes('prime')) return 'determine';
+            return 'understand';
+        }
+
         // ==================== STUDENT NOTES GENERATOR ====================
         // Generates a scaffolded, printable student notes handout as HTML
         function generateStudentNotes(analysis) {
@@ -3032,22 +3190,9 @@
             if (ltSlides.length > 0) {
                 ltText = ltSlides.map(s => s.text).join('\n');
             } else {
-                // Generate learning targets with appropriate action verbs based on topic
-                ltText = topics.map(t => {
-                    const tl = t.toLowerCase();
-                    let verb = 'understand';
-                    if (tl.includes('solve') || tl.includes('equation')) verb = 'solve problems involving';
-                    else if (tl.includes('compar') || tl.includes('order')) verb = 'compare and order';
-                    else if (tl.includes('represent') || tl.includes('graph') || tl.includes('plot')) verb = 'represent';
-                    else if (tl.includes('identif') || tl.includes('classify')) verb = 'identify and classify';
-                    else if (tl.includes('calculat') || tl.includes('comput') || tl.includes('evaluat')) verb = 'calculate';
-                    else if (tl.includes('convert') || tl.includes('equivalen')) verb = 'convert between equivalent forms of';
-                    else if (tl.includes('apply') || tl.includes('use')) verb = 'apply';
-                    else if (tl.includes('explain') || tl.includes('describ')) verb = 'explain';
-                    else if (tl.includes('measur') || tl.includes('area') || tl.includes('volume')) verb = 'find the';
-                    else if (tl.includes('ratio') || tl.includes('rate') || tl.includes('proportion')) verb = 'use';
-                    else if (tl.includes('fraction') || tl.includes('decimal') || tl.includes('percent')) verb = 'work with';
-                    else if (tl.includes('factor') || tl.includes('prime')) verb = 'determine';
+                // Generate learning targets with appropriate action verbs (uses shared getVerbForTopic)
+                ltText = topics.slice(0, 3).map(t => {
+                    const verb = getVerbForTopic(t);
                     return 'I can ' + verb + ' ' + t + ' using mathematical reasoning.';
                 }).join('\n');
             }
@@ -3139,6 +3284,9 @@
             html += '.footer { text-align: center; font-size: 0.75em; color: #94A3B8; margin-top: 20px; padding-top: 8px; border-top: 1px solid #E2E8F0; }';
             html += '.print-btn { position: fixed; top: 12px; right: 12px; background: #0D9488; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }';
             html += '.print-btn:hover { background: #0F766E; }';
+            html += '.criteria-check { margin: 3px 0; padding-left: 16px; }';
+            html += '.scaffold-box { background: #EFF6FF; border-left: 4px solid #3B82F6; padding: 8px 14px; margin: 6px 0; }';
+            html += '.relevance-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; margin: 8px 0; }';
             html += '</style></head><body>';
 
             // ── Print button ──
@@ -3157,6 +3305,54 @@
 
             // ── Learning Target ──
             html += '<div class="learning-target">' + escapeHTML(ltText).replace(/\n/g, '<br>') + '</div>';
+
+            // ── Success Criteria ──
+            if (typeof generateSuccessCriteria === 'function') {
+                html += '<h2>Success Criteria — How Will I Know I Learned It?</h2>';
+                for (const topic of topics.slice(0, 2)) {
+                    const verb = typeof getVerbForTopic === 'function' ? getVerbForTopic(topic) : 'understand';
+                    const criteria = generateSuccessCriteria(verb, topic);
+                    html += '<div class="concept-box" style="margin-bottom:6px;">';
+                    html += '<p style="font-weight:600;color:#0D9488;margin-bottom:4px;">' + escapeHTML(topic) + '</p>';
+                    for (const c of criteria.slice(0, 3)) {
+                        html += '<p style="margin:3px 0;padding-left:16px;">&#9744; ' + escapeHTML(c) + '</p>';
+                    }
+                    html += '</div>';
+                }
+            }
+
+            // ── Relevance — Why This Matters ──
+            if (typeof getRelevance === 'function') {
+                const rel = getRelevance(topics);
+                html += '<h2>Why This Matters</h2>';
+                html += '<div class="concept-box">';
+                html += '<p style="font-weight:600;color:#0D9488;margin-bottom:4px;">Who uses this math?</p>';
+                for (const career of rel.careers.slice(0, 2)) {
+                    html += '<p style="margin:2px 0;padding-left:12px;">&bull; ' + escapeHTML(career) + '</p>';
+                }
+                html += '<p style="font-weight:600;color:#1E2761;margin:8px 0 4px 0;">In your life:</p>';
+                for (const rl of rel.realLife.slice(0, 2)) {
+                    html += '<p style="margin:2px 0;padding-left:12px;">&bull; ' + escapeHTML(rl) + '</p>';
+                }
+                html += '<p style="font-weight:600;color:#D4870F;margin:8px 0 4px 0;">Where this leads:</p>';
+                html += '<p style="margin:2px 0;padding-left:12px;font-size:0.9em;">' + escapeHTML(rel.progression) + '</p>';
+                html += '</div>';
+            }
+
+            // ── Focus Skill Scaffolds (prerequisite reminders) ──
+            if (typeof getPrerequisites === 'function') {
+                const prereqData = getPrerequisites(topics);
+                if (prereqData.length > 0) {
+                    html += '<h2>Before We Start — Skills You Already Know</h2>';
+                    const focusData = prereqData[0].data;
+                    for (const p of focusData.prerequisites.slice(-2)) {
+                        html += '<div class="key-idea" style="border-left-color:#3B82F6;">';
+                        html += '<span style="font-size:0.8em;color:#3B82F6;font-weight:600;">Grade ' + p.grade + ':</span> ';
+                        html += escapeHTML(p.scaffold);
+                        html += '</div>';
+                    }
+                }
+            }
 
             // ── Key Ideas (Essential Understandings, simplified) ──
             if (cappedEssentials.length > 0) {
