@@ -6,6 +6,7 @@
     <title>The Lesson Digester - PPTX Analyzer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* ==================== ROOT & UTILITIES ==================== */
         :root {
@@ -1112,6 +1113,10 @@
                     <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">INTERVENTION OUTPUTS</div>
                     <button class="download-btn" id="tier2Btn" style="background: #0D9488; margin-right: 10px;">👥 Tier 2 — Small Group (.pptx)</button>
                     <button class="download-btn" id="tier3Btn" style="background: #7C3AED;">🎯 Tier 3 — Intensive (.pptx)</button>
+                </div>
+                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DATA & PROGRESS MONITORING</div>
+                    <button class="download-btn" id="trackerBtn" style="background: #1E6B3C;">📊 Teacher Progress Tracker (.xlsx)</button>
                 </div>
             </div>
         </div>
@@ -3611,6 +3616,198 @@
             return 'understand';
         }
 
+        // ==================== TEACHER PROGRESS MONITORING TRACKER (.xlsx) ====================
+        // Generates a pre-filled Excel workbook with 4 tabs:
+        //   1. Roster + Tier Assignments  2. Session Log  3. Progress Chart  4. Decision Rules
+        // Uses SheetJS (xlsx.full.min.js) — fully client-side, no server needed.
+        function buildTeacherTracker(analysis) {
+            if (typeof XLSX === 'undefined') throw new Error('SheetJS not loaded — please refresh the page.');
+
+            const wb = XLSX.utils.book_new();
+            const topic    = analysis.topics.slice(0, 3).join(', ') || 'Math Lesson';
+            const primary  = analysis.topics[0] || 'Math Lesson';
+            const standards = analysis.standards.map(s => s.code).join(', ') || 'See lesson file';
+            const today    = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            // ── helper: set col widths ──────────────────────────────────────────────
+            function colWidths(ws, widths) {
+                ws['!cols'] = widths.map(w => ({ wch: w }));
+            }
+
+            // ── helper: style a cell (bold, background fill, font color) ───────────
+            function styleCell(ws, addr, bold, bgHex, fgHex) {
+                if (!ws[addr]) ws[addr] = { v: '', t: 's' };
+                ws[addr].s = {
+                    font: { bold: !!bold, color: { rgb: (fgHex || '000000') } },
+                    fill: bgHex ? { patternType: 'solid', fgColor: { rgb: bgHex } } : undefined,
+                    alignment: { wrapText: true, vertical: 'top' }
+                };
+            }
+
+            // ═══════════════════════════════════════════════════════════════════
+            // TAB 1 — ROSTER + TIER ASSIGNMENTS
+            // ═══════════════════════════════════════════════════════════════════
+            const r = [];  // rows array
+            r.push(['TEACHER PROGRESS MONITORING TRACKER']);
+            r.push(['Lesson Topic:', topic]);
+            r.push(['Standards:', standards]);
+            r.push(['Date Created:', today]);
+            r.push(['Grade / Class:', '']);
+            r.push([]);
+            r.push(['#', 'Student Name', 'Tier (1 / 2 / 3)', 'Reason for Tier Placement', 'Pre-Assessment Score', 'Entry Date', 'Exit Date', 'Notes']);
+            for (let i = 1; i <= 30; i++) {
+                r.push([i, '', '1', '', '', '', '', '']);
+            }
+            const wsRoster = XLSX.utils.aoa_to_sheet(r);
+            colWidths(wsRoster, [4, 24, 18, 36, 22, 13, 13, 34]);
+            XLSX.utils.book_append_sheet(wb, wsRoster, 'Roster + Tier');
+
+            // ═══════════════════════════════════════════════════════════════════
+            // TAB 2 — SESSION LOG
+            // Data rows start at Excel row 5 (0-indexed array row 4 = headers)
+            // ═══════════════════════════════════════════════════════════════════
+            const s = [];
+            s.push(['SESSION LOG — ' + primary]);
+            s.push(['Standards: ' + standards]);
+            s.push([]);
+            // Row 4 headers (Excel row 4, array index 3)
+            s.push(['Date', 'Session #', 'Student Name', 'Tier', 'Problems\nAttempted', 'Problems\nCorrect', 'Score %', 'Flag 🔴🟡🟢', 'Teacher Notes / Observations']);
+
+            // Data rows: Excel rows 5–54 → array indices 4–53
+            for (let i = 0; i < 50; i++) {
+                const excelRow = i + 5;  // row 5 is first data row
+                s.push([
+                    '',                       // Date
+                    '',                       // Session #
+                    '',                       // Student Name
+                    '',                       // Tier
+                    '',                       // Problems Attempted
+                    '',                       // Problems Correct
+                    { f: `IF(E${excelRow}="","",F${excelRow}/E${excelRow})` },  // Score %
+                    { f: `IF(G${excelRow}="","",IF(G${excelRow}<0.5,"🔴",IF(G${excelRow}<0.8,"🟡","🟢")))` },  // Flag
+                    ''                        // Notes
+                ]);
+            }
+            const wsLog = XLSX.utils.aoa_to_sheet(s);
+            colWidths(wsLog, [12, 10, 24, 6, 12, 12, 10, 10, 40]);
+            // Format Score % column as percentage (col G = index 6, Excel col 7)
+            if (!wsLog['!numFmts']) wsLog['!numFmts'] = {};
+            // Apply % format to G5:G54
+            for (let i = 0; i < 50; i++) {
+                const addr = XLSX.utils.encode_cell({ r: i + 4, c: 6 });
+                if (!wsLog[addr]) wsLog[addr] = {};
+                wsLog[addr].z = '0%';
+            }
+            XLSX.utils.book_append_sheet(wb, wsLog, 'Session Log');
+
+            // ═══════════════════════════════════════════════════════════════════
+            // TAB 3 — PROGRESS CHART DATA
+            // ═══════════════════════════════════════════════════════════════════
+            const p = [];
+            p.push(['PROGRESS CHART — ' + primary]);
+            p.push(['HOW TO CHART: Select rows 5 onward (columns A–J). Go to Insert → Chart → Line Chart. Each row = one student.']);
+            p.push(['Benchmark Goal: 80% (0.80). Enter scores as decimals (e.g., 0.75 = 75%) or use the Session Log formulas.']);
+            p.push([]);
+            // Headers: Excel row 5 (array index 4)
+            p.push(['Student Name', 'Sess 1 %', 'Sess 2 %', 'Sess 3 %', 'Sess 4 %', 'Sess 5 %', 'Sess 6 %', 'Sess 7 %', 'Sess 8 %', 'Trend ▼▲→']);
+            for (let i = 0; i < 25; i++) {
+                const excelRow = i + 6;  // data starts Excel row 6 (header at row 5)
+                // Trend: compare last filled session to first session — simplified as comparing col J to col B
+                p.push([
+                    '',
+                    '', '', '', '', '', '', '', '',
+                    { f: `IF(B${excelRow}="","",IF(COUNTA(B${excelRow}:I${excelRow})<2,"—",IF(INDEX(B${excelRow}:I${excelRow},COUNTA(B${excelRow}:I${excelRow}))>B${excelRow}*1.05,"▲ Growing",IF(INDEX(B${excelRow}:I${excelRow},COUNTA(B${excelRow}:I${excelRow}))<B${excelRow}*0.95,"▼ Declining","→ Stable"))))` }
+                ]);
+            }
+            const wsChart = XLSX.utils.aoa_to_sheet(p);
+            colWidths(wsChart, [24, 10, 10, 10, 10, 10, 10, 10, 10, 14]);
+            // Format session % cols as percentage
+            for (let row = 0; row < 25; row++) {
+                for (let col = 1; col <= 8; col++) {
+                    const addr = XLSX.utils.encode_cell({ r: row + 5, c: col });
+                    if (!wsChart[addr]) wsChart[addr] = { v: '', t: 's' };
+                    wsChart[addr].z = '0%';
+                }
+            }
+            XLSX.utils.book_append_sheet(wb, wsChart, 'Progress Chart');
+
+            // ═══════════════════════════════════════════════════════════════════
+            // TAB 4 — DECISION RULES + EXIT CRITERIA
+            // ═══════════════════════════════════════════════════════════════════
+            const d = [];
+            d.push(['DECISION RULES + EXIT CRITERIA (IES Evidence-Based Framework)']);
+            d.push(['Lesson Topic: ' + topic]);
+            d.push(['']);
+
+            d.push(['TIER 2 — SMALL GROUP INTERVENTION', '']);
+            d.push(['Progress Monitoring Frequency', 'Every 2 weeks (biweekly) — minimum 6 data points before decisions']);
+            d.push(['Decision Point', 'After 6–8 sessions (approx. 3–4 weeks of 2x/week intervention)']);
+            d.push(['EXIT → Tier 1 (whole class)', '3+ consecutive data points at or above 80% benchmark']);
+            d.push(['INTENSIFY → Tier 3', 'Score < 50% on 3+ consecutive sessions after 4+ sessions total']);
+            d.push(['Session Length', '20–30 minutes IN ADDITION to core Tier 1 instruction']);
+            d.push(['Group Size', '3–5 students with similar skill gaps']);
+            d.push(['Instructional Focus', 'Targeted re-teaching of specific skill, CRA sequence, worked examples']);
+            d.push(['']);
+
+            d.push(['TIER 3 — INTENSIVE 1:1 OR 1:3 INTERVENTION', '']);
+            d.push(['Progress Monitoring Frequency', 'Weekly — every session if possible, document each attempt']);
+            d.push(['Decision Point', 'After 6 sessions (review); after 8 sessions (team decision meeting)']);
+            d.push(['EXIT → Tier 2', '4+ consecutive data points showing growth toward benchmark (≥60%)']);
+            d.push(['CONSIDER SPED REFERRAL', 'No meaningful growth after 8+ weeks of Tier 3 with fidelity']);
+            d.push(['Session Length', '30–45 minutes per session']);
+            d.push(['Group Size', '1–3 students (individual preferred)']);
+            d.push(['Instructional Focus', 'Concrete manipulatives first, number line always present, 10-min fluency per session']);
+            d.push(['']);
+
+            d.push(['SCORE FLAGS (Session Log Tab)', '']);
+            d.push(['🔴 RED — Score < 50%', 'Immediate re-teach needed. Do NOT move forward. Review prerequisites.']);
+            d.push(['🟡 YELLOW — Score 50–79%', 'Monitor closely. Provide additional guided practice. Check for specific error patterns.']);
+            d.push(['🟢 GREEN — Score ≥ 80%', 'On track. Consider fading support. Document 3 consecutive greens for exit discussion.']);
+            d.push(['']);
+
+            d.push(['DATA-DRIVEN DECISION CHECKPOINTS', '']);
+            d.push(['After Session 2', 'Quick check: Is student engaging? Any access barriers (language, behavior)? Adjust grouping if needed.']);
+            d.push(['After Session 4', 'Review Score % trend. If all 🔴 → adjust instructional approach, try different representation.']);
+            d.push(['After Session 6', 'FORMAL TIER DECISION POINT. Document rationale. Notify parents if concerns persist.']);
+            d.push(['After Session 8', 'Team review required if still below 60%. Parent communication. Consider referral if Tier 3.']);
+            d.push(['']);
+
+            d.push(['IES EVIDENCE-BASED PRACTICES (What Works Clearinghouse, 2021)', '']);
+            d.push(['CRA Sequence', 'Concrete (manipulatives) → Representational (pictures/diagrams) → Abstract (symbols). Never skip.']);
+            d.push(['Number Line', 'Primary tool for number sense. Always have a number line visible and usable.']);
+            d.push(['Fluency Practice', '10 minutes per session for computation fluency (timed or structured practice).']);
+            d.push(['Worked Examples', 'Explicit step-by-step modeling BEFORE student practice. Think-aloud your reasoning.']);
+            d.push(['Error Analysis', 'Identify specific misconceptions — do not just mark wrong. Address the root cause.']);
+            d.push(['Motivation', 'Begin each session with a WIN (something student can succeed at). End with celebration.']);
+            d.push(['']);
+
+            d.push(['FIDELITY CHECKLIST (Check each session)', '']);
+            d.push(['Session opened with a WIN / prior success connection', '☐ Yes  ☐ No']);
+            d.push(['CRA sequence used (at least Representational)', '☐ Yes  ☐ No']);
+            d.push(['Number line visible and referenced', '☐ Yes  ☐ No']);
+            d.push(['Worked example modeled before student practice', '☐ Yes  ☐ No']);
+            d.push(['10 minutes of fluency practice included', '☐ Yes  ☐ No']);
+            d.push(['Student self-assessment or exit ticket completed', '☐ Yes  ☐ No']);
+            d.push(['Data recorded in Session Log', '☐ Yes  ☐ No']);
+            d.push(['']);
+
+            d.push(['SOURCES', '']);
+            d.push(['IES What Works Clearinghouse', 'Assisting Students Struggling with Mathematics (2021) — https://ies.ed.gov/ncee/wwc/']);
+            d.push(['MTSS/RTI Framework', 'NASDSE — National Association of State Directors of Special Education']);
+            d.push(['CRA Sequence', 'Bruner, J.S. (1966). Toward a Theory of Instruction. Harvard University Press.']);
+            d.push(['Number Line Research', 'Fuchs et al. (2013). Improving at-risk learners understanding of fractions. Journal of Educational Psychology.']);
+
+            const wsDecision = XLSX.utils.aoa_to_sheet(d);
+            colWidths(wsDecision, [46, 72]);
+            XLSX.utils.book_append_sheet(wb, wsDecision, 'Decision Rules');
+
+            // ── Write file ───────────────────────────────────────────────────────
+            const safeTopic = primary.replace(/[^a-zA-Z0-9\s]/g, '').trim().replace(/\s+/g, '_').substring(0, 28);
+            const filename = `Teacher_Tracker_${safeTopic}.xlsx`;
+            XLSX.writeFile(wb, filename);
+            return filename;
+        }
+
         // ==================== TIER 2 — SMALL GROUP PRESENTATION ====================
         // Purpose: 3-5 students, 3x/week, 20-30 min, same concept more scaffolded
         // Student experience: collaborative, "we" language, starts from a WIN,
@@ -4860,6 +5057,25 @@
                     setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3500);
                 } catch (err) {
                     console.error('Tier 3 error:', err);
+                    btn.textContent = '❌ Error: ' + err.message;
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 4000);
+                }
+            }
+        });
+
+        // ── Teacher Tracker button ──
+        document.getElementById('trackerBtn')?.addEventListener('click', () => {
+            if (currentAnalysis) {
+                const btn = document.getElementById('trackerBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ Building Tracker...';
+                btn.disabled = true;
+                try {
+                    const filename = buildTeacherTracker(currentAnalysis);
+                    btn.textContent = '✅ Downloaded: ' + filename;
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3500);
+                } catch (err) {
+                    console.error('Tracker error:', err);
                     btn.textContent = '❌ Error: ' + err.message;
                     setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 4000);
                 }
