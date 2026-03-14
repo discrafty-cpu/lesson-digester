@@ -1,13 +1,16 @@
 /**
  * standards-db.js — K-12 Math Standards Cross-Reference Database
  * Lesson Digester | Drummond Math Solutions
- * v1.0 — March 2026
+ * v2.0 — March 2026
  *
  * Frameworks covered:
  *   CCSS   — Common Core State Standards for Mathematics
  *   MN07   — Minnesota 2007 Math Standards (MCA-aligned)
  *   MN22   — Minnesota 2022 Math Standards (effective 2027-28)
  *   TEKS   — Texas Essential Knowledge and Skills (Math)
+ *
+ * Coverage: Full depth K–8, abbreviated HS
+ * Updated 2026-03: K–5 now has EQUAL depth to grades 6–8 (~15 standards per grade per framework)
  *
  * Public API:
  *   StandardsDB.detectFramework(code)          → 'CCSS'|'MN07'|'MN22'|'TEKS'|null
@@ -42,81 +45,158 @@ const StandardsDB = (() => {
         'K.3C': { grade:'K', domain:'Operations', desc:'Explain the strategies used to solve problems involving addition and subtraction', topic:'addition' },
         'K.6A': { grade:'K', domain:'Geometry', desc:'Identify two-dimensional shapes, including circles, triangles, rectangles, and squares', topic:'geometry' },
         'K.6B': { grade:'K', domain:'Geometry', desc:'Identify three-dimensional solids, including cylinders, cones, spheres, and cubes', topic:'geometry' },
-        'K.8A': { grade:'K', domain:'Measurement', desc:'Compare two objects with a common measurable attribute', topic:'measurement' },
-        'K.8B': { grade:'K', domain:'Measurement', desc:'Describe a length by using a number and a unit', topic:'measurement' },
+        'K.7A': { grade:'K', domain:'Measurement', desc:'Compare two objects with a common measurable attribute', topic:'measurement' },
+        'K.7B': { grade:'K', domain:'Measurement', desc:'Describe a length by using a number and a unit', topic:'measurement' },
+        'K.8A': { grade:'K', domain:'Data', desc:'Collect, sort, and organize data into two or three categories', topic:'data' },
+        'K.8B': { grade:'K', domain:'Data', desc:'Use data to create real-object graphs, picture graphs, and bar-type graphs', topic:'data' },
 
         // ── Grade 1 ────────────────────────────────────────────────────────
         '1.2A': { grade:1, domain:'Number', desc:'Recognize instantly the quantity of structured arrangements', topic:'counting' },
         '1.2B': { grade:1, domain:'Number', desc:'Use concrete and pictorial models to compose and decompose numbers up to 120', topic:'place value' },
         '1.2C': { grade:1, domain:'Number', desc:'Use objects, pictures, and expanded and standard forms to represent numbers up to 120', topic:'place value' },
+        '1.2D': { grade:1, domain:'Number', desc:'Generate a number that is 10 more or 10 less than a given number', topic:'place value' },
+        '1.2E': { grade:1, domain:'Number', desc:'Create two-digit numbers using tens and ones with concrete models and pictures', topic:'place value' },
+        '1.2F': { grade:1, domain:'Number', desc:'Read and write two-digit numbers using numerals, number words, and expanded form', topic:'place value' },
+        '1.2G': { grade:1, domain:'Number', desc:'Compare and order whole numbers up to 120 using comparative language and symbols', topic:'comparison' },
         '1.3A': { grade:1, domain:'Operations', desc:'Use concrete and pictorial models to determine the sum of a multiple of 10 and a one-digit number', topic:'addition' },
         '1.3B': { grade:1, domain:'Operations', desc:'Use objects and pictorial models to solve word problems involving joining, separating, and comparing', topic:'addition' },
+        '1.3C': { grade:1, domain:'Operations', desc:'Use the commutative property of addition to find sums', topic:'addition' },
         '1.3D': { grade:1, domain:'Operations', desc:'Apply basic fact strategies to add and subtract within 20', topic:'addition' },
+        '1.3E': { grade:1, domain:'Operations', desc:'Identify and write number sentences that match story problems', topic:'equation' },
         '1.5A': { grade:1, domain:'Algebra', desc:'Recite numbers forward and backward from any given number between 1 and 120', topic:'counting' },
+        '1.6A': { grade:1, domain:'Measurement', desc:'Compare lengths of objects by using comparative language', topic:'measurement' },
+        '1.6B': { grade:1, domain:'Measurement', desc:'Express the length of an object as a whole number of length units', topic:'measurement' },
         '1.7A': { grade:1, domain:'Geometry', desc:'Describe the attributes of two-dimensional shapes using informal and formal language', topic:'geometry' },
         '1.7B': { grade:1, domain:'Geometry', desc:'Distinguish between attributes that define a two-dimensional or three-dimensional shape', topic:'geometry' },
+        '1.8A': { grade:1, domain:'Data', desc:'Collect, organize, and record data in more than one way', topic:'data' },
+        '1.8B': { grade:1, domain:'Data', desc:'Use data to create real-object graphs, picture graphs, and bar-type graphs', topic:'data' },
+        '1.8C': { grade:1, domain:'Data', desc:'Read and interpret data in real-object graphs, picture graphs, and bar-type graphs', topic:'data' },
 
         // ── Grade 2 ────────────────────────────────────────────────────────
         '2.2A': { grade:2, domain:'Number', desc:'Use concrete and pictorial models to compose and decompose numbers up to 1,200', topic:'place value' },
+        '2.2B': { grade:2, domain:'Number', desc:'Use objects, pictures, and numbers to represent place value in the hundreds, tens, and ones', topic:'place value' },
+        '2.2C': { grade:2, domain:'Number', desc:'Read and write numbers up to 1,200 using numerals, number words, and expanded form', topic:'place value' },
+        '2.2D': { grade:2, domain:'Number', desc:'Generate a number that is 10 or 100 more or less than a given number', topic:'place value' },
+        '2.2E': { grade:2, domain:'Number', desc:'Use the number line to compare and order numbers up to 1,200', topic:'comparison' },
+        '2.2F': { grade:2, domain:'Number', desc:'Use concrete models to represent equivalent sets involving fractions with denominators of 2, 3, or 4', topic:'fraction' },
         '2.4A': { grade:2, domain:'Operations', desc:'Recall basic facts to add and subtract within 20 with automaticity', topic:'addition' },
         '2.4B': { grade:2, domain:'Operations', desc:'Add up to four two-digit numbers and subtract two-digit numbers', topic:'addition' },
         '2.4C': { grade:2, domain:'Operations', desc:'Solve one-step and multi-step word problems involving addition and subtraction', topic:'addition' },
-        '2.6A': { grade:2, domain:'Geometry', desc:'Classify and sort three-dimensional solids, including spheres, cones, cylinders, rectangular prisms, and cubes', topic:'geometry' },
-        '2.8A': { grade:2, domain:'Measurement', desc:'Create two-dimensional shapes based on given attributes', topic:'measurement' },
-        '2.9A': { grade:2, domain:'Measurement', desc:'Find the length of objects using concrete models for standard units of length', topic:'measurement' },
-        '2.10A': { grade:2, domain:'Data', desc:'Explain that the length of a bar in a bar graph or the number of pictures in a pictograph represents the number of data points', topic:'data' },
+        '2.4D': { grade:2, domain:'Operations', desc:'Use the commutative and associative properties to find sums and differences', topic:'addition' },
+        '2.5A': { grade:2, domain:'Algebra', desc:'Use repeated addition to find the total number of objects in a set of equal groups', topic:'multiplication' },
+        '2.5B': { grade:2, domain:'Algebra', desc:'Use arrays, area models, and repeated addition to represent multiplication', topic:'multiplication' },
+        '2.6A': { grade:2, domain:'Geometry', desc:'Classify and sort two-dimensional shapes using informal language', topic:'geometry' },
+        '2.6B': { grade:2, domain:'Geometry', desc:'Classify and sort three-dimensional solids, including spheres, cones, cylinders, rectangular prisms, and cubes', topic:'geometry' },
+        '2.7A': { grade:2, domain:'Measurement', desc:'Measure the length of objects using appropriate non-standard and standard units', topic:'measurement' },
+        '2.7B': { grade:2, domain:'Measurement', desc:'Tell and write time to the hour and half hour using analog and digital clocks', topic:'measurement' },
+        '2.7C': { grade:2, domain:'Measurement', desc:'Identify coins and their values and describe relationships among them', topic:'money' },
+        '2.8A': { grade:2, domain:'Data', desc:'Collect, organize, record, and interpret data', topic:'data' },
+        '2.8B': { grade:2, domain:'Data', desc:'Construct picture graphs and bar graphs with single-unit scales', topic:'data' },
 
         // ── Grade 3 ────────────────────────────────────────────────────────
         '3.2A': { grade:3, domain:'Number', desc:'Compose and decompose numbers up to 100,000 as a sum of so many ten thousands, thousands, hundreds, tens, and ones', topic:'place value' },
+        '3.2B': { grade:3, domain:'Number', desc:'Describe the value of the digits in numbers up to 100,000 using place value', topic:'place value' },
+        '3.2C': { grade:3, domain:'Number', desc:'Read and write numbers up to 100,000 using numerals, number words, and expanded form', topic:'place value' },
+        '3.2D': { grade:3, domain:'Number', desc:'Compare and order whole numbers up to 100,000 and represent comparisons using symbols', topic:'comparison' },
         '3.3A': { grade:3, domain:'Fractions', desc:'Represent fractions greater than zero and less than or equal to one with denominators of 2, 3, 4, 6, and 8', topic:'fraction' },
         '3.3B': { grade:3, domain:'Fractions', desc:'Determine the corresponding fraction greater than zero and less than or equal to one on a number line', topic:'fraction' },
         '3.3C': { grade:3, domain:'Fractions', desc:'Explain that the unit fraction 1/b represents the quantity formed by one part of a whole that has been partitioned into b equal parts', topic:'fraction' },
         '3.3D': { grade:3, domain:'Fractions', desc:'Compose and decompose a fraction a/b with a numerator greater than zero and less than or equal to b as a sum of parts 1/b', topic:'fraction' },
+        '3.3E': { grade:3, domain:'Fractions', desc:'Identify concrete models that represent equivalent fractions', topic:'fraction' },
+        '3.3H': { grade:3, domain:'Fractions', desc:'Compare two fractions with the same denominator or the same numerator using symbols and justification', topic:'fraction' },
         '3.4A': { grade:3, domain:'Operations', desc:'Solve with fluency one-step and two-step problems involving addition and subtraction within 1,000', topic:'addition' },
+        '3.4B': { grade:3, domain:'Operations', desc:'Round to the nearest 10 or 100 using place value understanding', topic:'estimation' },
         '3.4D': { grade:3, domain:'Operations', desc:'Determine the total number of objects when equally-sized groups of objects are combined or arranged in arrays', topic:'multiplication' },
         '3.4E': { grade:3, domain:'Operations', desc:'Represent multiplication facts by using a variety of approaches such as repeated addition, equal-sized groups, arrays', topic:'multiplication' },
-        '3.4G': { grade:3, domain:'Operations', desc:'Use strategies and algorithms, including the standard algorithm, to multiply a two-digit number by a one-digit number', topic:'multiplication' },
+        '3.4F': { grade:3, domain:'Operations', desc:'Use strategies and algorithms, including the standard algorithm, to multiply a two-digit number by a one-digit number', topic:'multiplication' },
+        '3.4G': { grade:3, domain:'Operations', desc:'Use the commutative and associative properties of multiplication', topic:'multiplication' },
         '3.4H': { grade:3, domain:'Operations', desc:'Determine the number of objects in each group when a set of objects is partitioned into equal shares', topic:'division' },
+        '3.4I': { grade:3, domain:'Operations', desc:'Model division as equal sharing or repeated subtraction', topic:'division' },
         '3.4J': { grade:3, domain:'Operations', desc:'Determine a quotient using the relationship between multiplication and division', topic:'division' },
+        '3.5A': { grade:3, domain:'Algebra', desc:'Represent one- and two-step problems using symbolic representations', topic:'equation' },
+        '3.5B': { grade:3, domain:'Algebra', desc:'Describe a multiplication expression using related division facts', topic:'expression' },
+        '3.5C': { grade:3, domain:'Algebra', desc:'Describe a division expression using related multiplication facts', topic:'expression' },
+        '3.5D': { grade:3, domain:'Algebra', desc:'Determine the unknown whole number in a multiplication or division equation relating three whole numbers', topic:'equation' },
         '3.6A': { grade:3, domain:'Geometry', desc:'Classify and sort two-dimensional figures, including circles, triangles, rectangles, squares, and rhombuses', topic:'geometry' },
+        '3.6B': { grade:3, domain:'Geometry', desc:'Use attributes to describe how 2-D figures are alike and different', topic:'geometry' },
+        '3.6C': { grade:3, domain:'Geometry', desc:'Compose two-dimensional shapes and three-dimensional solids with given properties or attributes', topic:'geometry' },
+        '3.7A': { grade:3, domain:'Measurement', desc:'Measure lengths using standard units such as centimeters and inches', topic:'measurement' },
         '3.7B': { grade:3, domain:'Measurement', desc:'Determine the perimeter of a polygon or a missing length when given perimeter', topic:'perimeter' },
+        '3.8A': { grade:3, domain:'Data', desc:'Summarize a variety of data and represent the data on a frequency table, dot plot, pictograph, or bar graph', topic:'data' },
+        '3.8B': { grade:3, domain:'Data', desc:'Determine the mode and range of a data set', topic:'statistics' },
 
         // ── Grade 4 ────────────────────────────────────────────────────────
         '4.2A': { grade:4, domain:'Number', desc:'Interpret the value of each place-value position as 10 times the position to the right', topic:'place value' },
+        '4.2B': { grade:4, domain:'Number', desc:'Describe the relationship between two numbers when they differ by a multiple of 10', topic:'place value' },
+        '4.2C': { grade:4, domain:'Number', desc:'Read and write whole numbers up to 1,000,000 using numerals, number words, and expanded form', topic:'place value' },
+        '4.2D': { grade:4, domain:'Number', desc:'Compare and order whole numbers up to 1,000,000 and represent comparisons using symbols', topic:'comparison' },
+        '4.2E': { grade:4, domain:'Number', desc:'Represent the value of the digit in decimals through the hundredths using expanded notation and area models', topic:'decimal' },
+        '4.2F': { grade:4, domain:'Number', desc:'Compare and order decimal numbers to the hundredths', topic:'decimal' },
+        '4.2G': { grade:4, domain:'Number', desc:'Round whole numbers to a given place value through the hundred thousands place', topic:'estimation' },
+        '4.2H': { grade:4, domain:'Number', desc:'Round decimal numbers to the nearest tenth or hundredth', topic:'estimation' },
         '4.3A': { grade:4, domain:'Fractions', desc:'Represent a fraction a/b as a sum of fractions 1/b, where a and b are whole numbers', topic:'fraction' },
         '4.3B': { grade:4, domain:'Fractions', desc:'Decompose a fraction in more than one way into a sum of fractions with the same denominator', topic:'fraction' },
         '4.3C': { grade:4, domain:'Fractions', desc:'Determine if two given fractions are equivalent using a variety of methods', topic:'fraction' },
         '4.3D': { grade:4, domain:'Fractions', desc:'Compare two fractions with different numerators and different denominators', topic:'fraction' },
         '4.3E': { grade:4, domain:'Fractions', desc:'Represent and solve addition and subtraction of fractions with equal denominators', topic:'fraction' },
+        '4.3F': { grade:4, domain:'Fractions', desc:'Represent fractions and decimals to the hundredths as distances from zero on a number line', topic:'fraction' },
+        '4.3G': { grade:4, domain:'Fractions', desc:'Identify concrete models that represent equivalent fractions with denominators of 2, 3, 4, 6, and 8', topic:'fraction' },
         '4.4A': { grade:4, domain:'Operations', desc:'Add and subtract whole numbers and decimals to the hundredths place using standard algorithms', topic:'decimal' },
         '4.4B': { grade:4, domain:'Operations', desc:'Determine products of a number and 10 or 100 using properties of operations', topic:'multiplication' },
+        '4.4C': { grade:4, domain:'Operations', desc:'Solve word problems involving multiplication and division', topic:'multiplication' },
         '4.4D': { grade:4, domain:'Operations', desc:'Use strategies and algorithms, including the standard algorithm, to multiply up to a four-digit number by a one-digit number', topic:'multiplication' },
+        '4.4E': { grade:4, domain:'Operations', desc:'Express a fraction with denominator 10 as an equivalent fraction with denominator 100', topic:'fraction' },
+        '4.4F': { grade:4, domain:'Operations', desc:'Multiply and divide to solve word problems involving whole numbers', topic:'multiplication' },
+        '4.4G': { grade:4, domain:'Operations', desc:'Round to the nearest ten, hundred, or thousand', topic:'estimation' },
         '4.4H': { grade:4, domain:'Operations', desc:'Solve with fluency one- and two-step problems involving multiplication using strategies', topic:'multiplication' },
         '4.5A': { grade:4, domain:'Algebra', desc:'Represent multi-step problems involving the four operations using strip diagrams and equations', topic:'equation' },
         '4.5B': { grade:4, domain:'Algebra', desc:'Represent problems using an input-output table and numerical expressions', topic:'expression' },
+        '4.5C': { grade:4, domain:'Algebra', desc:'Describe the meaning of parentheses and brackets in numeric expressions', topic:'expression' },
+        '4.5D': { grade:4, domain:'Algebra', desc:'Simplify numerical expressions that do not involve exponents using order of operations', topic:'order of operations' },
+        '4.6A': { grade:4, domain:'Geometry', desc:'Draw points, lines, line segments, rays, angles (right, acute, obtuse), and perpendicular and parallel lines', topic:'geometry' },
+        '4.6B': { grade:4, domain:'Geometry', desc:'Classify and sort two- and three-dimensional figures based on attributes', topic:'geometry' },
+        '4.6C': { grade:4, domain:'Geometry', desc:'Support generalizations about geometric properties and relationships using concrete models and drawings', topic:'geometry' },
+        '4.6D': { grade:4, domain:'Geometry', desc:'Identify lines of symmetry in two-dimensional shapes', topic:'geometry' },
+        '4.7A': { grade:4, domain:'Measurement', desc:'Measure angles in two-dimensional figures using a protractor', topic:'measurement' },
+        '4.7B': { grade:4, domain:'Measurement', desc:'Illustrate that the area of a rectangle with whole-number side lengths is measured in square units', topic:'area' },
         '4.8A': { grade:4, domain:'Measurement', desc:'Identify relative sizes of measurement units within the customary and metric systems', topic:'measurement' },
+        '4.8B': { grade:4, domain:'Measurement', desc:'Convert measurements within the same measurement system', topic:'measurement' },
         '4.8C': { grade:4, domain:'Measurement', desc:'Solve problems that deal with measurements of length, intervals of time, liquid volumes, mass, and money', topic:'measurement' },
+        '4.9A': { grade:4, domain:'Data', desc:'Summarize a variety of data and represent the data on a frequency table, dot plot, pictograph, or bar graph', topic:'data' },
+        '4.9B': { grade:4, domain:'Data', desc:'Solve one- and two-step problems using data from a frequency table, dot plot, pictograph, or bar graph', topic:'data' },
 
         // ── Grade 5 ────────────────────────────────────────────────────────
-        '5.2A': { grade:5, domain:'Number', desc:'Represent the value of the digit in decimals through the thousandths using expanded notation', topic:'decimal' },
+        '5.2A': { grade:5, domain:'Number', desc:'Represent the value of the digit in decimals through the thousandths using expanded notation and area models', topic:'decimal' },
         '5.2B': { grade:5, domain:'Number', desc:'Compare and order two decimals to thousandths and represent comparisons using symbols', topic:'decimal' },
+        '5.2C': { grade:5, domain:'Number', desc:'Round decimals to the nearest tenth or hundredth', topic:'estimation' },
         '5.3A': { grade:5, domain:'Fractions', desc:'Estimate to determine solutions to mathematical and real-world problems involving addition, subtraction, multiplication, or division', topic:'fraction' },
         '5.3B': { grade:5, domain:'Fractions', desc:'Multiply with fluency a three-digit number by a two-digit number using standard algorithms', topic:'multiplication' },
+        '5.3C': { grade:5, domain:'Fractions', desc:'Solve with fluency one- and two-step problems involving multiplication and division', topic:'multiplication' },
+        '5.3D': { grade:5, domain:'Fractions', desc:'Identify and represent on a number line decimals, fractions, and mixed numbers', topic:'fraction' },
         '5.3E': { grade:5, domain:'Fractions', desc:'Solve for products of decimals to the hundredths', topic:'decimal' },
         '5.3F': { grade:5, domain:'Fractions', desc:'Represent quotients of decimals to the hundredths', topic:'decimal' },
         '5.3G': { grade:5, domain:'Fractions', desc:'Solve one-step and multi-step problems involving multiplication and division, including interpreting remainders', topic:'division' },
         '5.3H': { grade:5, domain:'Fractions', desc:'Represent and solve addition and subtraction of fractions with unequal denominators', topic:'fraction' },
+        '5.3I': { grade:5, domain:'Fractions', desc:'Represent multiplication of two fractions or whole number and a fraction with area and length models', topic:'fraction' },
+        '5.3J': { grade:5, domain:'Fractions', desc:'Find the product of a whole number and a fraction and represent using area models', topic:'fraction' },
         '5.3K': { grade:5, domain:'Fractions', desc:'Add and subtract positive rational numbers fluently', topic:'fraction' },
+        '5.3L': { grade:5, domain:'Fractions', desc:'Divide whole numbers by unit fractions and unit fractions by whole numbers', topic:'fraction' },
         '5.4A': { grade:5, domain:'Algebra', desc:'Identify prime and composite numbers', topic:'number theory' },
         '5.4B': { grade:5, domain:'Algebra', desc:'Represent and solve multi-step problems involving the four operations with whole numbers', topic:'expression' },
-        '5.4E': { grade:5, domain:'Algebra', desc:'Describe the meaning of parentheses and brackets in a numeric expression', topic:'expression' },
+        '5.4C': { grade:5, domain:'Algebra', desc:'Use the order of operations to evaluate numerical expressions', topic:'order of operations' },
+        '5.4D': { grade:5, domain:'Algebra', desc:'Describe the meaning of parentheses and brackets in a numeric expression', topic:'expression' },
+        '5.4E': { grade:5, domain:'Algebra', desc:'Simplify numerical expressions that do not involve exponents using order of operations', topic:'order of operations' },
         '5.4F': { grade:5, domain:'Algebra', desc:'Simplify numerical expressions that do not involve exponents using order of operations', topic:'order of operations' },
+        '5.5A': { grade:5, domain:'Geometry', desc:'Identify the attributes of triangles and classify them by their attributes or properties', topic:'geometry' },
+        '5.6A': { grade:5, domain:'Geometry', desc:'Identify points, lines, line segments, rays, angles, and perpendicular and parallel lines', topic:'geometry' },
+        '5.6B': { grade:5, domain:'Geometry', desc:'Identify and classify polygons based on their attributes', topic:'geometry' },
+        '5.7A': { grade:5, domain:'Measurement', desc:'Describe the formula for the area of a rectangle as length times width', topic:'area' },
         '5.8A': { grade:5, domain:'Geometry', desc:'Describe the key attributes of the coordinate plane and the process of graphing ordered pairs', topic:'coordinate' },
         '5.8B': { grade:5, domain:'Geometry', desc:'Describe the process for graphing ordered pairs of numbers in the first quadrant of the coordinate plane', topic:'coordinate' },
         '5.8C': { grade:5, domain:'Geometry', desc:'Graph in the first quadrant of the coordinate plane ordered pairs of numbers arising from mathematical and real-world problems', topic:'coordinate' },
         '5.9A': { grade:5, domain:'Data', desc:'Represent categorical data with bar graphs or frequency tables and numerical data with dot plots or stem-and-leaf plots', topic:'data' },
+        '5.9B': { grade:5, domain:'Data', desc:'Represent data using tables and graphs such as line plots, line graphs, and stem-and-leaf plots', topic:'data' },
         '5.9C': { grade:5, domain:'Data', desc:'Solve one- and two-step problems using data from a frequency table, dot plot, bar graph, stem-and-leaf plot, or scatterplot', topic:'data' },
-        '5.10A': { grade:5, domain:'Measurement', desc:'Define income tax, payroll tax, sales tax, and property tax', topic:'financial' },
 
         // ── Grade 6 ────────────────────────────────────────────────────────
         '6.2A': { grade:6, domain:'Number', desc:'Classify whole numbers, integers, and rational numbers using a visual representation', topic:'integer' },
@@ -261,26 +341,89 @@ const StandardsDB = (() => {
     //  MN-22 — Minnesota 2022 Mathematics Standards
     //  Format: [Grade].[Strand].[Standard].[Benchmark]
     //  Strands: N (Number), A (Algebra), GM (Geometry & Measurement), DP (Data & Probability)
-    //  Full coverage grades 6–8; K–5 and HS abbreviated
+    //  Full coverage grades K–8; abbreviated HS
     // ════════════════════════════════════════════════════════════════════════
     const MN22 = {
         // ── Kindergarten ───────────────────────────────────────────────────
         'K.N.1.1': { grade:'K', strand:'N', desc:'Count aloud, forward and backward, to at least 20', topic:'counting' },
         'K.N.1.2': { grade:'K', strand:'N', desc:'Recognize without counting (subitize) the quantity of a small group of objects in organized and random arrangements', topic:'counting' },
+        'K.N.1.3': { grade:'K', strand:'N', desc:'Connect number words and numerals to the quantities they represent', topic:'counting' },
         'K.N.2.1': { grade:'K', strand:'N', desc:'Use objects and draw pictures to find the sums and differences of numbers between 0 and 10', topic:'addition' },
+        'K.N.2.2': { grade:'K', strand:'N', desc:'Demonstrate fluency with addition and subtraction within 5', topic:'addition' },
         'K.GM.1.1': { grade:'K', strand:'GM', desc:'Recognize and sort basic two-dimensional shapes by attribute', topic:'geometry' },
+        'K.GM.1.2': { grade:'K', strand:'GM', desc:'Identify basic three-dimensional shapes in everyday objects', topic:'geometry' },
+        'K.GM.2.1': { grade:'K', strand:'GM', desc:'Compare objects by measurable attributes such as length and weight', topic:'measurement' },
         'K.DP.1.1': { grade:'K', strand:'DP', desc:'Collect and organize objects or data into categories and sort the categories by quantity', topic:'data' },
+        'K.DP.1.2': { grade:'K', strand:'DP', desc:'Create and read simple bar graphs and picture graphs', topic:'data' },
 
-        // ── Grades 1–5 abbreviated ─────────────────────────────────────────
+        // ── Grade 1 ────────────────────────────────────────────────────────
         '1.N.1.1': { grade:1, strand:'N', desc:'Recognize place value of ones and tens in a two-digit number', topic:'place value' },
+        '1.N.1.2': { grade:1, strand:'N', desc:'Use objects and representations to develop understanding of place value', topic:'place value' },
+        '1.N.1.3': { grade:1, strand:'N', desc:'Count on from a given number to find the number of objects in a group', topic:'counting' },
+        '1.N.2.1': { grade:1, strand:'N', desc:'Use concrete models and drawings to represent addition', topic:'addition' },
+        '1.N.2.2': { grade:1, strand:'N', desc:'Demonstrate fluency with addition and subtraction within 10', topic:'addition' },
+        '1.N.2.3': { grade:1, strand:'N', desc:'Demonstrate fluency with addition and subtraction within 20', topic:'addition' },
+        '1.A.1.1': { grade:1, strand:'A', desc:'Use objects and drawings to represent addition and subtraction situations', topic:'equation' },
+        '1.GM.1.1': { grade:1, strand:'GM', desc:'Identify and describe two-dimensional shapes and three-dimensional solids', topic:'geometry' },
+        '1.GM.1.2': { grade:1, strand:'GM', desc:'Compose and decompose two-dimensional shapes', topic:'geometry' },
+        '1.GM.2.1': { grade:1, strand:'GM', desc:'Tell time to the hour using analog and digital clocks', topic:'measurement' },
+        '1.DP.1.1': { grade:1, strand:'DP', desc:'Collect, organize, and represent data in bar graphs and picture graphs', topic:'data' },
+
+        // ── Grade 2 ────────────────────────────────────────────────────────
         '2.N.1.1': { grade:2, strand:'N', desc:'Read, write, and represent whole numbers up to 1000', topic:'place value' },
+        '2.N.1.2': { grade:2, strand:'N', desc:'Understand place value: ones, tens, and hundreds', topic:'place value' },
+        '2.N.1.3': { grade:2, strand:'N', desc:'Use place value understanding to compare numbers', topic:'comparison' },
+        '2.N.2.1': { grade:2, strand:'N', desc:'Demonstrate fluency with addition and subtraction within 20', topic:'addition' },
+        '2.N.2.2': { grade:2, strand:'N', desc:'Use strategies to add and subtract within 100', topic:'addition' },
+        '2.A.1.1': { grade:2, strand:'A', desc:'Represent addition and subtraction word problems using equations', topic:'equation' },
+        '2.GM.1.1': { grade:2, strand:'GM', desc:'Identify and describe two-dimensional shapes', topic:'geometry' },
+        '2.GM.1.2': { grade:2, strand:'GM', desc:'Identify and describe three-dimensional solids', topic:'geometry' },
+        '2.GM.2.1': { grade:2, strand:'GM', desc:'Measure length using standard units', topic:'measurement' },
+        '2.GM.2.2': { grade:2, strand:'GM', desc:'Tell time to the nearest 5 minutes', topic:'measurement' },
+        '2.DP.1.1': { grade:2, strand:'DP', desc:'Represent data using bar graphs and line graphs', topic:'data' },
+
+        // ── Grade 3 ────────────────────────────────────────────────────────
         '3.N.1.1': { grade:3, strand:'N', desc:'Read, write, and represent fractions with denominators of 2, 3, 4, 6, and 8', topic:'fraction' },
+        '3.N.1.2': { grade:3, strand:'N', desc:'Represent equivalent fractions using area and length models', topic:'fraction' },
         '3.N.2.1': { grade:3, strand:'N', desc:'Represent multiplication and division in various ways', topic:'multiplication' },
+        '3.N.2.2': { grade:3, strand:'N', desc:'Demonstrate fluency with multiplication and division facts within 100', topic:'multiplication' },
+        '3.N.3.1': { grade:3, strand:'N', desc:'Use arrays to model multiplication and division', topic:'multiplication' },
+        '3.A.1.1': { grade:3, strand:'A', desc:'Represent unknown numbers in multiplication and division equations', topic:'equation' },
+        '3.GM.1.1': { grade:3, strand:'GM', desc:'Develop understanding of area', topic:'area' },
+        '3.GM.1.2': { grade:3, strand:'GM', desc:'Recognize and describe perimeter', topic:'perimeter' },
+        '3.GM.1.3': { grade:3, strand:'GM', desc:'Identify and describe properties of two-dimensional shapes', topic:'geometry' },
+        '3.GM.2.1': { grade:3, strand:'GM', desc:'Tell time to the nearest minute', topic:'measurement' },
+        '3.DP.1.1': { grade:3, strand:'DP', desc:'Represent data using bar graphs, pictographs, and line plots', topic:'data' },
+
+        // ── Grade 4 ────────────────────────────────────────────────────────
         '4.N.1.1': { grade:4, strand:'N', desc:'Demonstrate mastery of multiplication and division basic facts; multiply multi-digit numbers', topic:'multiplication' },
+        '4.N.1.2': { grade:4, strand:'N', desc:'Multiply whole numbers up to four digits by one-digit numbers', topic:'multiplication' },
         '4.N.2.1': { grade:4, strand:'N', desc:'Represent equivalent fractions using fraction models', topic:'fraction' },
+        '4.N.2.2': { grade:4, strand:'N', desc:'Compare and order fractions', topic:'fraction' },
+        '4.N.2.3': { grade:4, strand:'N', desc:'Add and subtract fractions with like denominators', topic:'fraction' },
+        '4.N.3.1': { grade:4, strand:'N', desc:'Represent and interpret decimals', topic:'decimal' },
+        '4.A.1.1': { grade:4, strand:'A', desc:'Identify and describe factor pairs', topic:'number theory' },
+        '4.A.1.2': { grade:4, strand:'A', desc:'Recognize and describe patterns in addition and multiplication', topic:'expression' },
+        '4.GM.1.1': { grade:4, strand:'GM', desc:'Solve problems involving area', topic:'area' },
+        '4.GM.1.2': { grade:4, strand:'GM', desc:'Measure angles using a protractor', topic:'measurement' },
+        '4.GM.1.3': { grade:4, strand:'GM', desc:'Classify two-dimensional figures', topic:'geometry' },
+        '4.GM.2.1': { grade:4, strand:'GM', desc:'Measure length and weight using standard units', topic:'measurement' },
+        '4.DP.1.1': { grade:4, strand:'DP', desc:'Represent data using line plots, bar graphs, and tables', topic:'data' },
+
+        // ── Grade 5 ────────────────────────────────────────────────────────
         '5.N.1.1': { grade:5, strand:'N', desc:'Divide multi-digit numbers; solve real-world and mathematical problems using arithmetic', topic:'division' },
-        '5.N.2.1': { grade:5, strand:'N', desc:'Add and subtract fractions and mixed numbers with unlike denominators', topic:'fraction' },
+        '5.N.1.2': { grade:5, strand:'N', desc:'Add and subtract fractions with unlike denominators', topic:'fraction' },
+        '5.N.2.1': { grade:5, strand:'N', desc:'Multiply fractions and whole numbers', topic:'fraction' },
+        '5.N.2.2': { grade:5, strand:'N', desc:'Divide fractions by whole numbers and whole numbers by fractions', topic:'fraction' },
         '5.N.3.1': { grade:5, strand:'N', desc:'Multiply and divide decimals', topic:'decimal' },
+        '5.N.3.2': { grade:5, strand:'N', desc:'Add and subtract decimals to hundredths', topic:'decimal' },
+        '5.A.1.1': { grade:5, strand:'A', desc:'Write and interpret expressions using parentheses, brackets, and braces', topic:'expression' },
+        '5.A.1.2': { grade:5, strand:'A', desc:'Analyze patterns and relationships in sequences', topic:'expression' },
+        '5.GM.1.1': { grade:5, strand:'GM', desc:'Find volume of rectangular prisms', topic:'volume' },
+        '5.GM.1.2': { grade:5, strand:'GM', desc:'Understand relationships between area and volume', topic:'area' },
+        '5.GM.2.1': { grade:5, strand:'GM', desc:'Graph ordered pairs on the coordinate plane', topic:'coordinate' },
+        '5.DP.1.1': { grade:5, strand:'DP', desc:'Represent data using line plots and stem-and-leaf plots', topic:'data' },
+        '5.DP.1.2': { grade:5, strand:'DP', desc:'Analyze data using measures of center and spread', topic:'statistics' },
 
         // ── Grade 6 — Full Coverage ────────────────────────────────────────
         '6.N.1.1': { grade:6, strand:'N', desc:'Represent and compare positive and negative integers using a number line and other models', topic:'integer' },
@@ -360,6 +503,228 @@ const StandardsDB = (() => {
     //  Key format: "[topic]_[grade]"  (grade is a number or 'K')
     // ════════════════════════════════════════════════════════════════════════
     const TOPIC_STANDARDS = {
+        // ── Kindergarten ───────────────────────────────────────────────────
+        'counting_K': {
+            label: 'Counting & Cardinality',
+            CCSS:  ['K.CC.A.1','K.CC.A.2','K.CC.A.3','K.CC.B.4','K.CC.B.5'],
+            MN07:  ['K.1.1.1','K.1.1.2','K.1.1.3'],
+            MN22:  ['K.N.1.1','K.N.1.2','K.N.1.3'],
+            TEKS:  ['K.2A','K.2B','K.2C','K.2D','K.2F']
+        },
+        'operations_K': {
+            label: 'Addition & Subtraction',
+            CCSS:  ['K.OA.A.1','K.OA.A.2','K.OA.A.3','K.OA.A.4','K.OA.A.5'],
+            MN07:  ['K.1.2.1','K.1.2.2'],
+            MN22:  ['K.N.2.1','K.N.2.2'],
+            TEKS:  ['K.3A','K.3B','K.3C']
+        },
+        'geometry_K': {
+            label: 'Shapes & Geometry',
+            CCSS:  ['K.G.A.1','K.G.A.2','K.G.A.3'],
+            MN07:  ['K.3.1.1','K.3.1.2'],
+            MN22:  ['K.GM.1.1','K.GM.1.2'],
+            TEKS:  ['K.6A','K.6B']
+        },
+        'measurement_K': {
+            label: 'Measurement & Comparison',
+            CCSS:  ['K.MD.A.1','K.MD.A.2'],
+            MN07:  ['K.4.1.1'],
+            MN22:  ['K.GM.2.1'],
+            TEKS:  ['K.7A','K.7B']
+        },
+        'data_K': {
+            label: 'Data & Sorting',
+            CCSS:  ['K.MD.B.3'],
+            MN07:  ['K.4.2.1'],
+            MN22:  ['K.DP.1.1','K.DP.1.2'],
+            TEKS:  ['K.8A','K.8B']
+        },
+
+        // ── Grade 1 ────────────────────────────────────────────────────────
+        'place_value_1': {
+            label: 'Place Value & Number Sense',
+            CCSS:  ['1.NBT.A.1','1.NBT.B.2','1.NBT.B.3','1.NBT.C.4','1.NBT.C.5'],
+            MN07:  ['1.1.1.1','1.1.1.2','1.1.1.3'],
+            MN22:  ['1.N.1.1','1.N.1.2','1.N.1.3'],
+            TEKS:  ['1.2B','1.2C','1.2D','1.2E','1.2F','1.2G']
+        },
+        'addition_subtraction_1': {
+            label: 'Addition & Subtraction',
+            CCSS:  ['1.OA.A.1','1.OA.A.2','1.OA.B.3','1.OA.C.5','1.OA.C.6'],
+            MN07:  ['1.1.2.1','1.1.2.2','1.1.2.3'],
+            MN22:  ['1.N.2.1','1.N.2.2','1.N.2.3'],
+            TEKS:  ['1.3A','1.3B','1.3C','1.3D','1.3E']
+        },
+        'geometry_1': {
+            label: 'Shapes & Geometry',
+            CCSS:  ['1.G.A.1','1.G.A.2','1.G.A.3'],
+            MN07:  ['1.3.1.1','1.3.1.2'],
+            MN22:  ['1.GM.1.1','1.GM.1.2'],
+            TEKS:  ['1.7A','1.7B']
+        },
+        'measurement_1': {
+            label: 'Measurement & Time',
+            CCSS:  ['1.MD.A.1','1.MD.B.3'],
+            MN07:  ['1.4.1.1','1.4.1.2'],
+            MN22:  ['1.GM.2.1'],
+            TEKS:  ['1.6A','1.6B']
+        },
+        'data_1': {
+            label: 'Data & Graphs',
+            CCSS:  ['1.MD.C.4'],
+            MN07:  ['1.4.2.1'],
+            MN22:  ['1.DP.1.1'],
+            TEKS:  ['1.8A','1.8B','1.8C']
+        },
+
+        // ── Grade 2 ────────────────────────────────────────────────────────
+        'place_value_2': {
+            label: 'Place Value to 1000',
+            CCSS:  ['2.NBT.A.1','2.NBT.A.2','2.NBT.A.3','2.NBT.A.4'],
+            MN07:  ['2.1.1.1','2.1.1.2','2.1.1.3'],
+            MN22:  ['2.N.1.1','2.N.1.2','2.N.1.3'],
+            TEKS:  ['2.2A','2.2B','2.2C','2.2D','2.2E']
+        },
+        'operations_2': {
+            label: 'Addition & Subtraction',
+            CCSS:  ['2.OA.A.1','2.OA.B.2','2.NBT.B.5','2.NBT.B.6','2.NBT.B.7'],
+            MN07:  ['2.1.2.1','2.1.2.2','2.1.2.3'],
+            MN22:  ['2.N.2.1','2.N.2.2'],
+            TEKS:  ['2.4A','2.4B','2.4C','2.4D']
+        },
+        'geometry_2': {
+            label: 'Shapes & Geometry',
+            CCSS:  ['2.G.A.1','2.G.A.2','2.G.A.3'],
+            MN07:  ['2.3.1.1','2.3.1.2'],
+            MN22:  ['2.GM.1.1','2.GM.1.2'],
+            TEKS:  ['2.6A','2.6B']
+        },
+        'measurement_2': {
+            label: 'Measurement & Time',
+            CCSS:  ['2.MD.A.1','2.MD.A.2','2.MD.B.5','2.MD.B.6'],
+            MN07:  ['2.4.1.1','2.4.1.2'],
+            MN22:  ['2.GM.2.1','2.GM.2.2'],
+            TEKS:  ['2.7A','2.7B','2.7C']
+        },
+        'data_2': {
+            label: 'Data & Graphs',
+            CCSS:  ['2.MD.D.9','2.MD.D.10'],
+            MN07:  ['2.4.2.1'],
+            MN22:  ['2.DP.1.1'],
+            TEKS:  ['2.8A','2.8B']
+        },
+
+        // ── Grade 3 ────────────────────────────────────────────────────────
+        'fraction_3': {
+            label: 'Fractions & Equivalence',
+            CCSS:  ['3.NF.A.1','3.NF.A.2','3.NF.A.3'],
+            MN07:  ['3.1.2.1','3.1.2.2','3.1.2.3'],
+            MN22:  ['3.N.1.1','3.N.1.2'],
+            TEKS:  ['3.3A','3.3B','3.3C','3.3D','3.3E','3.3H']
+        },
+        'multiplication_3': {
+            label: 'Multiplication & Division',
+            CCSS:  ['3.OA.A.1','3.OA.A.2','3.OA.A.3','3.OA.B.5','3.OA.B.6','3.OA.C.7'],
+            MN07:  ['3.1.3.1','3.1.3.2','3.1.3.3'],
+            MN22:  ['3.N.2.1','3.N.2.2','3.N.3.1'],
+            TEKS:  ['3.4D','3.4E','3.4F','3.4G','3.4H','3.4I','3.4J']
+        },
+        'area_perimeter_3': {
+            label: 'Area & Perimeter',
+            CCSS:  ['3.MD.C.5','3.MD.C.6','3.MD.D.8'],
+            MN07:  ['3.3.1.1','3.3.1.2'],
+            MN22:  ['3.GM.1.1','3.GM.1.2'],
+            TEKS:  ['3.7A','3.7B']
+        },
+        'geometry_3': {
+            label: 'Shapes & Classification',
+            CCSS:  ['3.G.A.1','3.G.A.2'],
+            MN07:  ['3.3.2.1'],
+            MN22:  ['3.GM.1.3'],
+            TEKS:  ['3.6A','3.6B','3.6C']
+        },
+        'data_3': {
+            label: 'Data & Graphs',
+            CCSS:  ['3.MD.B.3','3.MD.B.4'],
+            MN07:  ['3.4.1.1','3.4.1.2'],
+            MN22:  ['3.DP.1.1'],
+            TEKS:  ['3.8A','3.8B']
+        },
+
+        // ── Grade 4 ────────────────────────────────────────────────────────
+        'fraction_4': {
+            label: 'Fractions & Operations',
+            CCSS:  ['4.NF.A.1','4.NF.A.2','4.NF.B.3','4.NF.B.4'],
+            MN07:  ['4.1.2.1','4.1.2.2','4.1.2.3'],
+            MN22:  ['4.N.2.1','4.N.2.2','4.N.2.3'],
+            TEKS:  ['4.3A','4.3B','4.3C','4.3D','4.3E','4.3F','4.3G']
+        },
+        'multiplication_division_4': {
+            label: 'Multiplication & Division',
+            CCSS:  ['4.OA.A.1','4.OA.A.2','4.OA.A.3','4.NBT.B.4','4.NBT.B.5','4.NBT.B.6'],
+            MN07:  ['4.1.3.1','4.1.3.2','4.1.3.3'],
+            MN22:  ['4.N.1.1','4.N.1.2'],
+            TEKS:  ['4.4A','4.4B','4.4C','4.4D','4.4F','4.4H']
+        },
+        'decimal_4': {
+            label: 'Decimals & Place Value',
+            CCSS:  ['4.NF.C.5','4.NF.C.6','4.NF.C.7'],
+            MN07:  ['4.1.1.1','4.1.1.2'],
+            MN22:  ['4.N.3.1'],
+            TEKS:  ['4.2E','4.2F','4.2G','4.2H','4.4E']
+        },
+        'measurement_4': {
+            label: 'Measurement & Area',
+            CCSS:  ['4.MD.A.1','4.MD.A.2','4.MD.A.3','4.MD.C.5','4.MD.C.7'],
+            MN07:  ['4.4.1.1','4.4.1.2'],
+            MN22:  ['4.GM.2.1'],
+            TEKS:  ['4.7A','4.7B','4.8A','4.8B','4.8C']
+        },
+        'geometry_4': {
+            label: 'Lines, Angles & Shapes',
+            CCSS:  ['4.G.A.1','4.G.A.2','4.G.A.3'],
+            MN07:  ['4.3.1.1','4.3.1.2'],
+            MN22:  ['4.GM.1.1','4.GM.1.2','4.GM.1.3'],
+            TEKS:  ['4.6A','4.6B','4.6C','4.6D']
+        },
+
+        // ── Grade 5 ────────────────────────────────────────────────────────
+        'fraction_5': {
+            label: 'Fractions & Operations',
+            CCSS:  ['5.NF.A.1','5.NF.A.2','5.NF.B.3','5.NF.B.4','5.NF.B.5','5.NF.B.6','5.NF.B.7'],
+            MN07:  ['5.1.2.1','5.1.2.2','5.1.2.3'],
+            MN22:  ['5.N.1.1','5.N.1.2','5.N.2.1','5.N.2.2'],
+            TEKS:  ['5.3A','5.3D','5.3H','5.3I','5.3J','5.3K','5.3L']
+        },
+        'decimal_5': {
+            label: 'Decimals & Operations',
+            CCSS:  ['5.NBT.A.1','5.NBT.A.2','5.NBT.A.3','5.NBT.A.4','5.NBT.B.7'],
+            MN07:  ['5.1.1.1','5.1.1.2'],
+            MN22:  ['5.N.3.1','5.N.3.2'],
+            TEKS:  ['5.2A','5.2B','5.2C','5.3E','5.3F']
+        },
+        'volume_5': {
+            label: 'Volume & Area',
+            CCSS:  ['5.MD.C.3','5.MD.C.4','5.MD.C.5'],
+            MN07:  ['5.3.1.1','5.3.1.2'],
+            MN22:  ['5.GM.1.1','5.GM.1.2'],
+            TEKS:  ['5.7A']
+        },
+        'coordinate_5': {
+            label: 'Coordinate Plane',
+            CCSS:  ['5.G.A.1','5.G.A.2'],
+            MN07:  ['5.3.2.1'],
+            MN22:  ['5.GM.2.1'],
+            TEKS:  ['5.8A','5.8B','5.8C']
+        },
+        'algebraic_thinking_5': {
+            label: 'Expressions & Order of Operations',
+            CCSS:  ['5.OA.A.1','5.OA.A.2','5.OA.B.3'],
+            MN07:  ['5.2.1.1','5.2.1.2'],
+            MN22:  ['5.A.1.1','5.A.1.2'],
+            TEKS:  ['5.4A','5.4B','5.4C','5.4D','5.4E','5.4F']
+        },
+
         // ── Grade 6 ────────────────────────────────────────────────────────
         'integer_6': {
             label: 'Integers & Rational Numbers',

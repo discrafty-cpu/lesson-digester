@@ -1037,6 +1037,7 @@
     <!-- ==================== JAVASCRIPT ==================== -->
     <script src="js/math-models.js"></script>
     <script src="js/standards-db.js"></script>
+    <script src="js/benchmark-descriptors.js"></script>
     <script src="js/digester-core.js"></script>
     <script src="js/teaching-insights-data.js"></script>
     <script src="js/rubric-descriptors.js"></script>
@@ -1896,6 +1897,29 @@
                 // Append cross-framework alignment panel
                 if (stdMap && typeof StandardsDB !== 'undefined') {
                     stdHTML += StandardsDB.buildCrossRefHTML(stdMap, selectedGrade);
+                }
+                // Append benchmark performance descriptors
+                if (typeof BenchmarkDescriptors !== 'undefined' && typeof StandardsDB !== 'undefined') {
+                    const clusterKeys = StandardsDB.topicsForGrade(selectedGrade);
+                    const matchedKeys = [];
+                    for (const ck of clusterKeys) {
+                        const cluster = StandardsDB.TOPIC_STANDARDS[ck];
+                        if (!cluster) continue;
+                        const topicWord = ck.split('_')[0];
+                        for (const t of (currentAnalysis.topics || [])) {
+                            if (t.toLowerCase().includes(topicWord) || topicWord.includes(t.toLowerCase().split(' ')[0])) {
+                                matchedKeys.push(ck);
+                                break;
+                            }
+                        }
+                    }
+                    if (matchedKeys.length > 0) {
+                        stdHTML += '<div style="margin-top:14px;"><div style="font-size:0.75rem;font-weight:700;color:#1E2761;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">📊 Benchmark Performance Descriptors</div>';
+                        for (const mk of matchedKeys.slice(0, 4)) {
+                            stdHTML += BenchmarkDescriptors.buildHTML(mk);
+                        }
+                        stdHTML += '</div>';
+                    }
                 }
                 document.getElementById('standardsList').innerHTML = stdHTML;
             } else {
