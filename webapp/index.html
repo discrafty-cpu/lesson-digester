@@ -1130,6 +1130,7 @@
     </main>
 
     <!-- ==================== JAVASCRIPT ==================== -->
+    <script src="js/math-models.js"></script>
     <script src="js/digester-core.js"></script>
     <script src="js/teaching-insights-data.js"></script>
     <script src="js/rubric-descriptors.js"></script>
@@ -3921,6 +3922,12 @@
             const verb = getVerbForTopic(topic1);
             const objectives = extractLessonObjectives(analysis);
 
+            // Pre-generate math model diagram (MathModels → PNG data URL)
+            let mathModelImg = null;
+            if (typeof MathModels !== 'undefined') {
+                try { mathModelImg = await MathModels.getModel(analysis); } catch(e) { console.warn('MathModels T2:', e.message); }
+            }
+
             // ── Tier 2 header — warm, encouraging ──
             function t2Header(sl, title, step, totalSteps) {
                 sl.background = { color: T2.bg };
@@ -4040,20 +4047,22 @@
                 const tvs = MathVisuals.getVisualsForTopic(t);
                 topicVisuals2.push(...tvs);
             }
-            if (topicVisuals2.length > 0) {
+            // Use MathModels PNG if available, fall back to MathVisuals SVG, then text card
+            const t2VisImg = mathModelImg || (topicVisuals2.length > 0 ? topicVisuals2[0].img : null);
+            const t2VisCaption = topicVisuals2.length > 0 ? (topicVisuals2[0].caption || topic1) : (typeof MathModels !== 'undefined' ? MathModels.detectModelType(analysis).replace(/([A-Z])/g,' $1').trim() : topic1);
+            if (t2VisImg) {
                 sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                     x: 0.5, y: 1.25, w: 5.5, h: 3.2,
                     fill: { color: T2.softBg }, line: { color: T2.teal, width: 0.8 }, rectRadius: 0.1
                 });
                 try {
-                    sl.addImage({ data: topicVisuals2[0].img, x: 0.65, y: 1.35, w: 5.2, h: 2.9, sizing: { type: 'contain', w: 5.2, h: 2.9 } });
+                    sl.addImage({ data: t2VisImg, x: 0.65, y: 1.32, w: 5.2, h: 3.0, sizing: { type: 'contain', w: 5.2, h: 3.0 } });
                 } catch(e) {}
-                sl.addText(topicVisuals2[0].caption || topic1, {
+                sl.addText(t2VisCaption, {
                     x: 0.5, y: 4.5, w: 5.5, h: 0.3,
                     fontSize: 10, color: T2.teal, align: 'center', fontFace: 'Calibri', italic: true
                 });
             } else {
-                // No visual — big concept card
                 sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                     x: 0.5, y: 1.25, w: 9, h: 2.0,
                     fill: { color: T2.softBg }, line: { color: T2.teal, width: 1 }, rectRadius: 0.1
@@ -4276,6 +4285,12 @@
             const verb = getVerbForTopic(topic1);
             const objectives = extractLessonObjectives(analysis);
 
+            // Pre-generate math model diagram — used in CRA slides
+            let mathModelImg = null;
+            if (typeof MathModels !== 'undefined') {
+                try { mathModelImg = await MathModels.getModel(analysis); } catch(e) { console.warn('MathModels T3:', e.message); }
+            }
+
             // Topic visuals for CRA slides (same pattern as Tier 2)
             const topicVisuals2 = [];
             if (typeof MathVisuals !== 'undefined') {
@@ -4470,9 +4485,10 @@
                 x: 0.5, y: 1.25, w: 4.4, h: 0.32,
                 fontSize: 10, bold: true, color: T3.purple, align: 'center', fontFace: 'Calibri', charSpacing: 2
             });
-            if (topicVisuals2.length > 0) {
+            const t3ConcImg = mathModelImg || (topicVisuals2.length > 0 ? topicVisuals2[0].img : null);
+            if (t3ConcImg) {
                 try {
-                    sl.addImage({ data: topicVisuals2[0].img, x: 0.65, y: 1.6, w: 4.1, h: 2.8, sizing: { type: 'contain', w: 4.1, h: 2.8 } });
+                    sl.addImage({ data: t3ConcImg, x: 0.62, y: 1.58, w: 4.16, h: 3.0, sizing: { type: 'contain', w: 4.16, h: 3.0 } });
                 } catch(e) {}
             } else {
                 sl.addText('Use manipulatives, tiles,\nor draw objects to\nrepresent ' + topic1, {
