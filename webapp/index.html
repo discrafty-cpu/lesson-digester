@@ -1036,6 +1036,7 @@
 
     <!-- ==================== JAVASCRIPT ==================== -->
     <script src="js/math-models.js"></script>
+    <script src="js/standards-db.js"></script>
     <script src="js/digester-core.js"></script>
     <script src="js/teaching-insights-data.js"></script>
     <script src="js/rubric-descriptors.js"></script>
@@ -1474,8 +1475,12 @@
                 const allText = slides.map(s => s.text).join(' ');
                 const topics = detectTopics(allText);
 
-                // Get standards
+                // Get standards (MN07/CCSS primary display list)
                 const standards = getStandardsForTopics(topics);
+                // Cross-framework map (CCSS + MN07 + MN22 + TEKS)
+                const standardsMap = (typeof StandardsDB !== 'undefined')
+                    ? StandardsDB.getAllForTopics(topics, selectedGrade || 7)
+                    : null;
 
                 // Get teaching insights
                 const insights = getTeachingInsights(topics);
@@ -1492,6 +1497,7 @@
                     slides: slides,
                     topics: topics,
                     standards: standards,
+                    standardsMap: standardsMap,
                     insights: insights,
                     buildScript: buildScript
                 };
@@ -1827,6 +1833,11 @@
 
             // Re-calculate standards based on selected grade
             const standards = getStandardsForTopics(currentAnalysis.topics);
+            // Re-calculate cross-framework map for current grade
+            const stdMap = (typeof StandardsDB !== 'undefined')
+                ? StandardsDB.getAllForTopics(currentAnalysis.topics, selectedGrade)
+                : null;
+            currentAnalysis.standardsMap = stdMap;
 
             // File Info
             document.getElementById('fileInfo').innerHTML = `
@@ -1874,7 +1885,7 @@
             // Standards
             if (standards.length > 0) {
                 document.getElementById('standardsSection').style.display = 'block';
-                document.getElementById('standardsList').innerHTML = standards
+                let stdHTML = standards
                     .map(std => `
                         <div class="standard-item">
                             <div class="standard-code">${std.code}</div>
@@ -1882,6 +1893,11 @@
                         </div>
                     `)
                     .join('');
+                // Append cross-framework alignment panel
+                if (stdMap && typeof StandardsDB !== 'undefined') {
+                    stdHTML += StandardsDB.buildCrossRefHTML(stdMap, selectedGrade);
+                }
+                document.getElementById('standardsList').innerHTML = stdHTML;
             } else {
                 document.getElementById('standardsSection').style.display = 'none';
             }
@@ -2632,18 +2648,45 @@
                 align: "center", valign: "middle", wrap: true, fontFace: 'Calibri'
             });
             if (analysis.standards.length > 0) {
-                const codes = analysis.standards.map(s => s.code).join("   •   ");
-                // Standards in a rounded box
+                const ccssCodes = analysis.standards.map(s => s.code).join("  •  ");
+                // Primary standards box (CCSS / MN07 detected codes)
                 slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                    x: 1.5, y: 3.6, w: 7, h: 0.5,
-                    fill: { color: '253380' },
+                    x: 0.5, y: 3.45, w: 9, h: 0.45,
+                    fill: { color: '1A3070' },
                     line: { color: C.amber, width: 0.8 },
                     rectRadius: 0.08
                 });
-                slide.addText(codes, {
-                    x: 1.5, y: 3.6, w: 7, h: 0.5,
+                slide.addText(ccssCodes, {
+                    x: 0.5, y: 3.45, w: 9, h: 0.45,
                     fontSize: 10, color: C.amber, align: "center", wrap: true, fontFace: 'Calibri'
                 });
+
+                // Cross-framework row if StandardsDB available
+                if (typeof StandardsDB !== 'undefined' && analysis.standardsMap) {
+                    const sm = analysis.standardsMap;
+                    const fwRows = [
+                        { label: 'CCSS', codes: sm.CCSS, col: '#60A5FA' },
+                        { label: 'MN-22', codes: sm.MN22, col: '#34D399' },
+                        { label: 'TEKS', codes: sm.TEKS, col: '#F9A8D4' },
+                    ].filter(r => r.codes && r.codes.length > 0);
+
+                    if (fwRows.length > 0) {
+                        const fwText = fwRows.map(r =>
+                            r.label + ': ' + r.codes.slice(0, 4).join(' · ')
+                        ).join('     ');
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: 0.5, y: 3.95, w: 9, h: 0.4,
+                            fill: { color: '0F1A4A' },
+                            line: { color: '2D4A9A', width: 0.5 },
+                            rectRadius: 0.06
+                        });
+                        slide.addText(fwText, {
+                            x: 0.5, y: 3.95, w: 9, h: 0.4,
+                            fontSize: 8, color: 'A5B4FC', align: "center",
+                            wrap: true, fontFace: 'Calibri'
+                        });
+                    }
+                }
             }
             // Bottom accent bar
             slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.1, w: 10, h: 0.525, fill: { color: C.teal } });
