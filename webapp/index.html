@@ -1603,13 +1603,22 @@
             const parser = new DOMParser();
             const doc = parser.parseFromString(xml, 'text/xml');
 
-            // Find all text elements (namespace-aware)
+            // Collect text paragraph-by-paragraph to preserve slide structure.
+            // Each <a:p> is one paragraph; runs within it are joined directly.
+            // Paragraphs join with \n so downstream parsers can split on lines.
+            const paras = doc.querySelectorAll('a\\:p, p');
+            if (paras.length > 0) {
+                const lines = Array.from(paras)
+                    .map(para => {
+                        const runs = para.querySelectorAll('a\\:t, t');
+                        return Array.from(runs).map(r => r.textContent).join('').trim();
+                    })
+                    .filter(line => line.length > 0);
+                if (lines.length > 0) return lines.join('\n');
+            }
+            // Fallback for namespace-stripped parsers
             const textElements = doc.querySelectorAll('a\\:t, t');
-            const text = Array.from(textElements)
-                .map(el => el.textContent)
-                .join(' ');
-
-            return text.trim();
+            return Array.from(textElements).map(el => el.textContent).join(' ').trim();
         }
 
         // ==================== SLIDE CLASSIFICATION ====================
@@ -1652,6 +1661,66 @@
             }
 
             return bestMatch;
+        }
+
+        // ==================== SLIDE LINE PURPOSE PARSER ====================
+        // Classifies each line of a slide's text by its pedagogical role.
+        // Input : raw multiline text (from extractTextFromXML)
+        // Output: array of { text, role } objects
+        //
+        // Roles: label | section_header | learning_target | numbered | bullet |
+        //        question | instruction | definition | body
+        function parseSlideLines(rawText) {
+            if (!rawText) return [];
+            const lines = rawText.split(/\n+/).map(l => l.trim()).filter(l => l.length > 1);
+            const result = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const low  = line.toLowerCase();
+                let role   = 'body';
+
+                // ── Metadata labels (unit/lesson/date/grade/teacher, short) ──
+                if (line.length < 40 &&
+                    /^(unit|lesson|day|page|date|teacher|grade|name|class|period|course|standards?|objective)\b/i.test(line)) {
+                    role = 'label';
+                }
+                // ── Known section header phrases ──
+                else if (/^(learning target|success criteria|agenda|warm[\s-]?up|vocabulary|key terms?|homework|objective|aim|do now|bell[\s-]?ringer|exit ticket|today'?s? goal|essential question|i can statement|standards?|focus skill|driving question|mission|commitment|check[\s-]?in|breathing|team roles?)\s*:?$/i.test(line)) {
+                    role = 'section_header';
+                }
+                // ── Learning target statements ──
+                else if (/^(i can |students will |swbat |today i will |by the end.{0,30}will )/i.test(line)) {
+                    role = 'learning_target';
+                }
+                // ── Numbered list items ──
+                else if (/^\d+[\.\)]\s/.test(line)) {
+                    role = 'numbered';
+                }
+                // ── Explicit bullet characters ──
+                else if (/^[•◦▸►▶\-\*]\s/.test(line)) {
+                    role = 'bullet';
+                }
+                // ── Question (ends with ?) ──
+                else if (line.endsWith('?') && line.length > 8) {
+                    role = 'question';
+                }
+                // ── Directive instructions ──
+                else if (/^(work with|show your|explain|justify|discuss|write|solve|find|calculate|simplify|evaluate|compare|draw|label|shade|graph|complete|answer|look at|notice|wonder|think about|partner|share|record|identify|describe|determine|create|use|apply|check|measure|list|match|place|order|sort|circle|underline|highlight)/i.test(line)) {
+                    role = 'instruction';
+                }
+                // ── Vocabulary definitions (short term: definition) ──
+                else if (/:\s/.test(line) && line.indexOf(':') < 30 && line.indexOf(':') > 1) {
+                    role = 'definition';
+                }
+                // ── Title candidate: first short line with no other role ──
+                else if (result.length === 0 && line.length < 70) {
+                    role = 'title';
+                }
+
+                result.push({ text: line, role });
+            }
+            return result;
         }
 
         // ==================== TOPIC DETECTION ====================
@@ -2385,6 +2454,129 @@
                 return 'full-width'; // stories, discussions, learning log, etc.
             }
 
+            // ── Parsed-line visual renderer ───────────────────────────────────────
+            // Renders a parseSlideLines() array onto a slide with role-specific styling.
+            // Returns the final Y position reached (for callers that continue below it).
+            function renderParsedLines(sl, lines, x, y, w, maxH, accentCol) {
+                const ac  = accentCol || C.teal;
+                let curY  = y;
+                const bot = y + maxH;
+
+                // Filter out pure metadata labels unless they're all we have
+                const renderLines = lines.filter(l => l.role !== 'label');
+                const toRender = renderLines.length > 0 ? renderLines : lines;
+
+                for (const line of toRender) {
+                    if (curY >= bot - 0.15) break;
+                    const rem = bot - curY;
+
+                    if (line.role === 'section_header') {
+                        // Small-caps section divider with accent underline
+                        const h = 0.30;
+                        if (rem < h) break;
+                        sl.addText(line.text.toUpperCase(), {
+                            x, y: curY, w, h,
+                            fontSize: 9, bold: true, color: ac,
+                            charSpacing: 3, fontFace: 'Calibri'
+                        });
+                        sl.addShape(pres.shapes.RECTANGLE, {
+                            x, y: curY + h - 0.03, w: w * 0.38, h: 0.025,
+                            fill: { color: ac }
+                        });
+                        curY += h + 0.06;
+
+                    } else if (line.role === 'learning_target') {
+                        // "I can" pill — light blue card
+                        const h = Math.min(0.58, rem - 0.08);
+                        if (h < 0.3) break;
+                        sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x, y: curY, w, h,
+                            fill: { color: 'EFF6FF' },
+                            line: { color: '3B82F6', width: 1 },
+                            rectRadius: 0.08
+                        });
+                        sl.addText('🎯  ' + line.text, {
+                            x: x + 0.12, y: curY + 0.04, w: w - 0.24, h: h - 0.08,
+                            fontSize: 13, bold: true, color: C.navy,
+                            wrap: true, valign: 'middle', fontFace: 'Calibri'
+                        });
+                        curY += h + 0.10;
+
+                    } else if (line.role === 'question') {
+                        // Warm amber question card
+                        const h = Math.min(0.68, rem - 0.08);
+                        if (h < 0.28) break;
+                        sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x, y: curY, w, h,
+                            fill: { color: 'FFFBEB' },
+                            line: { color: C.amber, width: 1.5 },
+                            rectRadius: 0.10
+                        });
+                        sl.addText(line.text, {
+                            x: x + 0.15, y: curY + 0.05, w: w - 0.30, h: h - 0.10,
+                            fontSize: 14, bold: true, color: C.navy,
+                            wrap: true, valign: 'middle', fontFace: 'Calibri'
+                        });
+                        curY += h + 0.10;
+
+                    } else if (line.role === 'numbered') {
+                        const h = 0.40;
+                        if (rem < h) break;
+                        sl.addText(line.text, {
+                            x: x + 0.08, y: curY, w: w - 0.08, h,
+                            fontSize: 13, color: C.textDark,
+                            wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.15
+                        });
+                        curY += h;
+
+                    } else if (line.role === 'bullet') {
+                        const h = 0.40;
+                        if (rem < h) break;
+                        sl.addText(line.text.replace(/^[•◦▸►▶\-\*]\s*/, ''), {
+                            x: x + 0.08, y: curY, w: w - 0.08, h,
+                            fontSize: 13, color: C.textDark,
+                            wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.15,
+                            bullet: { type: 'bullet', characterCode: '25BA', color: ac, size: 80 }
+                        });
+                        curY += h;
+
+                    } else if (line.role === 'instruction') {
+                        const h = 0.42;
+                        if (rem < h) break;
+                        sl.addText(line.text, {
+                            x, y: curY, w, h,
+                            fontSize: 12, color: C.textMid, italic: true,
+                            wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.15
+                        });
+                        curY += h;
+
+                    } else if (line.role === 'definition') {
+                        const colonIdx = line.text.indexOf(':');
+                        const term = line.text.slice(0, colonIdx).trim();
+                        const def  = line.text.slice(colonIdx + 1).trim();
+                        const h = 0.44;
+                        if (rem < h) break;
+                        sl.addText([
+                            { text: term + ':  ', options: { bold: true, color: ac } },
+                            { text: def,          options: { color: C.textDark } }
+                        ], { x, y: curY, w, h, fontSize: 13, fontFace: 'Calibri', wrap: true, lineSpacingMultiple: 1.15 });
+                        curY += h;
+
+                    } else {
+                        // 'body' or 'title' — standard text row
+                        const h = 0.44;
+                        if (rem < h) break;
+                        sl.addText(line.text, {
+                            x, y: curY, w, h,
+                            fontSize: 13, color: C.textDark,
+                            wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.15
+                        });
+                        curY += h;
+                    }
+                }
+                return curY;
+            }
+
             // Helper: build one slide per original slide — auto-detect layout, images + visuals
             function buildContentSlide(s, titleOverride, accent, extraVisual) {
                 const info = Digester.slideTypes[s.type] || { label: s.type, icon: '' };
@@ -2395,11 +2587,13 @@
                 const hasOrigImg = s.images && s.images.length > 0;
                 const hasVisual = extraVisual || hasOrigImg;
 
+                // Parse lines by pedagogical purpose for smart rendering
+                const parsedLines = parseSlideLines(s.text || '');
+
                 // Content area starts at y=0.85, usable height ~4.35
 
                 if (layout === 'two-col' && hasVisual) {
-                    // ── Two-Column: image/visual LEFT in card, text RIGHT ──
-                    // Left card background
+                    // ── Two-Column: image/visual LEFT, parsed content RIGHT ──
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.3, y: 0.9, w: 4.4, h: 4.15,
                         fill: { color: 'F8FAFC' },
@@ -2420,35 +2614,41 @@
                             sl.addImage({ data: extraVisual.img, x: 0.45, y: 1.0, w: 4.1, h: 3.9, sizing: { type: 'contain', w: 4.1, h: 3.9 } });
                         } catch (e) { console.warn('SVG embed error:', e); }
                     }
-                    // Text on the right with left accent line
+                    // Parsed content on the right with left accent bar
                     sl.addShape(pres.shapes.RECTANGLE, { x: 4.9, y: 0.95, w: 0.04, h: 3.8, fill: { color: ac } });
-                    sl.addText(s.text, {
-                        x: 5.1, y: 0.95, w: 4.5, h: 4.0,
-                        fontSize: 13, color: C.textDark, wrap: true, valign: "top", fontFace: 'Calibri', lineSpacingMultiple: 1.15
-                    });
+                    renderParsedLines(sl, parsedLines, 5.1, 0.95, 4.5, 4.0, ac);
+
                 } else if (layout === 'centered') {
-                    // ── Centered: text in card, larger font ──
+                    // ── Centered: short/motivational text — render with smart parsing ──
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.8, y: 1.0, w: 8.4, h: 3.5,
                         fill: { color: 'F8FAFC' },
                         line: { color: ac, width: 1.2 },
                         rectRadius: 0.12
                     });
-                    sl.addText(s.text, {
+                    // For centered slides, find the most prominent line and center it
+                    const mainLine = parsedLines.find(l => l.role === 'question' || l.role === 'learning_target')
+                                  || parsedLines.find(l => l.role !== 'label' && l.role !== 'section_header')
+                                  || { text: s.text };
+                    sl.addText(mainLine.text, {
                         x: 1.2, y: 1.2, w: 7.6, h: 3.0,
-                        fontSize: 18, color: C.textDark, wrap: true, valign: "middle", align: "center", fontFace: 'Calibri', lineSpacingMultiple: 1.3
+                        fontSize: 18, color: C.textDark, wrap: true, valign: "middle", align: "center",
+                        fontFace: 'Calibri', lineSpacingMultiple: 1.3, bold: mainLine.role === 'question'
                     });
+                    // Sub-lines below main
+                    const subLines = parsedLines.filter(l => l !== mainLine && l.role !== 'label' && l.role !== 'title');
+                    if (subLines.length > 0) {
+                        renderParsedLines(sl, subLines, 1.2, 4.25, 7.6, 0.95, ac);
+                    }
                     if (hasOrigImg) {
                         try {
                             sl.addImage({ data: s.images[0].data, x: 3.5, y: 4.55, w: 3.0, h: 0.7, sizing: { type: 'contain', w: 3.0, h: 0.7 } });
                         } catch (e) {}
                     }
+
                 } else if (layout === 'full-vis-below' && hasVisual) {
-                    // ── Full width text on top, visual below in card ──
-                    sl.addText(s.text, {
-                        x: 0.5, y: 0.9, w: 9, h: 2.0,
-                        fontSize: 14, color: C.textDark, wrap: true, valign: "top", fontFace: 'Calibri', lineSpacingMultiple: 1.15
-                    });
+                    // ── Full-width parsed content on top, visual below ──
+                    renderParsedLines(sl, parsedLines, 0.5, 0.9, 9.0, 2.0, ac);
                     // Visual card
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.8, y: 3.0, w: 8.4, h: 2.1,
@@ -2462,14 +2662,12 @@
                             sl.addImage({ data: imgSrc, x: 1.0, y: 3.1, w: 8.0, h: 1.85, sizing: { type: 'contain', w: 8.0, h: 1.85 } });
                         } catch (e) {}
                     }
+
                 } else {
-                    // ── Full-width (default): text fills the slide ──
+                    // ── Full-width (default): parsed content fills the slide ──
                     if (hasOrigImg) {
-                        // Text left 58%, image right 42% in card
-                        sl.addText(s.text, {
-                            x: 0.5, y: 0.9, w: 5.3, h: 4.2,
-                            fontSize: 14, color: C.textDark, wrap: true, valign: "top", fontFace: 'Calibri', lineSpacingMultiple: 1.15
-                        });
+                        // Parsed text left 58%, image right 42%
+                        renderParsedLines(sl, parsedLines, 0.5, 0.9, 5.3, 4.2, ac);
                         sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                             x: 6.0, y: 0.9, w: 3.6, h: 3.8,
                             fill: { color: 'F8FAFC' },
@@ -2480,12 +2678,9 @@
                             sl.addImage({ data: s.images[0].data, x: 6.15, y: 1.0, w: 3.3, h: 3.5, sizing: { type: 'contain', w: 3.3, h: 3.5 } });
                         } catch (e) {}
                     } else {
-                        // No image — text with left accent line
+                        // No image — left accent bar + parsed content
                         sl.addShape(pres.shapes.RECTANGLE, { x: 0.4, y: 0.9, w: 0.04, h: 4.0, fill: { color: ac } });
-                        sl.addText(s.text, {
-                            x: 0.65, y: 0.9, w: 8.9, h: 4.2,
-                            fontSize: 14, color: C.textDark, wrap: true, valign: "top", fontFace: 'Calibri', lineSpacingMultiple: 1.15
-                        });
+                        renderParsedLines(sl, parsedLines, 0.65, 0.9, 8.9, 4.2, ac);
                     }
                 }
                 // Additional original images (2nd, 3rd, etc.) — add as thumbnails at bottom
@@ -2653,34 +2848,48 @@
                 });
                 sl.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 0.65, w: 3, h: 0.03, fill: { color: C.amber } });
 
-                if (ltSlides.length > 0) {
-                    // Use text from original slide — one big centered statement
-                    const ltText = ltSlides[0].text;
-                    sl.addText(ltText, {
-                        x: 0.7, y: 0.85, w: 8.6, h: 3.5,
-                        fontSize: 26, bold: true, color: C.white,
-                        align: 'center', valign: 'middle', wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.4
-                    });
-                } else {
-                    // Generate from topics — stacked, each target on its own bold line
-                    let ltY = 1.0;
-                    for (const topic of ltTopics) {
-                        if (ltY > 4.0) break;
-                        const verb = getVerbForTopic(topic);
-                        const targetText = "I can " + verb + " " + topic + ".";
-                        // Teal pill background per target
+                // Use extractLessonObjectives for clean, categorized targets
+                // (works whether original slide exists or not)
+                {
+                    const objectives = extractLessonObjectives(analysis);
+                    let ltY = 0.82;
+
+                    // ── Primary targets as "I can" pill cards ──
+                    for (const target of objectives.allTargets.slice(0, 3)) {
+                        if (ltY > 3.9) break;
+                        const pillH = 0.86;
                         sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                            x: 0.6, y: ltY, w: 8.8, h: 0.9,
+                            x: 0.55, y: ltY, w: 8.9, h: pillH,
                             fill: { color: '1A3A6A' },
-                            line: { color: C.teal, width: 1 },
-                            rectRadius: 0.08
+                            line: { color: C.teal, width: 1.2 },
+                            rectRadius: 0.09
                         });
-                        sl.addText(targetText, {
-                            x: 0.8, y: ltY + 0.05, w: 8.4, h: 0.8,
-                            fontSize: 18, bold: true, color: C.white,
+                        sl.addText('🎯  ' + target, {
+                            x: 0.75, y: ltY + 0.07, w: 8.5, h: pillH - 0.14,
+                            fontSize: 17, bold: true, color: C.white,
                             wrap: true, valign: 'middle', fontFace: 'Calibri', lineSpacingMultiple: 1.2
                         });
-                        ltY += 1.05;
+                        ltY += pillH + 0.12;
+                    }
+
+                    // ── Success criteria below if space allows ──
+                    if (ltY < 3.85 && objectives.successCriteria.length > 0) {
+                        ltY += 0.06;
+                        sl.addText('SUCCESS CRITERIA', {
+                            x: 0.6, y: ltY, w: 8.8, h: 0.26,
+                            fontSize: 9, bold: true, color: C.amber,
+                            charSpacing: 3, fontFace: 'Calibri'
+                        });
+                        ltY += 0.32;
+                        const maxCrit = Math.min(objectives.successCriteria.length, Math.floor((4.85 - ltY) / 0.36));
+                        for (let ci = 0; ci < maxCrit; ci++) {
+                            sl.addText('✓  ' + objectives.successCriteria[ci], {
+                                x: 0.8, y: ltY, w: 8.4, h: 0.34,
+                                fontSize: 11, color: 'B8C9F5',
+                                wrap: true, fontFace: 'Calibri'
+                            });
+                            ltY += 0.36;
+                        }
                     }
                 }
 
