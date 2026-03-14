@@ -3808,6 +3808,95 @@
             return filename;
         }
 
+        // ==================== LESSON OBJECTIVES EXTRACTOR ====================
+        // Pulls learning targets + success criteria from the lesson itself.
+        // If the lesson has no LT slides, generates them from standards + topics.
+        // Returns: { primaryTarget, allTargets, successCriteria[], scaffoldedSteps[], standardCodes[], hasOriginalTargets }
+
+        const SCAFFOLD_STEPS_MAP = {
+            'ratio':          ['I can identify the two quantities being compared in a ratio', 'I can write a ratio in three forms: a to b, a:b, and a/b', 'I can build a table of equivalent ratios', 'I can find a missing value using equivalent ratios', 'I can explain what the ratio means in context'],
+            'proportion':     ['I can recognize when two ratios are equivalent', 'I can set up a proportion to represent the problem', 'I can solve for the unknown using cross-multiplication or unit rate', 'I can verify my answer by checking both ratios are equal'],
+            'unit rate':      ['I can identify the two quantities in the rate', 'I can write the rate as a fraction', 'I can divide to find the unit rate (per one)', 'I can use the unit rate to solve problems', 'I can explain the unit rate in context'],
+            'percent':        ['I can represent a percent on a double number line or bar model', 'I can convert between percent, decimal, and fraction', 'I can find the percent of a number (e.g., 40% of 80)', 'I can find the whole when given a part and percent', 'I can apply percent to real-world situations'],
+            'fraction':       ['I can represent a fraction with a bar or circle model', 'I can find equivalent fractions', 'I can compare fractions using benchmarks or a common denominator', 'I can perform the operation and check my answer', 'I can explain my answer using the context of the problem'],
+            'integer':        ['I can use a number line or chips to represent positive and negative numbers', 'I can identify zero pairs and explain why they equal zero', 'I can add integers using the chip or number line model', 'I can subtract integers by adding the opposite', 'I can explain why the result makes sense'],
+            'equation':       ['I can use a balance model to understand what equality means', 'I can identify the operation being applied to the variable', 'I can use inverse operations to isolate the variable', 'I can substitute my solution back to verify it is correct', 'I can write and solve equations from word problems'],
+            'expression':     ['I can identify terms, coefficients, and constants in an expression', 'I can identify like terms using algebra tiles', 'I can combine like terms to simplify an expression', 'I can apply the distributive property to expand an expression', 'I can write and interpret expressions from real-world contexts'],
+            'slope':          ['I can identify rise and run from a graph', 'I can calculate slope using rise ÷ run', 'I can determine if slope is positive, negative, zero, or undefined', 'I can write the equation of a line using slope and y-intercept', 'I can interpret slope as a rate of change in context'],
+            'linear':         ['I can identify a rate of change from a table or graph', 'I can write an equation in y = mx + b form', 'I can graph a line using slope and y-intercept', 'I can connect the equation to a real-world situation', 'I can use the equation to make predictions'],
+            'function':       ['I can explain that a function has exactly one output for each input', 'I can represent a function using a table, graph, or equation', 'I can determine if a relation is a function using the vertical line test', 'I can evaluate a function for a given input value', 'I can compare two functions given in different representations'],
+            'pythagorean':    ['I can identify the right angle, legs (a and b), and hypotenuse (c)', 'I can write the Pythagorean theorem: a² + b² = c²', 'I can substitute known side lengths into the theorem', 'I can solve for the missing side length', 'I can apply the theorem to find distances in real-world problems'],
+            'area':           ['I can identify the base and height of the shape', 'I can choose and apply the correct area formula', 'I can decompose a complex shape into simpler shapes', 'I can add partial areas to find the total area', 'I can label my answer with correct square units'],
+            'volume':         ['I can explain what volume means using unit cubes', 'I can identify the length, width, and height of a prism', 'I can calculate volume using V = l × w × h', 'I can solve real-world problems involving volume', 'I can explain the difference between area and volume'],
+            'circle':         ['I can identify and label radius, diameter, circumference, and area', 'I can explain the relationship d = 2r', 'I can explain what pi represents', 'I can calculate circumference using C = πd or C = 2πr', 'I can calculate area using A = πr²'],
+            'probability':    ['I can list all outcomes in the sample space', 'I can calculate theoretical probability as favorable ÷ total outcomes', 'I can find probability of compound events using a tree diagram or area model', 'I can compare theoretical and experimental probability', 'I can explain why probability is always between 0 and 1'],
+            'statistics':     ['I can organize a data set in a plot or table', 'I can calculate mean, median, and mode', 'I can choose the best measure of center for a data set', 'I can find range and IQR to describe spread', 'I can interpret statistical measures in context'],
+            'scatter':        ['I can plot ordered pairs on a coordinate plane', 'I can describe the association (positive, negative, or none)', 'I can sketch a line of best fit through the data', 'I can use the line of best fit to make predictions', 'I can explain what the trend means in the context of the data'],
+            'transformation': ['I can identify translations, reflections, rotations, and dilations', 'I can perform a transformation on the coordinate plane', 'I can write the coordinates of the image after a transformation', 'I can identify whether a transformation preserves size and shape', 'I can describe a transformation precisely using mathematical language'],
+            'distance':       ['I can identify the three quantities: distance, rate, and time', 'I can write and use the formula d = r × t', 'I can solve for any missing variable in the formula', 'I can organize d/r/t information in a table', 'I can interpret results in the context of the problem'],
+            'scale':          ['I can identify the scale factor in a scale drawing or similar figure', 'I can set up a proportion using the scale factor', 'I can find actual dimensions from a scale drawing', 'I can create a scale drawing given actual dimensions', 'I can apply scale factor to find missing side lengths in similar figures'],
+            'multiplier':     ['I can identify the multiplier that connects two quantities', 'I can use a table to track how quantities scale together', 'I can write a multiplication equation using the multiplier', 'I can apply the multiplier to find unknown values', 'I can explain the multiplier in real-world context'],
+            'default':        ['I can identify the key information needed to solve the problem', 'I can represent the problem using a model, table, or diagram', 'I can apply the strategy step by step and show my work', 'I can check whether my answer is reasonable', 'I can explain my reasoning using mathematical vocabulary']
+        };
+
+        function getScaffoldedSteps(topics) {
+            const topicStr = (topics || []).join(' ').toLowerCase();
+            let bestKey = null, bestLen = 0;
+            for (const key of Object.keys(SCAFFOLD_STEPS_MAP)) {
+                if (key !== 'default' && topicStr.includes(key) && key.length > bestLen) {
+                    bestKey = key;
+                    bestLen = key.length;
+                }
+            }
+            return SCAFFOLD_STEPS_MAP[bestKey || 'default'];
+        }
+
+        function extractLessonObjectives(analysis) {
+            // 1. Pull from classified LEARNING_TARGET slides
+            const ltSlides = (analysis.slides || []).filter(s => s.type === 'LEARNING_TARGET');
+            const rawText = ltSlides.map(s => s.text || '').join('\n').trim();
+
+            // 2. Parse individual targets
+            let learningTargets = [];
+            if (rawText) {
+                const lines = rawText.split(/[\n;•\-\*]+/).map(l => l.trim()).filter(l => l.length > 8);
+                for (const line of lines) {
+                    let t = line;
+                    if (/^students will/i.test(t)) t = 'I can' + t.replace(/^students will/i, '');
+                    if (/^swbat/i.test(t)) t = 'I can' + t.replace(/^swbat/i, '');
+                    // Accept I can..., or any substantive line
+                    if (/^i can/i.test(t) || (t.length > 15 && !/^(grade|date|teacher|page|unit|lesson|standard)/i.test(t))) {
+                        learningTargets.push(t);
+                    }
+                }
+            }
+
+            // 3. Fallback: generate from topics + standards
+            if (learningTargets.length === 0) {
+                const topics = analysis.topics || [];
+                const stdCodes = (analysis.standards || []).map(s => s.code).filter(Boolean);
+                for (const topic of topics.slice(0, 3)) {
+                    const v = typeof getVerbForTopic === 'function' ? getVerbForTopic(topic) : 'solve';
+                    learningTargets.push('I can ' + v + ' ' + topic + ' and explain my reasoning.');
+                }
+                if (learningTargets.length === 0) {
+                    learningTargets.push('I can apply mathematical reasoning to solve problems and justify my steps.');
+                }
+            }
+
+            const scaffoldedSteps = getScaffoldedSteps(analysis.topics || []);
+            const standardCodes   = (analysis.standards || []).map(s => s.code).filter(Boolean);
+
+            return {
+                primaryTarget:      learningTargets[0],
+                allTargets:         learningTargets,
+                successCriteria:    scaffoldedSteps.slice(0, 4),
+                scaffoldedSteps:    scaffoldedSteps,
+                standardCodes:      standardCodes,
+                hasOriginalTargets: ltSlides.length > 0
+            };
+        }
+
         // ==================== TIER 2 — SMALL GROUP PRESENTATION ====================
         // Purpose: 3-5 students, 3x/week, 20-30 min, same concept more scaffolded
         // Student experience: collaborative, "we" language, starts from a WIN,
@@ -3830,6 +3919,7 @@
             const insights = analysis.insights;
             const topic1 = topics[0] || 'Today\'s Concept';
             const verb = getVerbForTopic(topic1);
+            const objectives = extractLessonObjectives(analysis);
 
             // ── Tier 2 header — warm, encouraging ──
             function t2Header(sl, title, step, totalSteps) {
@@ -3875,17 +3965,32 @@
                 fontSize: 30, bold: true, color: T2.white, align: 'center', valign: 'middle',
                 fontFace: 'Calibri', lineSpacingMultiple: 1.3, wrap: true
             });
+            // Learning target from the lesson itself
             sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                x: 1.5, y: 2.9, w: 7, h: 0.65,
+                x: 0.5, y: 2.72, w: 9, h: 0.72,
                 fill: { color: '0A7A6A' }, line: { color: T2.amber, width: 0.8 }, rectRadius: 0.08
             });
-            sl.addText('Today: ' + topic1, {
-                x: 1.6, y: 2.9, w: 6.8, h: 0.65,
-                fontSize: 18, color: T2.white, align: 'center', valign: 'middle', fontFace: 'Calibri', wrap: true
+            sl.addText('🎯  ' + objectives.primaryTarget, {
+                x: 0.65, y: 2.74, w: 8.7, h: 0.68,
+                fontSize: 14, bold: true, color: T2.white, valign: 'middle', fontFace: 'Calibri', wrap: true
             });
-            sl.addText('Small Group  •  Grades ' + selectedGrade + '  •  ' + (standards.length > 0 ? standards[0].code : ''), {
-                x: 0.5, y: 3.75, w: 9, h: 0.3,
-                fontSize: 9, color: 'B2F0E8', align: 'center', fontFace: 'Calibri'
+            // Success criteria — top 3 steps
+            const sc2 = objectives.successCriteria.slice(0, 3);
+            let scY2 = 3.58;
+            for (const step of sc2) {
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.5, y: scY2, w: 9, h: 0.35,
+                    fill: { color: '0D8070' }, line: { color: 'none' }, rectRadius: 0.05
+                });
+                sl.addText('☐  ' + step, {
+                    x: 0.65, y: scY2 + 0.02, w: 8.7, h: 0.31,
+                    fontSize: 10, color: 'B2F0E8', valign: 'middle', fontFace: 'Calibri', wrap: true
+                });
+                scY2 += 0.39;
+            }
+            sl.addText((objectives.standardCodes.length > 0 ? objectives.standardCodes.join('  •  ') + '  •  ' : '') + 'Grade ' + selectedGrade + '  •  Small Group', {
+                x: 0.5, y: 5.1, w: 9, h: 0.22,
+                fontSize: 8, color: 'B2F0E8', align: 'center', fontFace: 'Calibri'
             });
             sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: T2.amber } });
 
@@ -4104,53 +4209,45 @@
             });
             t2Footer(sl, 'Tier 2 Small Group  •  Step 5: Independent Practice');
 
-            // ── Slide 7: Check In — Self-Assessment ──
+            // ── Slide 7: Check In — Success Criteria Checklist ──
             sl = pres.addSlide();
-            t2Header(sl, 'Check In — How Did That Go?', '6', '6');
-            sl.addText('Be honest — this is just information to help us both.', {
-                x: 0.5, y: 0.82, w: 9, h: 0.3,
-                fontSize: 12, color: T2.textMid, fontFace: 'Calibri', italic: true
+            t2Header(sl, 'Check In — Where Are You?', '6', '6');
+            sl.addText('Look at each step. Circle ✓ Got it  or  ✗ Not yet. Be honest — this helps us plan what\'s next.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.32,
+                fontSize: 11, color: T2.textMid, fontFace: 'Calibri', italic: true
             });
-            // Self-assessment scale — 3 cards
-            const selfOptions = [
-                { icon: '😕', label: 'I\'m lost', sub: 'I need more help', color: 'FEF2F2', border: 'FCA5A5', textCol: 'DC2626' },
-                { icon: '🤔', label: 'Getting there', sub: 'I understand some of it', color: 'FFFBEB', border: T2.warmBorder, textCol: T2.amber },
-                { icon: '😊', label: 'I got it!', sub: 'I can explain it', color: 'F0FDF4', border: '86EFAC', textCol: T2.green }
-            ];
-            let soX = 0.6;
-            for (const opt of selfOptions) {
+            // Success criteria from the lesson — each as a checkable row
+            const allSteps = objectives.scaffoldedSteps;
+            let checkY = 1.22;
+            const stepColors = ['E0F2FE','FEF3C7','F0FDF4','EDE9FE','FEE2E2'];
+            const stepBorders = ['38BDF8', T2.amber, '4ADE80','A78BFA','FCA5A5'];
+            for (let si = 0; si < Math.min(allSteps.length, 5); si++) {
+                const bg = stepColors[si % stepColors.length];
+                const br = stepBorders[si % stepBorders.length];
                 sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                    x: soX, y: 1.25, w: 2.8, h: 2.4,
-                    fill: { color: opt.color }, line: { color: opt.border, width: 1.5 }, rectRadius: 0.12
+                    x: 0.4, y: checkY, w: 9.2, h: 0.56,
+                    fill: { color: bg }, line: { color: br, width: 0.8 }, rectRadius: 0.06
                 });
-                sl.addText(opt.icon, {
-                    x: soX, y: 1.45, w: 2.8, h: 0.9,
-                    fontSize: 40, align: 'center', valign: 'middle'
+                sl.addText('Step ' + (si + 1) + ':  ' + allSteps[si], {
+                    x: 0.55, y: checkY + 0.04, w: 7.2, h: 0.48,
+                    fontSize: 11, color: T2.textDark, valign: 'middle', fontFace: 'Calibri', wrap: true
                 });
-                sl.addText(opt.label, {
-                    x: soX + 0.1, y: 2.4, w: 2.6, h: 0.38,
-                    fontSize: 16, bold: true, color: opt.textCol, align: 'center', fontFace: 'Calibri'
+                sl.addText('✓  ✗', {
+                    x: 7.9, y: checkY + 0.08, w: 1.5, h: 0.38,
+                    fontSize: 16, bold: true, color: '475569', align: 'center', valign: 'middle', fontFace: 'Calibri'
                 });
-                sl.addText(opt.sub, {
-                    x: soX + 0.1, y: 2.8, w: 2.6, h: 0.5,
-                    fontSize: 11, color: T2.textMid, align: 'center', fontFace: 'Calibri', wrap: true
-                });
-                soX += 3.0;
+                checkY += 0.62;
             }
-            sl.addText('Circle how you feel, then tell your teacher.', {
-                x: 0.5, y: 3.85, w: 9, h: 0.3,
-                fontSize: 11, color: T2.textMid, align: 'center', fontFace: 'Calibri', italic: true
+            // Self-assessment rating
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.4, y: checkY + 0.05, w: 9.2, h: 0.42,
+                fill: { color: T2.softBg }, line: { color: T2.teal, width: 0.8 }, rectRadius: 0.06
             });
-            if (typeof generateSuccessCriteria === 'function') {
-                const crit = generateSuccessCriteria(verb, topic1);
-                if (crit && crit.length > 0) {
-                    sl.addText('I can check: ' + crit[0], {
-                        x: 0.5, y: 4.25, w: 9, h: 0.35,
-                        fontSize: 11, color: T2.teal, align: 'center', fontFace: 'Calibri', italic: true, wrap: true
-                    });
-                }
-            }
-            t2Footer(sl, 'Tier 2 Small Group  •  Step 6: Self-Assessment & Reflection');
+            sl.addText('Overall feeling:   😕 I need more help      🤔 Getting there      😊 I got it!', {
+                x: 0.6, y: checkY + 0.08, w: 9.0, h: 0.34,
+                fontSize: 11, color: T2.teal, align: 'center', valign: 'middle', fontFace: 'Calibri'
+            });
+            t2Footer(sl, 'Tier 2 Small Group  •  Step 6: Success Criteria Check  •  ' + objectives.primaryTarget.substring(0, 60));
 
             const fname = (analysis.filename || 'lesson').replace('.pptx','').replace(/[^a-z0-9]/gi,'_') + '_tier2_small_group.pptx';
             await pres.writeFile({ fileName: fname });
@@ -4177,6 +4274,16 @@
             const topics = analysis.topics;
             const topic1 = topics[0] || 'Today\'s Skill';
             const verb = getVerbForTopic(topic1);
+            const objectives = extractLessonObjectives(analysis);
+
+            // Topic visuals for CRA slides (same pattern as Tier 2)
+            const topicVisuals2 = [];
+            if (typeof MathVisuals !== 'undefined') {
+                for (const topic of topics) {
+                    const tvs = MathVisuals.getVisualsForTopic(topic);
+                    if (tvs && tvs.length > 0) topicVisuals2.push(...tvs);
+                }
+            }
 
             function t3Header(sl, title, step, totalSteps) {
                 sl.background = { color: T3.bg };
@@ -4243,10 +4350,36 @@
                     x: 1.2, y: 3.65, w: 7.6, h: 0.6,
                     fill: { color: '5B21B6' }, line: { color: T3.teal, width: 0.8 }, rectRadius: 0.08
                 });
-                sl.addText('Today we go one step further: ' + topic1, {
-                    x: 1.4, y: 3.73, w: 7.2, h: 0.45,
-                    fontSize: 14, color: T3.white, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                // Learning target from the lesson
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 1.2, y: 3.58, w: 7.6, h: 0.68,
+                    fill: { color: '5B21B6' }, line: { color: T3.teal, width: 1 }, rectRadius: 0.08
                 });
+                sl.addText('🎯  ' + objectives.primaryTarget, {
+                    x: 1.35, y: 3.63, w: 7.3, h: 0.58,
+                    fontSize: 12, bold: true, color: T3.white, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                });
+            } else {
+                // No prerequisite data — just show target
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 1.2, y: 2.7, w: 7.6, h: 0.72,
+                    fill: { color: '5B21B6' }, line: { color: T3.amber, width: 0.8 }, rectRadius: 0.08
+                });
+                sl.addText('🎯  ' + objectives.primaryTarget, {
+                    x: 1.35, y: 2.75, w: 7.3, h: 0.62,
+                    fontSize: 13, bold: true, color: T3.white, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                });
+            }
+            // Today's scaffold roadmap — first 3 steps
+            const t3Steps = objectives.scaffoldedSteps.slice(0, 3);
+            let t3StepY = 4.38;
+            sl.addText('Your steps today:', { x: 0.6, y: 4.3, w: 9, h: 0.22, fontSize: 9, color: T3.amber, bold: true, fontFace: 'Calibri', charSpacing: 1 });
+            for (let si = 0; si < t3Steps.length; si++) {
+                sl.addText((si + 1) + '. ' + t3Steps[si], {
+                    x: 0.7, y: t3StepY, w: 8.6, h: 0.22,
+                    fontSize: 9, color: 'C4B5FD', fontFace: 'Calibri', wrap: true
+                });
+                t3StepY += 0.23;
             }
             sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: T3.amber } });
 
@@ -4495,23 +4628,27 @@
             });
             // Progress stars
             sl.addText('⭐ ⭐ ⭐', {
-                x: 0.5, y: 2.6, w: 9, h: 0.6,
-                fontSize: 36, align: 'center'
+                x: 0.5, y: 2.56, w: 9, h: 0.48,
+                fontSize: 30, align: 'center'
             });
-            sl.addText('See you next session. Keep going.', {
-                x: 0.5, y: 3.35, w: 9, h: 0.4,
-                fontSize: 16, color: 'B2A0F0', align: 'center', fontFace: 'Calibri', italic: true
+            // Success criteria checklist — what we worked on today
+            sl.addText('TODAY I WORKED ON:', {
+                x: 0.6, y: 3.12, w: 9, h: 0.24,
+                fontSize: 9, bold: true, color: T3.amber, align: 'center', fontFace: 'Calibri', charSpacing: 2
             });
-            // What we did today
-            if (typeof generateSuccessCriteria === 'function') {
-                const crit = generateSuccessCriteria(icanVerb, topic1);
-                if (crit && crit.length > 0) {
-                    sl.addText('Today I: ' + crit[0], {
-                        x: 1.5, y: 3.9, w: 7, h: 0.5,
-                        fontSize: 12, color: T3.amber, align: 'center', fontFace: 'Calibri', italic: true, wrap: true
-                    });
-                }
+            const celebSteps = objectives.scaffoldedSteps.slice(0, 4);
+            let celY = 3.4;
+            for (const step of celebSteps) {
+                sl.addText('☐  ' + step, {
+                    x: 1.0, y: celY, w: 8.0, h: 0.22,
+                    fontSize: 10, color: 'C4B5FD', fontFace: 'Calibri', wrap: true
+                });
+                celY += 0.24;
             }
+            sl.addText('See you next session. You are building something great.', {
+                x: 0.5, y: 4.98, w: 9, h: 0.3,
+                fontSize: 10, color: 'B2A0F0', align: 'center', fontFace: 'Calibri', italic: true
+            });
 
             const fname = (analysis.filename || 'lesson').replace('.pptx','').replace(/[^a-z0-9]/gi,'_') + '_tier3_intensive.pptx';
             await pres.writeFile({ fileName: fname });
