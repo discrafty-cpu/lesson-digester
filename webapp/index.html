@@ -1108,6 +1108,11 @@
             <div class="results-section delay-8" id="downloadSection">
                 <button class="download-btn" id="downloadBtn">⬇️ Download Rebuilt Lesson (.pptx)</button>
                 <button class="download-btn" id="notesBtn" style="background: var(--teal); margin-left: 12px;">📝 Download Student Notes</button>
+                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">INTERVENTION OUTPUTS</div>
+                    <button class="download-btn" id="tier2Btn" style="background: #0D9488; margin-right: 10px;">👥 Tier 2 — Small Group (.pptx)</button>
+                    <button class="download-btn" id="tier3Btn" style="background: #7C3AED;">🎯 Tier 3 — Intensive (.pptx)</button>
+                </div>
             </div>
         </div>
 
@@ -3606,6 +3611,716 @@
             return 'understand';
         }
 
+        // ==================== TIER 2 — SMALL GROUP PRESENTATION ====================
+        // Purpose: 3-5 students, 3x/week, 20-30 min, same concept more scaffolded
+        // Student experience: collaborative, "we" language, starts from a WIN,
+        //   CRA sequence, partner talk baked in, self-assessment at end.
+        //   Colors: warm teal/amber — supportive, not clinical.
+        async function buildTier2Presentation(analysis) {
+            const pres = new PptxGenJS();
+            pres.defineLayout({ name: 'LAYOUT_16x9', width: 10, height: 5.625 });
+
+            const T2 = {
+                bg: 'FFFFFF', navy: '1E2761', teal: '0D9488',
+                amber: 'D4870F', warm: 'FFF7ED', warmBorder: 'FED7AA',
+                green: '16A34A', softBg: 'F0FDFA', textDark: '1E293B',
+                textMid: '475569', border: 'E2E8F0', white: 'FFFFFF',
+                purple: '7C3AED', softPurple: 'F5F3FF'
+            };
+
+            const topics = analysis.topics;
+            const standards = analysis.standards;
+            const insights = analysis.insights;
+            const topic1 = topics[0] || 'Today\'s Concept';
+            const verb = getVerbForTopic(topic1);
+
+            // ── Tier 2 header — warm, encouraging ──
+            function t2Header(sl, title, step, totalSteps) {
+                sl.background = { color: T2.bg };
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.07, fill: { color: T2.teal } });
+                sl.addText(title, {
+                    x: 0.4, y: 0.15, w: 7.5, h: 0.48,
+                    fontSize: 22, bold: true, color: T2.teal, fontFace: 'Calibri'
+                });
+                if (step && totalSteps) {
+                    // Step pill — top right
+                    sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                        x: 8.1, y: 0.16, w: 1.6, h: 0.36,
+                        fill: { color: T2.teal }, rectRadius: 0.1
+                    });
+                    sl.addText('Step ' + step + ' of ' + totalSteps, {
+                        x: 8.1, y: 0.16, w: 1.6, h: 0.36,
+                        fontSize: 10, bold: true, color: T2.white, align: 'center', valign: 'middle', fontFace: 'Calibri'
+                    });
+                }
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0.4, y: 0.65, w: 1.4, h: 0.03, fill: { color: T2.amber } });
+            }
+
+            function t2Footer(sl, text) {
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: T2.teal } });
+                sl.addText(text, {
+                    x: 0.4, y: 5.36, w: 9.2, h: 0.25,
+                    fontSize: 7, color: T2.white, fontFace: 'Calibri'
+                });
+            }
+
+            // ── Slide 1: Welcome / You Belong Here ──
+            let sl = pres.addSlide();
+            sl.background = { color: T2.teal };
+            sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.07, fill: { color: T2.amber } });
+            sl.addText('Small Group Time', {
+                x: 0.5, y: 0.5, w: 9, h: 0.45,
+                fontSize: 14, bold: true, color: T2.amber, align: 'center', fontFace: 'Calibri', charSpacing: 3
+            });
+            sl.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 0.98, w: 3, h: 0.03, fill: { color: T2.amber } });
+            sl.addText('You can do this.\nWe will figure it out together.', {
+                x: 0.8, y: 1.15, w: 8.4, h: 1.5,
+                fontSize: 30, bold: true, color: T2.white, align: 'center', valign: 'middle',
+                fontFace: 'Calibri', lineSpacingMultiple: 1.3, wrap: true
+            });
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 1.5, y: 2.9, w: 7, h: 0.65,
+                fill: { color: '0A7A6A' }, line: { color: T2.amber, width: 0.8 }, rectRadius: 0.08
+            });
+            sl.addText('Today: ' + topic1, {
+                x: 1.6, y: 2.9, w: 6.8, h: 0.65,
+                fontSize: 18, color: T2.white, align: 'center', valign: 'middle', fontFace: 'Calibri', wrap: true
+            });
+            sl.addText('Small Group  •  Grades ' + selectedGrade + '  •  ' + (standards.length > 0 ? standards[0].code : ''), {
+                x: 0.5, y: 3.75, w: 9, h: 0.3,
+                fontSize: 9, color: 'B2F0E8', align: 'center', fontFace: 'Calibri'
+            });
+            sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: T2.amber } });
+
+            // ── Slide 2: Quick Check — What Do You Already Know? ──
+            sl = pres.addSlide();
+            t2Header(sl, 'Quick Check — What do you remember?', '1', '6');
+            sl.addText('Before we start, let\'s see what you already know.\nNo pressure — all answers are good information.', {
+                x: 0.5, y: 0.85, w: 9, h: 0.55,
+                fontSize: 12, color: T2.textMid, fontFace: 'Calibri', italic: true, wrap: true
+            });
+            // Prerequisite quick check from our data
+            if (typeof getPrerequisites === 'function') {
+                const prereqs = getPrerequisites(topics);
+                if (prereqs.length > 0) {
+                    const p = prereqs[0].data;
+                    const checkQ = p.focusProblems[0] || ('What do you know about ' + topic1 + '?');
+                    sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                        x: 0.5, y: 1.55, w: 9, h: 1.4,
+                        fill: { color: T2.softBg }, line: { color: T2.teal, width: 1.2 }, rectRadius: 0.08
+                    });
+                    sl.addText(checkQ, {
+                        x: 0.7, y: 1.65, w: 8.6, h: 1.2,
+                        fontSize: 20, bold: true, color: T2.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                    });
+                }
+            }
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.5, y: 3.1, w: 9, h: 0.95,
+                fill: { color: T2.warm }, line: { color: T2.warmBorder, width: 0.8, dashType: 'dash' }, rectRadius: 0.08
+            });
+            sl.addText('Write or draw your answer here:', {
+                x: 0.7, y: 3.15, w: 4, h: 0.25,
+                fontSize: 9, color: T2.amber, italic: true, fontFace: 'Calibri'
+            });
+            t2Footer(sl, 'Tier 2 Small Group  •  Step 1: Activate Prior Knowledge');
+
+            // ── Slide 3: Let\'s Look Together — CRA Concrete/Visual ──
+            sl = pres.addSlide();
+            t2Header(sl, 'Let\'s Look Together', '2', '6');
+            sl.addText('Look at this model. What do you notice?', {
+                x: 0.5, y: 0.82, w: 9, h: 0.35,
+                fontSize: 14, color: T2.textDark, fontFace: 'Calibri', italic: true
+            });
+            // Visual model — use topic visual if available
+            const topicVisuals2 = [];
+            for (const t of topics) {
+                const tvs = MathVisuals.getVisualsForTopic(t);
+                topicVisuals2.push(...tvs);
+            }
+            if (topicVisuals2.length > 0) {
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.5, y: 1.25, w: 5.5, h: 3.2,
+                    fill: { color: T2.softBg }, line: { color: T2.teal, width: 0.8 }, rectRadius: 0.1
+                });
+                try {
+                    sl.addImage({ data: topicVisuals2[0].img, x: 0.65, y: 1.35, w: 5.2, h: 2.9, sizing: { type: 'contain', w: 5.2, h: 2.9 } });
+                } catch(e) {}
+                sl.addText(topicVisuals2[0].caption || topic1, {
+                    x: 0.5, y: 4.5, w: 5.5, h: 0.3,
+                    fontSize: 10, color: T2.teal, align: 'center', fontFace: 'Calibri', italic: true
+                });
+            } else {
+                // No visual — big concept card
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.5, y: 1.25, w: 9, h: 2.0,
+                    fill: { color: T2.softBg }, line: { color: T2.teal, width: 1 }, rectRadius: 0.1
+                });
+                sl.addText(topic1, {
+                    x: 0.7, y: 1.35, w: 8.6, h: 1.8,
+                    fontSize: 28, bold: true, color: T2.teal, align: 'center', valign: 'middle', fontFace: 'Calibri'
+                });
+            }
+            // Notice/Wonder prompts on right
+            const nwPrompts = ['What do you notice?', 'What does this remind you of?', 'What question do you have?'];
+            let npY = 1.25;
+            for (const np of nwPrompts) {
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 6.3, y: npY, w: 3.3, h: 0.85,
+                    fill: { color: T2.warm }, line: { color: T2.warmBorder, width: 0.6 }, rectRadius: 0.06
+                });
+                sl.addText(np, {
+                    x: 6.45, y: npY + 0.05, w: 3.0, h: 0.75,
+                    fontSize: 11, color: T2.amber, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                });
+                npY += 1.0;
+            }
+            t2Footer(sl, 'Tier 2 Small Group  •  Step 2: Concrete/Visual — CRA Phase 1');
+
+            // ── Slide 4: Watch Me — Explicit Worked Example ──
+            sl = pres.addSlide();
+            t2Header(sl, 'Watch Me — Step by Step', '3', '6');
+            sl.addText('Follow along. I\'ll think out loud as I work through this.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T2.textMid, fontFace: 'Calibri', italic: true
+            });
+            // Worked example from leveled problems or getSimpleExample
+            const exampleHtml = getSimpleExample(topic1);
+            // Parse the example into steps (it's HTML, extract text content)
+            const exSteps = [
+                { label: 'The Problem', text: '' },
+                { label: 'Step 1', text: '' },
+                { label: 'Step 2', text: '' },
+                { label: 'Answer', text: '' }
+            ];
+            // Extract from HTML string
+            const stepMatches = exampleHtml.match(/<strong>(.*?)<\/strong>(.*?)(?=<p>|$)/gs) || [];
+            const parsed = exampleHtml.replace(/<[^>]+>/g, '').split('\n').filter(s => s.trim());
+            const colors = [T2.navy, T2.teal, T2.teal, T2.green];
+            let stepY = 1.2;
+            const stepCount = Math.min(4, parsed.length);
+            for (let si = 0; si < stepCount; si++) {
+                const line = parsed[si].trim();
+                if (!line) continue;
+                const isAnswer = line.toLowerCase().includes('answer:');
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.4, y: stepY, w: 9.2, h: 0.78,
+                    fill: { color: isAnswer ? 'F0FDF4' : (si % 2 === 0 ? T2.softBg : T2.bg) },
+                    line: { color: isAnswer ? T2.green : T2.border, width: isAnswer ? 1.2 : 0.5 },
+                    rectRadius: 0.06
+                });
+                sl.addText(line, {
+                    x: 0.6, y: stepY + 0.06, w: 8.8, h: 0.65,
+                    fontSize: 14, color: isAnswer ? T2.green : T2.textDark,
+                    wrap: true, valign: 'middle', fontFace: 'Calibri',
+                    bold: isAnswer
+                });
+                stepY += 0.84;
+            }
+            t2Footer(sl, 'Tier 2 Small Group  •  Step 3: Explicit Instruction / Worked Example');
+
+            // ── Slide 5: Try Together — Partner Problem ──
+            sl = pres.addSlide();
+            t2Header(sl, 'Try Together — Partner Problem', '4', '6');
+            sl.addText('Work with your partner. Talk through every step.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T2.textMid, fontFace: 'Calibri', italic: true
+            });
+            // Get a problem from leveled data DOK 1
+            let partnerProblem = 'Use what you noticed in the model to solve this problem together.';
+            if (typeof getLeveledProblems === 'function') {
+                const lp = getLeveledProblems(topics);
+                if (lp.length > 0 && lp[0].problems.dok1 && lp[0].problems.dok1.length > 0) {
+                    partnerProblem = lp[0].problems.dok1[0].stem;
+                }
+            }
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.4, y: 1.2, w: 9.2, h: 1.4,
+                fill: { color: T2.softBg }, line: { color: T2.teal, width: 1.5 }, rectRadius: 0.08
+            });
+            sl.addText(partnerProblem, {
+                x: 0.6, y: 1.3, w: 8.8, h: 1.2,
+                fontSize: 18, bold: true, color: T2.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
+            });
+            // Sentence frames for partner talk
+            if (typeof SENTENCE_FRAMES !== 'undefined' && SENTENCE_FRAMES.problem_solving) {
+                sl.addText('SAY TO YOUR PARTNER:', {
+                    x: 0.4, y: 2.75, w: 9.2, h: 0.25,
+                    fontSize: 9, bold: true, color: T2.amber, charSpacing: 1.5, fontFace: 'Calibri'
+                });
+                let sfY = 3.05;
+                for (const frame of SENTENCE_FRAMES.problem_solving.slice(0, 2)) {
+                    sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                        x: 0.4, y: sfY, w: 9.2, h: 0.48,
+                        fill: { color: T2.warm }, line: { color: T2.warmBorder, width: 0.6 }, rectRadius: 0.06
+                    });
+                    sl.addText('"' + frame + '"', {
+                        x: 0.6, y: sfY + 0.04, w: 8.8, h: 0.4,
+                        fontSize: 12, italic: true, color: T2.amber, fontFace: 'Calibri', valign: 'middle'
+                    });
+                    sfY += 0.55;
+                }
+            }
+            // Work space
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.4, y: 4.2, w: 9.2, h: 0.8,
+                fill: { color: 'FAFBFC' }, line: { color: 'CBD5E1', width: 0.75, dashType: 'dash' }, rectRadius: 0.06
+            });
+            sl.addText('Work space:', {
+                x: 0.6, y: 4.25, w: 2, h: 0.22,
+                fontSize: 8, color: '94A3B8', italic: true, fontFace: 'Calibri'
+            });
+            t2Footer(sl, 'Tier 2 Small Group  •  Step 4: Guided Practice with Partner');
+
+            // ── Slide 6: Try On Your Own — Independent Check ──
+            sl = pres.addSlide();
+            t2Header(sl, 'Now You Try — On Your Own', '5', '6');
+            sl.addText('Take 3 minutes. Give it your best shot.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T2.textMid, fontFace: 'Calibri', italic: true
+            });
+            let indProblem = 'Show what you know about ' + topic1 + '.';
+            if (typeof getLeveledProblems === 'function') {
+                const lp = getLeveledProblems(topics);
+                if (lp.length > 0 && lp[0].problems.dok1 && lp[0].problems.dok1.length > 1) {
+                    indProblem = lp[0].problems.dok1[1].stem;
+                } else if (lp.length > 0 && lp[0].problems.dok2 && lp[0].problems.dok2.length > 0) {
+                    indProblem = lp[0].problems.dok2[0].stem;
+                }
+            }
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.4, y: 1.2, w: 9.2, h: 1.3,
+                fill: { color: 'FFFBEB' }, line: { color: T2.amber, width: 1.5 }, rectRadius: 0.08
+            });
+            sl.addText(indProblem, {
+                x: 0.6, y: 1.3, w: 8.8, h: 1.1,
+                fontSize: 18, bold: true, color: T2.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
+            });
+            // Large work space
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.4, y: 2.65, w: 9.2, h: 2.4,
+                fill: { color: 'FAFBFC' }, line: { color: 'CBD5E1', width: 0.75, dashType: 'dash' }, rectRadius: 0.08
+            });
+            sl.addText('Show your work here:', {
+                x: 0.6, y: 2.72, w: 4, h: 0.25,
+                fontSize: 9, color: '94A3B8', italic: true, fontFace: 'Calibri'
+            });
+            t2Footer(sl, 'Tier 2 Small Group  •  Step 5: Independent Practice');
+
+            // ── Slide 7: Check In — Self-Assessment ──
+            sl = pres.addSlide();
+            t2Header(sl, 'Check In — How Did That Go?', '6', '6');
+            sl.addText('Be honest — this is just information to help us both.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T2.textMid, fontFace: 'Calibri', italic: true
+            });
+            // Self-assessment scale — 3 cards
+            const selfOptions = [
+                { icon: '😕', label: 'I\'m lost', sub: 'I need more help', color: 'FEF2F2', border: 'FCA5A5', textCol: 'DC2626' },
+                { icon: '🤔', label: 'Getting there', sub: 'I understand some of it', color: 'FFFBEB', border: T2.warmBorder, textCol: T2.amber },
+                { icon: '😊', label: 'I got it!', sub: 'I can explain it', color: 'F0FDF4', border: '86EFAC', textCol: T2.green }
+            ];
+            let soX = 0.6;
+            for (const opt of selfOptions) {
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: soX, y: 1.25, w: 2.8, h: 2.4,
+                    fill: { color: opt.color }, line: { color: opt.border, width: 1.5 }, rectRadius: 0.12
+                });
+                sl.addText(opt.icon, {
+                    x: soX, y: 1.45, w: 2.8, h: 0.9,
+                    fontSize: 40, align: 'center', valign: 'middle'
+                });
+                sl.addText(opt.label, {
+                    x: soX + 0.1, y: 2.4, w: 2.6, h: 0.38,
+                    fontSize: 16, bold: true, color: opt.textCol, align: 'center', fontFace: 'Calibri'
+                });
+                sl.addText(opt.sub, {
+                    x: soX + 0.1, y: 2.8, w: 2.6, h: 0.5,
+                    fontSize: 11, color: T2.textMid, align: 'center', fontFace: 'Calibri', wrap: true
+                });
+                soX += 3.0;
+            }
+            sl.addText('Circle how you feel, then tell your teacher.', {
+                x: 0.5, y: 3.85, w: 9, h: 0.3,
+                fontSize: 11, color: T2.textMid, align: 'center', fontFace: 'Calibri', italic: true
+            });
+            if (typeof generateSuccessCriteria === 'function') {
+                const crit = generateSuccessCriteria(verb, topic1);
+                if (crit && crit.length > 0) {
+                    sl.addText('I can check: ' + crit[0], {
+                        x: 0.5, y: 4.25, w: 9, h: 0.35,
+                        fontSize: 11, color: T2.teal, align: 'center', fontFace: 'Calibri', italic: true, wrap: true
+                    });
+                }
+            }
+            t2Footer(sl, 'Tier 2 Small Group  •  Step 6: Self-Assessment & Reflection');
+
+            const fname = (analysis.filename || 'lesson').replace('.pptx','').replace(/[^a-z0-9]/gi,'_') + '_tier2_small_group.pptx';
+            await pres.writeFile({ fileName: fname });
+            return fname;
+        }
+
+        // ==================== TIER 3 — INTENSIVE PRESENTATION ====================
+        // Purpose: 1:1 or 1:2, 4-5x/week, 30-45 min, prerequisite-focused
+        // Student experience: STARTS FROM A WIN, very clean uncluttered slides,
+        //   large print, CRA sequence (concrete → representational → abstract),
+        //   number line always present (IES #1 recommendation), 10-min fluency,
+        //   celebrate every small step. Colors: soft/warm — never clinical.
+        async function buildTier3Presentation(analysis) {
+            const pres = new PptxGenJS();
+            pres.defineLayout({ name: 'LAYOUT_16x9', width: 10, height: 5.625 });
+
+            const T3 = {
+                bg: 'FFFFFF', navy: '1E2761', purple: '7C3AED', softPurple: 'EDE9FE',
+                amber: 'D4870F', warm: 'FFF7ED', warmBorder: 'FED7AA',
+                green: '16A34A', softGreen: 'F0FDF4', teal: '0D9488',
+                textDark: '1E293B', textMid: '475569', border: 'E2E8F0', white: 'FFFFFF'
+            };
+
+            const topics = analysis.topics;
+            const topic1 = topics[0] || 'Today\'s Skill';
+            const verb = getVerbForTopic(topic1);
+
+            function t3Header(sl, title, step, totalSteps) {
+                sl.background = { color: T3.bg };
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.07, fill: { color: T3.purple } });
+                sl.addText(title, {
+                    x: 0.4, y: 0.15, w: 7.5, h: 0.5,
+                    fontSize: 22, bold: true, color: T3.purple, fontFace: 'Calibri'
+                });
+                if (step && totalSteps) {
+                    // Progress dots — top right
+                    for (let di = 0; di < totalSteps; di++) {
+                        sl.addShape(pres.shapes.OVAL, {
+                            x: 8.1 + di * 0.3, y: 0.26, w: 0.2, h: 0.2,
+                            fill: { color: di < step ? T3.purple : 'D1D5DB' }
+                        });
+                    }
+                }
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0.4, y: 0.67, w: 1.2, h: 0.03, fill: { color: T3.amber } });
+            }
+
+            function t3Footer(sl, text) {
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: T3.purple } });
+                sl.addText(text, {
+                    x: 0.4, y: 5.36, w: 9.2, h: 0.25,
+                    fontSize: 7, color: T3.white, fontFace: 'Calibri'
+                });
+            }
+
+            // Get prerequisite data
+            let prereqData = [];
+            let focusData = null;
+            if (typeof getPrerequisites === 'function') {
+                prereqData = getPrerequisites(topics);
+                if (prereqData.length > 0) focusData = prereqData[0].data;
+            }
+
+            // ── Slide 1: You Already Know This ──
+            // Always start from a WIN — something they CAN do
+            let sl = pres.addSlide();
+            sl.background = { color: T3.purple };
+            sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.07, fill: { color: T3.amber } });
+            sl.addText('Your Learning Time', {
+                x: 0.5, y: 0.4, w: 9, h: 0.4,
+                fontSize: 13, bold: true, color: T3.amber, align: 'center', fontFace: 'Calibri', charSpacing: 3
+            });
+            sl.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 0.85, w: 3, h: 0.03, fill: { color: T3.amber } });
+            sl.addText('You already know so much.\nToday we build on it.', {
+                x: 0.8, y: 1.1, w: 8.4, h: 1.4,
+                fontSize: 28, bold: true, color: T3.white, align: 'center', valign: 'middle',
+                fontFace: 'Calibri', lineSpacingMultiple: 1.35, wrap: true
+            });
+            // Show what they already know
+            if (focusData && focusData.prerequisites && focusData.prerequisites.length > 0) {
+                const lastPrereq = focusData.prerequisites[focusData.prerequisites.length - 1];
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 1.2, y: 2.7, w: 7.6, h: 0.8,
+                    fill: { color: '5B21B6' }, line: { color: T3.amber, width: 0.8 }, rectRadius: 0.08
+                });
+                sl.addText('You already know: ' + lastPrereq.scaffold, {
+                    x: 1.4, y: 2.78, w: 7.2, h: 0.65,
+                    fontSize: 15, color: T3.white, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                });
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 1.2, y: 3.65, w: 7.6, h: 0.6,
+                    fill: { color: '5B21B6' }, line: { color: T3.teal, width: 0.8 }, rectRadius: 0.08
+                });
+                sl.addText('Today we go one step further: ' + topic1, {
+                    x: 1.4, y: 3.73, w: 7.2, h: 0.45,
+                    fontSize: 14, color: T3.white, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                });
+            }
+            sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: T3.amber } });
+
+            // ── Slide 2: Start Here — Something They Know ──
+            sl = pres.addSlide();
+            t3Header(sl, 'Start Here — You Know This', 1, 7);
+            sl.addText('Let\'s begin with something you\'re already good at.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T3.textMid, fontFace: 'Calibri', italic: true
+            });
+            // Foundational problem — earliest prerequisite
+            let foundationProblem = 'What is 3 + 5?  What is 12 - 4?';
+            if (focusData && focusData.prerequisites && focusData.prerequisites.length > 0) {
+                foundationProblem = focusData.focusProblems[0] || foundationProblem;
+            }
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.5, y: 1.2, w: 9, h: 1.5,
+                fill: { color: T3.softGreen }, line: { color: T3.green, width: 1.5 }, rectRadius: 0.1
+            });
+            sl.addText('✓  ' + foundationProblem, {
+                x: 0.7, y: 1.3, w: 8.6, h: 1.3,
+                fontSize: 22, bold: true, color: T3.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
+            });
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.5, y: 2.85, w: 9, h: 1.8,
+                fill: { color: 'FAFBFC' }, line: { color: 'CBD5E1', width: 0.75, dashType: 'dash' }, rectRadius: 0.08
+            });
+            sl.addText('Show your work / draw a picture:', {
+                x: 0.7, y: 2.92, w: 4, h: 0.25,
+                fontSize: 9, color: '94A3B8', italic: true, fontFace: 'Calibri'
+            });
+            sl.addText('This problem uses skills from Grade ' + (focusData && focusData.prerequisites[0] ? focusData.prerequisites[0].grade : selectedGrade - 2), {
+                x: 0.5, y: 4.82, w: 9, h: 0.25,
+                fontSize: 9, color: T3.green, align: 'center', fontFace: 'Calibri', italic: true
+            });
+            t3Footer(sl, 'Tier 3 Intensive  •  Session Start from Strength');
+
+            // ── Slide 3: The Number Line — IES #1 Recommendation ──
+            sl = pres.addSlide();
+            t3Header(sl, 'The Number Line — Our Best Tool', 2, 7);
+            sl.addText('The number line helps us see how numbers and ideas connect.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T3.textMid, fontFace: 'Calibri', italic: true
+            });
+            // Always show a number line visual
+            const nlVisuals = MathVisuals.getVisualsForTopic('number line locate compare rational');
+            if (nlVisuals.length > 0) {
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.5, y: 1.2, w: 9, h: 2.2,
+                    fill: { color: T3.softPurple }, line: { color: T3.purple, width: 0.8 }, rectRadius: 0.1
+                });
+                try {
+                    sl.addImage({ data: nlVisuals[0].img, x: 0.65, y: 1.3, w: 8.7, h: 1.9, sizing: { type: 'contain', w: 8.7, h: 1.9 } });
+                } catch(e) {}
+            } else {
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.5, y: 1.2, w: 9, h: 1.5,
+                    fill: { color: T3.softPurple }, line: { color: T3.purple, width: 0.8 }, rectRadius: 0.1
+                });
+                sl.addText('←————|————|————|————|————→\n0    1/4   1/2   3/4    1', {
+                    x: 0.8, y: 1.35, w: 8.4, h: 1.1,
+                    fontSize: 20, color: T3.purple, align: 'center', valign: 'middle', fontFace: 'Courier New'
+                });
+            }
+            // Connection to topic
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.5, y: 3.55, w: 9, h: 0.7,
+                fill: { color: T3.warm }, line: { color: T3.amber, width: 0.8 }, rectRadius: 0.08
+            });
+            sl.addText('Where does ' + topic1 + ' show up on a number line? Let\'s find it.', {
+                x: 0.7, y: 3.62, w: 8.6, h: 0.55,
+                fontSize: 14, color: T3.amber, wrap: true, valign: 'middle', fontFace: 'Calibri'
+            });
+            t3Footer(sl, 'Tier 3 Intensive  •  IES Recommendation: Use the Number Line');
+
+            // ── Slide 4: Build It — CRA Concrete ──
+            sl = pres.addSlide();
+            t3Header(sl, 'Build It — Hands On', 3, 7);
+            sl.addText('Before we write anything, let\'s understand what it means.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T3.textMid, fontFace: 'Calibri', italic: true
+            });
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.5, y: 1.2, w: 4.4, h: 3.6,
+                fill: { color: T3.softPurple }, line: { color: T3.purple, width: 1 }, rectRadius: 0.1
+            });
+            sl.addText('CONCRETE', {
+                x: 0.5, y: 1.25, w: 4.4, h: 0.32,
+                fontSize: 10, bold: true, color: T3.purple, align: 'center', fontFace: 'Calibri', charSpacing: 2
+            });
+            if (topicVisuals2.length > 0) {
+                try {
+                    sl.addImage({ data: topicVisuals2[0].img, x: 0.65, y: 1.6, w: 4.1, h: 2.8, sizing: { type: 'contain', w: 4.1, h: 2.8 } });
+                } catch(e) {}
+            } else {
+                sl.addText('Use manipulatives, tiles,\nor draw objects to\nrepresent ' + topic1, {
+                    x: 0.7, y: 1.65, w: 4.0, h: 2.7,
+                    fontSize: 14, color: T3.purple, wrap: true, valign: 'middle', align: 'center', fontFace: 'Calibri'
+                });
+            }
+            // Teacher cue on right
+            const concreteSteps = [
+                'Use what you can touch or draw',
+                'Say out loud what you\'re doing',
+                'Check: does your model make sense?'
+            ];
+            let csY = 1.2;
+            for (const cs of concreteSteps) {
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 5.2, y: csY, w: 4.4, h: 0.85,
+                    fill: { color: T3.warm }, line: { color: T3.warmBorder, width: 0.6 }, rectRadius: 0.08
+                });
+                sl.addText(cs, {
+                    x: 5.4, y: csY + 0.06, w: 4.0, h: 0.72,
+                    fontSize: 13, color: T3.amber, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                });
+                csY += 1.0;
+            }
+            t3Footer(sl, 'Tier 3 Intensive  •  CRA Phase 1: Concrete Understanding');
+
+            // ── Slide 5: Draw It — CRA Representational ──
+            sl = pres.addSlide();
+            t3Header(sl, 'Draw It — Make a Picture', 4, 7);
+            sl.addText('Now draw what you just built. A picture is a bridge to the math.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T3.textMid, fontFace: 'Calibri', italic: true
+            });
+            // Large drawing space with guided structure
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.5, y: 1.2, w: 9, h: 3.2,
+                fill: { color: 'FAFBFC' }, line: { color: T3.purple, width: 0.8, dashType: 'dash' }, rectRadius: 0.1
+            });
+            sl.addText('Draw your model here:', {
+                x: 0.7, y: 1.28, w: 4, h: 0.25,
+                fontSize: 9, color: T3.purple, italic: true, fontFace: 'Calibri'
+            });
+            // Dotted grid lines to help
+            for (let gi = 0; gi < 5; gi++) {
+                sl.addShape(pres.shapes.RECTANGLE, {
+                    x: 0.5, y: 1.8 + gi * 0.5, w: 9, h: 0.01,
+                    fill: { color: 'E2E8F0' }
+                });
+            }
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.5, y: 4.55, w: 9, h: 0.5,
+                fill: { color: T3.softPurple }, line: { color: T3.purple, width: 0.6 }, rectRadius: 0.06
+            });
+            sl.addText('My picture shows: ___________________________________', {
+                x: 0.7, y: 4.6, w: 8.6, h: 0.4,
+                fontSize: 12, color: T3.purple, fontFace: 'Calibri'
+            });
+            t3Footer(sl, 'Tier 3 Intensive  •  CRA Phase 2: Representational');
+
+            // ── Slide 6: Write It — CRA Abstract ──
+            sl = pres.addSlide();
+            t3Header(sl, 'Write It — Use the Math Symbols', 5, 7);
+            sl.addText('Now we write the math. Your picture and model are right here to help.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T3.textMid, fontFace: 'Calibri', italic: true
+            });
+            // Worked example using the getSimpleExample function
+            const ex2 = getSimpleExample(topic1);
+            const parsedEx2 = ex2.replace(/<[^>]+>/g, '').split('\n').filter(s => s.trim());
+            let exY = 1.2;
+            for (let pi = 0; pi < Math.min(4, parsedEx2.length); pi++) {
+                const line = parsedEx2[pi].trim();
+                if (!line) continue;
+                const isAnswer = line.toLowerCase().includes('answer:');
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.4, y: exY, w: 9.2, h: 0.72,
+                    fill: { color: isAnswer ? T3.softGreen : T3.softPurple },
+                    line: { color: isAnswer ? T3.green : T3.purple, width: isAnswer ? 1.2 : 0.5 },
+                    rectRadius: 0.06
+                });
+                sl.addText(line, {
+                    x: 0.6, y: exY + 0.05, w: 8.8, h: 0.62,
+                    fontSize: 15, color: isAnswer ? T3.green : T3.purple,
+                    wrap: true, valign: 'middle', fontFace: 'Calibri', bold: isAnswer
+                });
+                exY += 0.78;
+            }
+            t3Footer(sl, 'Tier 3 Intensive  •  CRA Phase 3: Abstract Notation');
+
+            // ── Slide 7: Fluency — Quick 10 Minutes ──
+            sl = pres.addSlide();
+            t3Header(sl, 'Fluency — Quick Practice', 6, 7);
+            sl.addText('10 minutes. Short, focused, you can do it.', {
+                x: 0.5, y: 0.82, w: 9, h: 0.3,
+                fontSize: 12, color: T3.textMid, fontFace: 'Calibri', italic: true
+            });
+            // Get DOK 1 problems for fluency
+            const fluencyProblems = [];
+            if (typeof getLeveledProblems === 'function') {
+                const lp = getLeveledProblems(topics);
+                if (lp.length > 0 && lp[0].problems.dok1) {
+                    fluencyProblems.push(...lp[0].problems.dok1.slice(0, 3));
+                }
+            }
+            if (fluencyProblems.length === 0) {
+                fluencyProblems.push(
+                    { stem: focusData && focusData.focusProblems[0] ? focusData.focusProblems[0] : 'Practice problem 1 for ' + topic1 },
+                    { stem: focusData && focusData.focusProblems[1] ? focusData.focusProblems[1] : 'Practice problem 2 for ' + topic1 }
+                );
+            }
+            let fpY = 1.2;
+            for (let fpi = 0; fpi < Math.min(3, fluencyProblems.length); fpi++) {
+                sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                    x: 0.4, y: fpY, w: 9.2, h: 0.9,
+                    fill: { color: T3.softPurple }, line: { color: T3.purple, width: 0.6 }, rectRadius: 0.06
+                });
+                sl.addShape(pres.shapes.OVAL, { x: 0.55, y: fpY + 0.22, w: 0.42, h: 0.42, fill: { color: T3.purple } });
+                sl.addText((fpi + 1).toString(), {
+                    x: 0.55, y: fpY + 0.22, w: 0.42, h: 0.42,
+                    fontSize: 14, bold: true, color: T3.white, align: 'center', valign: 'middle', fontFace: 'Calibri'
+                });
+                sl.addText(fluencyProblems[fpi].stem, {
+                    x: 1.1, y: fpY + 0.08, w: 7.2, h: 0.75,
+                    fontSize: 14, color: T3.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
+                });
+                // Answer blank
+                sl.addShape(pres.shapes.RECTANGLE, { x: 8.5, y: fpY + 0.3, w: 0.9, h: 0.02, fill: { color: T3.purple } });
+                sl.addText('ans:', { x: 8.1, y: fpY + 0.16, w: 0.4, h: 0.2, fontSize: 7, color: T3.textMid, fontFace: 'Calibri' });
+                fpY += 1.0;
+            }
+            t3Footer(sl, 'Tier 3 Intensive  •  Fluency Practice (10 min)  •  IES Recommendation');
+
+            // ── Slide 8: I Can — Celebrate the WIN ──
+            sl = pres.addSlide();
+            sl.background = { color: T3.purple };
+            sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.07, fill: { color: T3.amber } });
+            sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: T3.amber } });
+            sl.addText('I DID IT.', {
+                x: 0.5, y: 0.5, w: 9, h: 0.55,
+                fontSize: 42, bold: true, color: T3.white, align: 'center', fontFace: 'Calibri', charSpacing: 4
+            });
+            sl.addShape(pres.shapes.RECTANGLE, { x: 3, y: 1.1, w: 4, h: 0.04, fill: { color: T3.amber } });
+            const icanVerb = getVerbForTopic(topic1);
+            sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                x: 0.8, y: 1.3, w: 8.4, h: 1.1,
+                fill: { color: '5B21B6' }, line: { color: T3.amber, width: 1 }, rectRadius: 0.1
+            });
+            sl.addText('I can ' + icanVerb + ' ' + topic1 + '.', {
+                x: 1.0, y: 1.38, w: 8.0, h: 0.9,
+                fontSize: 20, bold: true, color: T3.white, align: 'center', valign: 'middle',
+                fontFace: 'Calibri', wrap: true, lineSpacingMultiple: 1.2
+            });
+            // Progress stars
+            sl.addText('⭐ ⭐ ⭐', {
+                x: 0.5, y: 2.6, w: 9, h: 0.6,
+                fontSize: 36, align: 'center'
+            });
+            sl.addText('See you next session. Keep going.', {
+                x: 0.5, y: 3.35, w: 9, h: 0.4,
+                fontSize: 16, color: 'B2A0F0', align: 'center', fontFace: 'Calibri', italic: true
+            });
+            // What we did today
+            if (typeof generateSuccessCriteria === 'function') {
+                const crit = generateSuccessCriteria(icanVerb, topic1);
+                if (crit && crit.length > 0) {
+                    sl.addText('Today I: ' + crit[0], {
+                        x: 1.5, y: 3.9, w: 7, h: 0.5,
+                        fontSize: 12, color: T3.amber, align: 'center', fontFace: 'Calibri', italic: true, wrap: true
+                    });
+                }
+            }
+
+            const fname = (analysis.filename || 'lesson').replace('.pptx','').replace(/[^a-z0-9]/gi,'_') + '_tier3_intensive.pptx';
+            await pres.writeFile({ fileName: fname });
+            return fname;
+        }
+
         // ==================== STUDENT NOTES GENERATOR ====================
         // Generates a scaffolded, printable student notes handout as HTML
         function generateStudentNotes(analysis) {
@@ -4109,6 +4824,44 @@
                         btn.textContent = originalText;
                         btn.disabled = false;
                     }, 4000);
+                }
+            }
+        });
+
+        // ── Tier 2 button ──
+        document.getElementById('tier2Btn')?.addEventListener('click', async () => {
+            if (currentAnalysis) {
+                const btn = document.getElementById('tier2Btn');
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ Building Tier 2...';
+                btn.disabled = true;
+                try {
+                    const filename = await buildTier2Presentation(currentAnalysis);
+                    btn.textContent = '✅ Downloaded: ' + filename;
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3500);
+                } catch (err) {
+                    console.error('Tier 2 error:', err);
+                    btn.textContent = '❌ Error: ' + err.message;
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 4000);
+                }
+            }
+        });
+
+        // ── Tier 3 button ──
+        document.getElementById('tier3Btn')?.addEventListener('click', async () => {
+            if (currentAnalysis) {
+                const btn = document.getElementById('tier3Btn');
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ Building Tier 3...';
+                btn.disabled = true;
+                try {
+                    const filename = await buildTier3Presentation(currentAnalysis);
+                    btn.textContent = '✅ Downloaded: ' + filename;
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3500);
+                } catch (err) {
+                    console.error('Tier 3 error:', err);
+                    btn.textContent = '❌ Error: ' + err.message;
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 4000);
                 }
             }
         });
