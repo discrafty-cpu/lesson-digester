@@ -2,7 +2,7 @@
  * math-models.js — SVG Math Model Generator Library
  * Lesson Digester | Drummond Math Solutions
  *
- * 25 fully client-side SVG diagram generators for grades 6–8.
+ * 30 fully client-side SVG diagram generators for grades 6–8.
  * Each model accepts an options object and returns a raw SVG string.
  * The public API converts SVG → PNG data URL (via canvas) for PptxGenJS.
  *
@@ -87,11 +87,10 @@ const MathModels = (() => {
         { keys: ['pythagorean', 'hypotenuse', 'right triangle', 'distance between points'],
                                                                                   model: 'pythagorean'     },
         { keys: ['circle', 'circumference', 'diameter', 'radius', 'arc', 'pi'], model: 'circleModel'      },
-        { keys: ['probability', 'outcome', 'sample space', 'compound event',
-                  'tree diagram'],                                                model: 'probabilityArea'  },
+        { keys: ['probability', 'outcome', 'sample space', 'compound event'],     model: 'probabilityArea'  },
         { keys: ['scatter', 'correlation', 'association', 'bivariate'],          model: 'scatterPlot'      },
         { keys: ['box plot', 'whisker', 'quartile', 'five-number', 'five number'],model: 'boxPlot'         },
-        { keys: ['dot plot', 'histogram', 'data distribution', 'frequency'],     model: 'dotPlot'          },
+        { keys: ['dot plot', 'data distribution'],                               model: 'dotPlot'          },
         { keys: ['transformation', 'translation', 'reflection', 'rotation',
                   'dilation', 'congruent', 'similar transformation'],            model: 'transformationGrid'},
         { keys: ['volume', 'prism', 'pyramid', 'cubic unit', 'surface area'],    model: 'volumeModel'      },
@@ -101,6 +100,14 @@ const MathModels = (() => {
         { keys: ['place value', 'decimal', 'rounding', 'tenths', 'hundredths'],  model: 'placeValueChart'  },
         { keys: ['distance', 'rate', 'time', 'd = rt', 'speed'],                 model: 'tapeDiagram'      },
         { keys: ['ten frame', 'counting', 'subitize'],                           model: 'tenFrame'         },
+        { keys: ['proportional relationship', 'constant of proportionality',
+                  'y = kx', 'proportional graph'],                               model: 'proportionalGraph'},
+        { keys: ['function machine', 'function rule', 'input output table',
+                  'function notation'],                                           model: 'functionMachine'  },
+        { keys: ['histogram', 'grouped data', 'frequency distribution',
+                  'frequency table'],                                             model: 'histogram'        },
+        { keys: ['tree diagram', 'two-stage experiment', 'listing outcomes',
+                  'organized list', 'sample space diagram'],                     model: 'treeDiagram'      },
     ];
 
     // ── SVG building helpers ─────────────────────────────────────────────────
@@ -997,6 +1004,195 @@ const MathModels = (() => {
         return wrap(W,H,C.light,p.join(''));
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    //  MODEL 27 — HISTOGRAM
+    //  Use: frequency distributions, grouped continuous data, data analysis
+    // ════════════════════════════════════════════════════════════════════════
+    function histogram(o={}) {
+        const title = o.title || 'Frequency Distribution';
+        const bars  = o.bars  || [
+            { label: '0–10',  freq: 3 },
+            { label: '10–20', freq: 7 },
+            { label: '20–30', freq: 9 },
+            { label: '30–40', freq: 5 },
+            { label: '40–50', freq: 2 },
+        ];
+        const W=580, H=320;
+        const ml=62, mr=20, mt=46, mb=58;
+        const cW=W-ml-mr, cH=H-mt-mb;
+        const maxF = Math.max(...bars.map(b=>b.freq));
+        const yMax = Math.ceil((maxF+1)/2)*2;
+        const bw   = cW / bars.length;
+        const p    = [];
+        // title
+        p.push(t(W/2, 27, title, {sz:15, bold:true, col:C.navy}));
+        // gridlines + y-labels
+        for (let v=0; v<=yMax; v+=2) {
+            const gy = mt + cH - (v/yMax)*cH;
+            p.push(ln(ml, gy, ml+cW, gy, {col:'#E2E8F0', sw:1}));
+            p.push(t(ml-8, gy+5, v, {sz:11, col:'#94A3B8', anc:'end'}));
+        }
+        // bars
+        bars.forEach((bar, i) => {
+            const bx = ml + i*bw;
+            const bh = (bar.freq/yMax)*cH;
+            const by = mt + cH - bh;
+            p.push(r(bx+1, by, bw-2, bh, {fill:C.amber, stroke:C.white, sw:2, rx:3}));
+            if (bh > 18) p.push(t(bx+bw/2, by-7, bar.freq, {sz:12, bold:true, col:C.navy}));
+            p.push(t(bx+bw/2, mt+cH+18, bar.label, {sz:10, col:C.dark}));
+        });
+        // axes
+        p.push(ln(ml, mt, ml, mt+cH, {col:C.navy, sw:2}));
+        p.push(ln(ml, mt+cH, ml+cW, mt+cH, {col:C.navy, sw:2}));
+        // axis labels
+        p.push(`<text x="${ml-42}" y="${mt+cH/2}" fill="${C.navy}" font-size="12" font-family="Arial,Helvetica,sans-serif" text-anchor="middle" transform="rotate(-90,${ml-42},${mt+cH/2})">Frequency</text>`);
+        p.push(t(ml+cW/2, H-6, 'Data Intervals', {sz:12, col:C.navy}));
+        return wrap(W, H, C.white, p.join(''));
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  MODEL 28 — TREE DIAGRAM
+    //  Use: probability of compound events, 2-stage experiments, outcomes
+    // ════════════════════════════════════════════════════════════════════════
+    function treeDiagram(o={}) {
+        const title  = o.title  || 'Tree Diagram';
+        const first  = o.first  || ['Heads', 'Tails'];
+        const second = o.second || ['Heads', 'Tails'];
+        const fLabel = o.fLabel || 'Flip 1';
+        const sLabel = o.sLabel || 'Flip 2';
+        const W=580, H=370, p=[];
+        // title
+        p.push(t(W/2, 26, title, {sz:15, bold:true, col:C.navy}));
+        // column header labels
+        p.push(t(68, 48, 'Start', {sz:11, col:'#94A3B8'}));
+        p.push(t(218, 48, fLabel, {sz:11, col:C.teal, bold:true}));
+        p.push(t(382, 48, sLabel, {sz:11, col:C.amber, bold:true}));
+        p.push(t(518, 48, 'Outcome', {sz:11, col:C.navy, bold:true}));
+        // root node
+        const rx0=68, ry0=H/2+10;
+        p.push(circ(rx0, ry0, 10, {fill:C.navy, stroke:'none'}));
+        // first level
+        const n1 = first.length;
+        first.forEach((fv, fi) => {
+            const fy = 60 + (H-80) * (fi+0.5) / n1;
+            p.push(ln(rx0+10, ry0, 200, fy, {col:C.teal, sw:2}));
+            p.push(circ(213, fy, 18, {fill:'#E0F2FE', stroke:C.teal, sw:2}));
+            p.push(t(213, fy+5, fv.length>5 ? fv.slice(0,4) : fv, {sz:11, bold:true, col:C.teal}));
+            const mx1=(rx0+10+200)/2, my1=(ry0+fy)/2-8;
+            p.push(t(mx1, my1, '½', {sz:10, col:'#94A3B8'}));
+            // second level
+            const n2 = second.length;
+            second.forEach((sv, si) => {
+                const sy = 60 + (H-80) * ((fi*n2+si)+0.5) / (n1*n2);
+                p.push(ln(231, fy, 362, sy, {col:C.amber, sw:1.5}));
+                p.push(circ(375, sy, 18, {fill:'#FFF7ED', stroke:C.amber, sw:2}));
+                p.push(t(375, sy+5, sv.length>5 ? sv.slice(0,4) : sv, {sz:11, bold:true, col:C.amber}));
+                const outTxt = `${fv.slice(0,1)},${sv.slice(0,1)}`;
+                p.push(t(513, sy+5, outTxt, {sz:12, col:C.navy, bold:true}));
+                p.push(t((231+362)/2, (fy+sy)/2-6, '½', {sz:10, col:'#94A3B8'}));
+            });
+        });
+        return wrap(W, H, C.white, p.join(''));
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  MODEL 29 — FUNCTION MACHINE
+    //  Use: function rules, input-output tables, evaluating functions
+    // ════════════════════════════════════════════════════════════════════════
+    function functionMachine(o={}) {
+        const title = o.title || 'Function Machine';
+        const rule  = o.rule  || 'x × 3 + 1';
+        const pairs = o.pairs || [{x:0,y:1},{x:1,y:4},{x:2,y:7},{x:3,y:10}];
+        const W=540, H=290, p=[];
+        // title
+        p.push(t(W/2, 26, title, {sz:15, bold:true, col:C.navy}));
+        // Machine body
+        const mx=110, my=58, mw=165, mh=148;
+        p.push(r(mx, my, mw, mh, {fill:'#EFF6FF', stroke:C.navy, sw:3, rx:12}));
+        // machine header bar
+        p.push(r(mx+8, my+8, mw-16, 34, {fill:C.navy, stroke:'none', rx:6}));
+        p.push(t(mx+mw/2, my+30, 'FUNCTION', {sz:11, bold:true, col:C.white}));
+        // rule display
+        p.push(r(mx+10, my+52, mw-20, 38, {fill:'#DBEAFE', stroke:C.blue, sw:1.5, rx:6}));
+        p.push(t(mx+mw/2, my+77, rule, {sz:13, bold:true, col:C.teal}));
+        p.push(t(mx+mw/2, my+108, 'MACHINE', {sz:11, col:'#94A3B8'}));
+        p.push(r(mx+14, my+118, mw-28, 22, {fill:'#F0FDF4', stroke:'#86EFAC', sw:1, rx:4}));
+        p.push(t(mx+mw/2, my+133, 'f(x) = ' + rule, {sz:9, col:C.dark}));
+        // input arrow + labels
+        p.push(arrow(24, my+mh/2, mx-5, my+mh/2, C.teal, 3));
+        p.push(t(26, my+mh/2-18, 'INPUT', {sz:11, bold:true, col:C.teal, anc:'start'}));
+        p.push(t(38, my+mh/2+20, 'x', {sz:22, bold:true, col:C.teal, anc:'start'}));
+        // output arrow + labels
+        p.push(arrow(mx+mw+5, my+mh/2, mx+mw+72, my+mh/2, C.amber, 3));
+        p.push(t(mx+mw+78, my+mh/2-18, 'OUTPUT', {sz:11, bold:true, col:C.amber, anc:'start'}));
+        p.push(t(mx+mw+88, my+mh/2+20, 'y', {sz:22, bold:true, col:C.amber, anc:'start'}));
+        // table
+        const tx=360, ty=52, tw=168, rowH=34;
+        p.push(r(tx, ty, tw, rowH, {fill:C.navy, stroke:'none', rx:6}));
+        p.push(t(tx+tw*0.33, ty+23, 'x', {sz:13, bold:true, col:C.white}));
+        p.push(t(tx+tw*0.72, ty+23, 'f(x)', {sz:13, bold:true, col:C.white}));
+        p.push(ln(tx+tw*0.54, ty, tx+tw*0.54, ty+rowH+(pairs.length)*rowH, {col:'#94A3B8', sw:1.5}));
+        pairs.forEach((pr, i) => {
+            const ry2 = ty + rowH + i*rowH;
+            p.push(r(tx, ry2, tw, rowH, {fill: i%2===0?'#F8FAFC':'#EFF6FF', stroke:'#CBD5E1', sw:1}));
+            p.push(t(tx+tw*0.33, ry2+23, pr.x, {sz:14, col:C.teal}));
+            p.push(t(tx+tw*0.72, ry2+23, pr.y, {sz:14, bold:true, col:C.amber}));
+        });
+        return wrap(W, H, C.white, p.join(''));
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  MODEL 30 — PROPORTIONAL RELATIONSHIP GRAPH
+    //  Use: y = kx, constant of proportionality, proportional reasoning
+    // ════════════════════════════════════════════════════════════════════════
+    function proportionalGraph(o={}) {
+        const title = o.title || 'Proportional Relationship';
+        const k     = o.k     ?? 2;
+        const xMax  = o.xMax  ?? 5;
+        const unit  = o.unit  || '';
+        const W=480, H=460, p=[];
+        const ml=65, mr=30, mt=50, mb=62;
+        const cW=W-ml-mr, cH=H-mt-mb;
+        const px = x => ml + (x/xMax)*cW;
+        const py = y => mt + cH - (y/(k*xMax))*cH;
+        // title
+        p.push(t(W/2, 28, title, {sz:14, bold:true, col:C.navy}));
+        // gridlines
+        for (let x=0; x<=xMax; x++) {
+            const gx=px(x);
+            p.push(ln(gx, mt, gx, mt+cH, {col:'#E2E8F0', sw:1}));
+            p.push(t(gx, mt+cH+18, x, {sz:11, col:C.dark}));
+        }
+        for (let y=0; y<=k*xMax; y++) {
+            const gy=py(y);
+            p.push(ln(ml, gy, ml+cW, gy, {col:'#E2E8F0', sw:1}));
+            p.push(t(ml-10, gy+5, y, {sz:11, col:C.dark, anc:'end'}));
+        }
+        // y=kx line
+        p.push(`<line x1="${px(0)}" y1="${py(0)}" x2="${px(xMax)}" y2="${py(k*xMax)}" stroke="${C.teal}" stroke-width="3"/>`);
+        // highlighted points
+        for (let x=1; x<=Math.min(xMax,4); x++) {
+            const y=k*x;
+            p.push(circ(px(x), py(y), 7, {fill:C.amber, stroke:C.white, sw:2}));
+            p.push(t(px(x)+13, py(y)-8, `(${x},${y})`, {sz:10, col:C.navy, anc:'start'}));
+        }
+        // origin dot
+        p.push(circ(px(0), py(0), 5, {fill:C.navy, stroke:C.white, sw:2}));
+        // axes
+        p.push(arrow(ml-5, mt+cH+2, ml-5, mt-10, C.navy, 2));
+        p.push(arrow(ml-5, mt+cH+2, ml+cW+12, mt+cH+2, C.navy, 2));
+        // axis labels
+        p.push(t(ml+cW/2, H-6, 'x', {sz:14, col:C.navy, bold:true}));
+        p.push(`<text x="${ml-46}" y="${mt+cH/2}" fill="${C.navy}" font-size="14" font-weight="bold" font-family="Arial,Helvetica,sans-serif" text-anchor="middle" transform="rotate(-90,${ml-46},${mt+cH/2})">y</text>`);
+        // equation box (top-right)
+        p.push(r(ml+cW-96, mt+8, 94, 34, {fill:'#ECFDF5', stroke:C.teal, sw:2, rx:6}));
+        p.push(t(ml+cW-49, mt+30, `y = ${k}x`, {sz:15, bold:true, col:C.teal}));
+        // k callout (top-left)
+        p.push(r(ml+6, mt+8, 130, 30, {fill:'#FFF7ED', stroke:C.amber, sw:1.5, rx:6}));
+        p.push(t(ml+71, mt+28, `k = ${k}${unit ? '  ('+unit+')' : ''}`, {sz:12, bold:true, col:C.amber}));
+        return wrap(W, H, C.white, p.join(''));
+    }
+
     // ── Generator registry ───────────────────────────────────────────────────
     const GEN = {
         numberLine, doubleNumberLine, fractionBar, fractionCircle,
@@ -1005,7 +1201,8 @@ const MathModels = (() => {
         slopeTriangle, pythagorean, circleModel, probabilityArea,
         boxPlot, dotPlot, scatterPlot, transformationGrid,
         volumeModel, angleModel, scientificNotation, placeValueChart,
-        tenFrame, workSpace
+        tenFrame, workSpace,
+        histogram, treeDiagram, functionMachine, proportionalGraph
     };
 
     // ════════════════════════════════════════════════════════════════════════
