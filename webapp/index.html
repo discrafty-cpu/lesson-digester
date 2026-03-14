@@ -716,36 +716,6 @@
             line-height: 1.6;
         }
 
-        /* ==================== GRADE SELECTOR ==================== */
-        .grade-selector {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .grade-btn {
-            background: var(--navy);
-            color: var(--text);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .grade-btn:hover {
-            border-color: var(--amber);
-        }
-
-        .grade-btn.active {
-            background: var(--amber);
-            color: var(--navy);
-            border-color: var(--amber);
-        }
-
         /* ==================== BUILD SCRIPT ==================== */
         .script-container {
             background: rgba(0, 0, 0, 0.3);
@@ -858,53 +828,6 @@
             color: var(--text-dim);
         }
 
-        /* ==================== GRADE SELECTOR ==================== */
-        .grade-selector {
-            margin-bottom: 30px;
-            text-align: center;
-            animation: slide-in-up 0.4s ease;
-        }
-
-        .grade-selector-label {
-            display: block;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .grade-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .grade-btn {
-            background: transparent;
-            border: 2px solid var(--navy);
-            color: var(--navy);
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .grade-btn:hover {
-            border-color: var(--amber);
-            color: var(--amber);
-        }
-
-        .grade-btn.active {
-            background: var(--amber);
-            color: var(--navy);
-            border-color: var(--amber);
-        }
-
         /* ==================== RESPONSIVE ==================== */
         @media (max-width: 768px) {
             header {
@@ -981,15 +904,6 @@
                 font-size: 1.2rem;
             }
 
-            .grade-selector-label {
-                font-size: 0.85rem;
-            }
-
-            .grade-btn {
-                padding: 8px 14px;
-                font-size: 0.85rem;
-            }
-
             .drop-zone {
                 padding: 30px 16px;
             }
@@ -1026,15 +940,6 @@
 
     <!-- ==================== MAIN CONTENT ==================== -->
     <main>
-        <!-- GRADE SELECTOR -->
-        <div class="grade-selector" id="mainGradeSelector">
-            <span class="grade-selector-label">Select Grade Level:</span>
-            <div class="grade-buttons">
-                <button class="grade-btn" data-grade="6">Grade 6</button>
-                <button class="grade-btn active" data-grade="7">Grade 7</button>
-                <button class="grade-btn" data-grade="8">Grade 8</button>
-            </div>
-        </div>
 
         <!-- DROP ZONE -->
         <div class="drop-zone" id="dropZone">
@@ -1070,7 +975,7 @@
             <!-- Topics Detected -->
             <div class="results-section delay-3" id="topicsSection">
                 <h2 class="section-heading">🔍 Topics Detected</h2>
-                <div class="grade-selector" id="gradeSelector"></div>
+                <div id="detectedGradeBadge" style="margin-bottom:10px;"></div>
                 <div class="tags-container" id="topicsContainer"></div>
             </div>
 
@@ -1407,26 +1312,32 @@
 
         // ==================== STATE ====================
         let currentAnalysis = null;
-        let selectedGrade = 7; // Default to Grade 7
+        let selectedGrade = 7; // Auto-detected from lesson content
 
-        // ==================== GRADE SELECTOR ====================
-        function initializeGradeSelector() {
-            const gradeButtons = document.querySelectorAll('.grade-btn');
-            gradeButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    gradeButtons.forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    selectedGrade = parseInt(e.target.dataset.grade);
-                    // Re-display results if analysis exists
-                    if (currentAnalysis) {
-                        displayResults();
-                    }
-                });
-            });
+        // ==================== GRADE AUTO-DETECTION ====================
+        // Reads grade from standard codes (e.g. "7.RP.A.1" → 7), then from
+        // any "Grade X" text in the slides, then falls back to 7.
+        function detectGradeFromAnalysis(analysis) {
+            // 1. Standards are the most reliable signal
+            for (const std of (analysis.standards || [])) {
+                const m = (std.code || '').match(/^([678])\./);
+                if (m) return parseInt(m[1]);
+            }
+            // 2. Slide text mentions
+            const allText = (analysis.slides || []).map(s => s.text).join('\n');
+            if (/\bgrade\s*8\b|8th[\s-]grade/i.test(allText)) return 8;
+            if (/\bgrade\s*6\b|6th[\s-]grade/i.test(allText)) return 6;
+            if (/\bgrade\s*7\b|7th[\s-]grade/i.test(allText)) return 7;
+            // 3. Default
+            return 7;
         }
 
-        // Initialize grade selector on page load
-        document.addEventListener('DOMContentLoaded', initializeGradeSelector);
+        // Show a small detected-grade badge in the Topics section
+        function renderDetectedGradeBadge(grade) {
+            const el = document.getElementById('detectedGradeBadge');
+            if (!el) return;
+            el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;background:#D4870F;color:#1E2761;font-size:0.78rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:0.5px;">✦ GRADE ${grade} DETECTED</span>`;
+        }
 
         // ==================== EVENT LISTENERS ====================
         document.getElementById('fileInput').addEventListener('change', handleFileSelect);
@@ -1585,8 +1496,12 @@
                     buildScript: buildScript
                 };
 
+                // Auto-detect grade from lesson content
+                selectedGrade = detectGradeFromAnalysis(currentAnalysis);
+
                 updateProgress(100, 'Complete!');
                 displayResults();
+                renderDetectedGradeBadge(selectedGrade);
 
                 setTimeout(() => {
                     document.getElementById('progressContainer').classList.remove('visible');
