@@ -85,6 +85,64 @@
 
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // FRACTION RENDERER BRIDGE
+  // Automatically converts inline fractions (3/4, 1/2, etc.) to proper
+  // vertical notation using FractionRenderer when available.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Check if FractionRenderer is available (loaded before this file).
+   */
+  function hasFR() {
+    return typeof root.FractionRenderer !== 'undefined';
+  }
+
+  /**
+   * Convert text to PptxGenJS text runs with fraction rendering.
+   * If FractionRenderer is not loaded, returns the text as a plain run.
+   *
+   * @param {string} text - Text that may contain fractions like "3/4 of the pizza"
+   * @param {object} opts - { fontSize, fontFace, color } for PptxGenJS
+   * @returns {Array} PptxGenJS text run array
+   */
+  function fracRuns(text, opts) {
+    opts = opts || {};
+    if (!text || typeof text !== 'string') {
+      return [{ text: text || '', options: opts }];
+    }
+    if (hasFR() && root.FractionRenderer.findFractions(text).length > 0) {
+      return root.FractionRenderer.convertTextToPptxRuns(text, opts);
+    }
+    return [{ text: text, options: opts }];
+  }
+
+  /**
+   * Add text to a slide with automatic fraction rendering.
+   * Drop-in replacement for slide.addText(text, opts) that processes fractions.
+   *
+   * @param {Object} slide - PptxGenJS slide object
+   * @param {string} text - Text content (may contain fractions)
+   * @param {Object} textOpts - PptxGenJS text options (x, y, w, h, fontSize, etc.)
+   */
+  function addTextWithFractions(slide, text, textOpts) {
+    if (!text || typeof text !== 'string') {
+      slide.addText(text || '', textOpts);
+      return;
+    }
+    if (hasFR() && root.FractionRenderer.findFractions(text).length > 0) {
+      var runs = root.FractionRenderer.convertTextToPptxRuns(text, {
+        fontSize: textOpts.fontSize || K.FONT_BODY,
+        fontFace: textOpts.fontFace || 'Calibri',
+        color: textOpts.color || '1E293B'
+      });
+      slide.addText(runs, textOpts);
+    } else {
+      slide.addText(text, textOpts);
+    }
+  }
+
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // HELPER FUNCTIONS
   // ═══════════════════════════════════════════════════════════════════════════
 
@@ -356,7 +414,7 @@
       }
 
       if (content.left.body) {
-        slide.addText(content.left.body, {
+        addTextWithFractions(slide, content.left.body, {
           x: leftX + 0.25, y: textStartY + 0.45, w: leftW - 0.5, h: leftH - (textStartY - leftY) - 0.75,
           fontSize: K.FONT_BODY, fontFace: bodyFont(theme),
           color: dark ? C.text2 : (C.textMid || '64748B'),
@@ -391,9 +449,9 @@
         });
       }
 
-      // Card body
+      // Card body — with automatic fraction rendering
       if (card.body) {
-        slide.addText(card.body, {
+        addTextWithFractions(slide, card.body, {
           x: rightX + 0.2, y: cardY + 0.4, w: rightW - 0.4, h: cardH - 0.5,
           fontSize: K.FONT_BODY - 1, fontFace: bodyFont(theme),
           color: dark ? C.text : (C.textDark || '1E293B'),
@@ -470,9 +528,9 @@
         });
       }
 
-      // Card body
+      // Card body — with automatic fraction rendering
       if (card.body) {
-        slide.addText(card.body, {
+        addTextWithFractions(slide, card.body, {
           x: cx + 0.12, y: titleY + 0.35, w: colW - 0.24, h: rowH - (titleY - cy) - 0.5,
           fontSize: K.FONT_BODY - 2, fontFace: bodyFont(theme),
           color: dark ? C.text2 : (C.textMid || '64748B'),
@@ -558,8 +616,8 @@
         });
       }
 
-      // Item text
-      slide.addText(item.text, {
+      // Item text — with automatic fraction rendering
+      addTextWithFractions(slide, item.text, {
         x: cbX + 0.4, y: iy, w: listW - 0.7, h: itemH,
         fontSize: K.FONT_BODY, fontFace: bodyFont(theme),
         color: dark ? C.text : (C.textDark || '1E293B'),
@@ -661,7 +719,7 @@
                         (dark ? C.text : (C.textDark || '1E293B'));
         var itemWeight = (item.isError || item.isCorrect) ? true : false;
 
-        slide.addText(item.text, {
+        addTextWithFractions(slide, item.text, {
           x: x + 0.15, y: iy, w: colW - 0.3, h: itemH,
           fontSize: K.FONT_BODY - 1, fontFace: bodyFont(theme),
           color: itemColor, bold: itemWeight,
@@ -686,7 +744,7 @@
       var bY = colY + colH + 0.1;
       drawCard(slide, pres, K.MARGIN, bY, K.CONTENT_W, bottomH,
         dark ? C.card : 'F8FAFC', { shadow: true });
-      slide.addText(content.bottomText, {
+      addTextWithFractions(slide, content.bottomText, {
         x: K.MARGIN + 0.2, y: bY, w: K.CONTENT_W - 0.4, h: bottomH,
         fontSize: K.FONT_BODY - 1, fontFace: bodyFont(theme),
         color: dark ? C.text2 : (C.textMid || '64748B'),
@@ -754,9 +812,9 @@
         bold: true, color: phaseColor, valign: 'top', margin: 0
       });
 
-      // Phase body
+      // Phase body — with automatic fraction rendering
       if (phase.body) {
-        slide.addText(phase.body, {
+        addTextWithFractions(slide, phase.body, {
           x: px + 0.15, y: phaseY + 0.55, w: phaseW - 0.3, h: phaseH - 0.7,
           fontSize: K.FONT_BODY - 1, fontFace: bodyFont(theme),
           color: dark ? C.text : (C.textDark || '1E293B'),
@@ -847,7 +905,7 @@
       // Process text: replace ____ with underline visual
       var processedText = (msg.text || '').replace(/_{3,}/g, '________');
 
-      slide.addText(processedText, {
+      addTextWithFractions(slide, processedText, {
         x: mx + 0.12, y: my + 0.24, w: bubbleW - 0.24, h: msgH - 0.32,
         fontSize: K.FONT_BODY - 1, fontFace: bodyFont(theme),
         color: speakerTextColors[side],
@@ -939,9 +997,9 @@
       });
     }
 
-    // Problem text
+    // Problem text — with automatic fraction rendering (Vinculum)
     var ptX = content.problemNum !== undefined ? K.MARGIN + 0.75 : K.MARGIN + 0.15;
-    slide.addText(content.problemText, {
+    addTextWithFractions(slide, content.problemText, {
       x: ptX, y: barY + 0.05, w: K.CONTENT_W - (ptX - K.MARGIN) - 1.2, h: barH - 0.1,
       fontSize: K.FONT_CARD_HEAD, fontFace: bodyFont(theme),
       bold: true, color: forceDark ? 'F1F5F9' : (C.textDark || '1E293B'),
@@ -1083,7 +1141,7 @@
         x: K.MARGIN + levelW, y: by, w: K.CONTENT_W - levelW, h: bandH,
         fill: { color: descFill, transparency: dark ? 0 : 85 }
       });
-      slide.addText(band.description, {
+      addTextWithFractions(slide, band.description, {
         x: K.MARGIN + levelW + 0.2, y: by, w: K.CONTENT_W - levelW - 0.4, h: bandH,
         fontSize: K.FONT_BODY - 1, fontFace: bodyFont(theme),
         color: dark ? C.text : (C.textDark || '1E293B'),
@@ -1435,7 +1493,10 @@
       addFooter: addFooter,
       drawCard: drawCard,
       addBadge: addBadge,
-      makeCardShadow: makeCardShadow
+      makeCardShadow: makeCardShadow,
+      addTextWithFractions: addTextWithFractions,
+      fracRuns: fracRuns,
+      hasFractionRenderer: hasFR
     },
 
     // Registry (for inspection/debugging)

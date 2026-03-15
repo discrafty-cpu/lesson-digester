@@ -1727,6 +1727,22 @@
             return bestMatch;
         }
 
+        // ==================== GLOBAL FRACTION TEXT HELPER ====================
+        // Shared helper: render text with FractionRenderer if available.
+        // Used by all presentation builders (main, Tier 2, Tier 3).
+        function globalFrText(sl, text, opts) {
+            if (typeof FractionRenderer !== 'undefined' && text && typeof text === 'string' && FractionRenderer.findFractions(text).length > 0) {
+                const runs = FractionRenderer.convertTextToPptxRuns(text, {
+                    fontSize: opts.fontSize || 13,
+                    fontFace: opts.fontFace || 'Calibri',
+                    color: opts.color || '1E293B'
+                });
+                sl.addText(runs, opts);
+            } else {
+                sl.addText(text || '', opts);
+            }
+        }
+
         // ==================== SLIDE LINE PURPOSE PARSER ====================
         // Classifies each line of a slide's text by its pedagogical role.
         // Input : raw multiline text (from extractTextFromXML)
@@ -2447,6 +2463,21 @@
                 return 'full-width'; // stories, discussions, learning log, etc.
             }
 
+            // ── Fraction-aware text helper ────────────────────────────────────────
+            // Drop-in for slide.addText() that auto-converts inline fractions via FractionRenderer.
+            function frText(sl, text, opts) {
+                if (typeof FractionRenderer !== 'undefined' && text && typeof text === 'string' && FractionRenderer.findFractions(text).length > 0) {
+                    const runs = FractionRenderer.convertTextToPptxRuns(text, {
+                        fontSize: opts.fontSize || 13,
+                        fontFace: opts.fontFace || (theme ? theme.fonts.body : 'Calibri'),
+                        color: opts.color || C.textDark
+                    });
+                    sl.addText(runs, opts);
+                } else {
+                    sl.addText(text, opts);
+                }
+            }
+
             // ── Parsed-line visual renderer ───────────────────────────────────────
             // Renders a parseSlideLines() array onto a slide with role-specific styling.
             // Returns the final Y position reached (for callers that continue below it).
@@ -2505,7 +2536,7 @@
                             line: { color: C.questionBorder, width: 1.5 },
                             rectRadius: 0.10
                         });
-                        sl.addText(line.text, {
+                        frText(sl, line.text, {
                             x: x + 0.15, y: curY + 0.05, w: w - 0.30, h: h - 0.10,
                             fontSize: 17, bold: true, color: isDark ? C.text : C.navy,
                             wrap: true, valign: 'middle', fontFace: theme ? theme.fonts.body : 'Calibri'
@@ -2515,7 +2546,7 @@
                     } else if (line.role === 'numbered') {
                         const h = 0.40;
                         if (rem < h) break;
-                        sl.addText(line.text, {
+                        frText(sl, line.text, {
                             x: x + 0.08, y: curY, w: w - 0.08, h,
                             fontSize: 13, color: C.textDark,
                             wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15
@@ -2525,7 +2556,7 @@
                     } else if (line.role === 'bullet') {
                         const h = 0.40;
                         if (rem < h) break;
-                        sl.addText(line.text.replace(/^[•◦▸►▶\-\*]\s*/, ''), {
+                        frText(sl, line.text.replace(/^[•◦▸►▶\-\*]\s*/, ''), {
                             x: x + 0.08, y: curY, w: w - 0.08, h,
                             fontSize: 13, color: C.textDark,
                             wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15,
@@ -2536,7 +2567,7 @@
                     } else if (line.role === 'instruction') {
                         const h = 0.42;
                         if (rem < h) break;
-                        sl.addText(line.text, {
+                        frText(sl, line.text, {
                             x, y: curY, w, h,
                             fontSize: 14, color: isDark ? C.textMid : C.textMid, italic: true,
                             wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15
@@ -2559,7 +2590,7 @@
                         // 'body' or 'title' — standard text row
                         const h = 0.44;
                         if (rem < h) break;
-                        sl.addText(line.text, {
+                        frText(sl, line.text, {
                             x, y: curY, w, h,
                             fontSize: 16, color: isDark ? C.text : C.textDark,
                             wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15
@@ -2662,7 +2693,7 @@
                     const mainLine = parsedLines.find(l => l.role === 'question' || l.role === 'learning_target')
                                   || parsedLines.find(l => l.role !== 'label' && l.role !== 'section_header')
                                   || { text: s.text };
-                    sl.addText(mainLine.text, {
+                    frText(sl, mainLine.text, {
                         x: 1.2, y: 1.2, w: 7.6, h: 3.0,
                         fontSize: 18, color: C.textDark, wrap: true, valign: "middle", align: "center",
                         fontFace: 'Calibri', lineSpacingMultiple: 1.3, bold: mainLine.role === 'question'
@@ -2868,9 +2899,24 @@
                 }
             }
 
-            // ─── Intro / Agenda (ALL) ───
+            // ─── Intro / Agenda — Layout Engine: Card Grid ───
             for (const s of (slideGroups['INTRO_AGENDA'] || [])) {
-                buildContentSlide(s, "What We Need Today");
+                const agendaSlide = pres.addSlide();
+                const agendaLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                const agendaCards = agendaLines.slice(0, 6).map((line, i) => ({
+                    title: (i + 1) + '.',
+                    body: line.replace(/^\d+[\.\)]\s*/, '').trim(),
+                    accentColor: i % 2 === 0 ? (LC.primary || '1E2761') : (LC.accent || '3B82F6')
+                }));
+                if (agendaCards.length === 0) {
+                    agendaCards.push({ title: 'Today', body: s.text || 'See agenda', accentColor: LC.primary });
+                }
+                LE.layouts.cardGrid(agendaSlide, pres, {
+                    title: 'What We Need Today',
+                    category: 'unitDesign',
+                    cards: agendaCards,
+                    footerText: 'Agenda  •  Slide ' + s.num
+                }, LC, theme);
             }
 
             // ─── Check-in / Breathing / Commitment — Layout Engine: Hero Statement ───
@@ -3010,29 +3056,85 @@
                 }
             }
 
-            // ─── Warm-Up / Review (ALL, with visuals) ───
+            // ─── Warm-Up / Review — Layout Engine: Split Panel ───
             for (const s of (slideGroups['WARMUP_REVIEW'] || [])) {
                 const vis = topicVisuals.length > 0 ? topicVisuals[0] : null;
-                buildContentSlide(s, "Warm-Up", C.blue, vis);
+                const wuSlide = pres.addSlide();
+                const wuLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                const wuCards = [];
+                for (let wi = 0; wi < wuLines.length && wi < 3; wi++) {
+                    wuCards.push({ title: 'Problem ' + (wi + 1), body: wuLines[wi] });
+                }
+                if (wuCards.length === 0) wuCards.push({ title: 'Warm-Up', body: s.text || 'Review' });
+                LE.layouts.splitPanel(wuSlide, pres, {
+                    title: 'Warm-Up',
+                    category: 'delivery',
+                    left: vis ? { imageSrc: vis.img } : { icon: '🔥', heading: 'WARM UP', body: 'Activate prior knowledge and get ready to learn.' },
+                    cards: wuCards,
+                    footerText: 'Warm-Up  •  Slide ' + s.num
+                }, LC, theme);
             }
 
-            // ─── Team Roles (ALL) ───
+            // ─── Team Roles — Layout Engine: Card Grid ───
             for (const s of (slideGroups['TEAM_ROLES'] || [])) {
-                buildContentSlide(s, "Team Roles", C.blue);
+                const trSlide = pres.addSlide();
+                const trLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                const trRoleColors = ['3B82F6', '0D9488', 'F59E0B', 'E8436D'];
+                const trCards = trLines.slice(0, 4).map((line, i) => ({
+                    title: line.split(/[:\-–]/)[0].trim(),
+                    body: (line.split(/[:\-–]/).slice(1).join('–').trim()) || line,
+                    accentColor: trRoleColors[i % 4]
+                }));
+                if (trCards.length === 0) trCards.push({ title: 'Team Roles', body: s.text || 'Assign roles', accentColor: '3B82F6' });
+                LE.layouts.cardGrid(trSlide, pres, {
+                    title: 'Team Roles',
+                    category: 'community',
+                    cards: trCards,
+                    footerText: 'Team Roles  •  Slide ' + s.num
+                }, LC, theme);
             }
             for (const s of (slideGroups['TEAM_ROLES_ACTIVITY'] || [])) {
-                buildContentSlide(s, "Team Roles — Activity", C.blue);
+                const traSlide = pres.addSlide();
+                LE.layouts.splitPanel(traSlide, pres, {
+                    title: 'Team Roles — Activity',
+                    category: 'community',
+                    left: { icon: '👥', heading: 'TEAM ACTIVITY', body: 'Work together using your assigned roles.' },
+                    cards: [{ title: 'Instructions', body: s.text || 'Activity instructions' }],
+                    footerText: 'Team Roles Activity  •  Slide ' + s.num
+                }, LC, theme);
             }
 
-            // ─── Story / Narrative (ALL) ───
+            // ─── Story / Narrative — Layout Engine: Split Panel ───
             for (const s of (slideGroups['STORY_NARRATIVE'] || [])) {
-                buildContentSlide(s, null, C.amber);
+                const snSlide = pres.addSlide();
+                const snInfo = Digester.slideTypes[s.type] || { label: 'Story', icon: '' };
+                LE.layouts.splitPanel(snSlide, pres, {
+                    title: snInfo.label || 'Story',
+                    category: 'delivery',
+                    left: { icon: '📖', heading: 'THE STORY', body: 'Context and narrative to hook your thinking.' },
+                    cards: [{ title: 'Narrative', body: s.text || '' }],
+                    footerText: (snInfo.icon + ' ' + snInfo.label + '  •  Slide ' + s.num).trim()
+                }, LC, theme);
             }
             for (const s of (slideGroups['STORY_DRAMATIC'] || [])) {
-                buildContentSlide(s, null, C.pink);
+                const sdSlide = pres.addSlide();
+                LE.layouts.splitPanel(sdSlide, pres, {
+                    title: 'The Challenge',
+                    category: 'delivery',
+                    left: { icon: '🎭', heading: 'DRAMATIC SETUP', body: 'A challenge that needs your math skills to solve.' },
+                    cards: [{ title: 'Challenge', body: s.text || '', accentColor: 'E8436D' }],
+                    footerText: 'Story Challenge  •  Slide ' + s.num
+                }, LC, theme);
             }
             for (const s of (slideGroups['STORY_MISSION'] || [])) {
-                buildContentSlide(s, null, C.amber);
+                const smSlide = pres.addSlide();
+                LE.layouts.splitPanel(smSlide, pres, {
+                    title: 'Your Mission',
+                    category: 'delivery',
+                    left: { icon: '🎯', heading: 'MISSION BRIEF', body: 'Here\'s what you need to figure out.' },
+                    cards: [{ title: 'Mission', body: s.text || '', accentColor: 'F59E0B' }],
+                    footerText: 'Mission  •  Slide ' + s.num
+                }, LC, theme);
             }
 
             // ─── RISA Social Dialogue — Layout Engine: Dialogue Bubbles ───
@@ -3053,27 +3155,105 @@
                 }, LC, theme);
             }
 
-            // ─── Focus Skill / Math Tool (ALL, with visuals) ───
+            // ─── Focus Skill / Math Tool — Layout Engine: Split Panel ───
             for (const s of (slideGroups['FOCUS_SKILL_DETAIL'] || [])) {
                 const vis = topicVisuals.length > 0 ? topicVisuals[0] : null;
-                buildContentSlide(s, null, C.blue, vis);
+                const fsSlide = pres.addSlide();
+                const fsInfo = Digester.slideTypes[s.type] || { label: 'Focus Skill', icon: '' };
+                const fsLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                const fsCards = fsLines.slice(0, 3).map((line, i) => ({
+                    title: i === 0 ? 'Key Concept' : 'Detail ' + i,
+                    body: line
+                }));
+                if (fsCards.length === 0) fsCards.push({ title: 'Focus Skill', body: s.text || '' });
+                LE.layouts.splitPanel(fsSlide, pres, {
+                    title: fsInfo.label || 'Focus Skill',
+                    category: 'clarity',
+                    left: vis ? { imageSrc: vis.img } : { icon: '🔍', heading: 'FOCUS SKILL', body: 'The key skill for today\'s lesson.' },
+                    cards: fsCards,
+                    footerText: (fsInfo.label || 'Focus Skill') + '  •  Slide ' + s.num
+                }, LC, theme);
             }
             for (const s of (slideGroups['MATH_TOOL'] || [])) {
                 const vis = topicVisuals.length > 1 ? topicVisuals[1] : (topicVisuals[0] || null);
-                buildContentSlide(s, null, C.teal, vis);
+                const mtSlide = pres.addSlide();
+                const mtInfo = Digester.slideTypes[s.type] || { label: 'Math Tool', icon: '' };
+                LE.layouts.splitPanel(mtSlide, pres, {
+                    title: mtInfo.label || 'Math Tool',
+                    category: 'delivery',
+                    left: vis ? { imageSrc: vis.img } : { icon: '🧮', heading: 'MATH TOOL', body: 'A mathematical model to help you solve problems.' },
+                    cards: [{ title: 'How To Use It', body: s.text || '' }],
+                    footerText: (mtInfo.label || 'Math Tool') + '  •  Slide ' + s.num
+                }, LC, theme);
             }
 
-            // ─── Activity Launch (ALL) ───
+            // ─── Activity Launch — Layout Engine: Split Panel ───
             for (const s of (slideGroups['ACTIVITY_LAUNCH'] || [])) {
-                buildContentSlide(s, null, C.blue);
+                const alSlide = pres.addSlide();
+                const alInfo = Digester.slideTypes[s.type] || { label: 'Activity', icon: '' };
+                const alLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                const alCards = alLines.slice(0, 3).map((line, i) => ({
+                    title: 'Step ' + (i + 1),
+                    body: line.replace(/^\d+[\.\)]\s*/, '').trim()
+                }));
+                if (alCards.length === 0) alCards.push({ title: 'Instructions', body: s.text || '' });
+                LE.layouts.splitPanel(alSlide, pres, {
+                    title: alInfo.label || 'Activity Launch',
+                    category: 'delivery',
+                    left: { icon: '🚀', heading: 'GET STARTED', body: 'Follow the steps to begin the activity.' },
+                    cards: alCards,
+                    footerText: (alInfo.label || 'Activity Launch') + '  •  Slide ' + s.num
+                }, LC, theme);
             }
 
-            // ─── Notice & Wonder / Would You Rather (ALL) ───
+            // ─── Notice & Wonder — Layout Engine: Two Column Compare ───
             for (const s of (slideGroups['NOTICE_WONDER'] || [])) {
-                buildContentSlide(s, null, C.teal);
+                const nwSlide = pres.addSlide();
+                const nwLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                LE.layouts.twoColumnCompare(nwSlide, pres, {
+                    title: 'Notice & Wonder',
+                    category: 'delivery',
+                    colA: {
+                        heading: 'I Notice...',
+                        color: '0D9488',
+                        items: nwLines.length > 0
+                            ? nwLines.slice(0, 4).map(l => ({ text: l }))
+                            : [{ text: 'I notice _____.' }, { text: 'I see that _____.' }]
+                    },
+                    colB: {
+                        heading: 'I Wonder...',
+                        color: '3B82F6',
+                        items: [{ text: 'I wonder _____.' }, { text: 'What would happen if _____?' }, { text: 'Why does _____?' }]
+                    },
+                    footerText: 'Notice & Wonder  •  Slide ' + s.num
+                }, LC, theme);
             }
+
+            // ─── Would You Rather — Layout Engine: Two Column Compare ───
             for (const s of (slideGroups['WOULD_YOU_RATHER'] || [])) {
-                buildContentSlide(s, null, C.amber);
+                const wyrSlide = pres.addSlide();
+                const wyrLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                const midpoint = Math.ceil(wyrLines.length / 2);
+                LE.layouts.twoColumnCompare(wyrSlide, pres, {
+                    title: 'Would You Rather?',
+                    category: 'community',
+                    colA: {
+                        heading: 'Option A',
+                        color: 'F59E0B',
+                        items: wyrLines.length > 1
+                            ? wyrLines.slice(0, midpoint).map(l => ({ text: l }))
+                            : [{ text: s.text || 'Option A' }]
+                    },
+                    colB: {
+                        heading: 'Option B',
+                        color: '3B82F6',
+                        items: wyrLines.length > 1
+                            ? wyrLines.slice(midpoint).map(l => ({ text: l }))
+                            : [{ text: 'Option B' }]
+                    },
+                    bottomText: 'Explain your reasoning using math vocabulary.',
+                    footerText: 'Would You Rather  •  Slide ' + s.num
+                }, LC, theme);
             }
 
             // ─── Problem Slides — Layout Engine: Problem Workspace ───
@@ -3126,31 +3306,43 @@
                 }, LC, theme);
             }
 
-            // ─── Group Discussion (ALL — with role prompts + sentence frames) ───
+            // ─── Group Discussion — Layout Engine: Split Panel + role/frame overlays ───
             let discIdx = 0;
             for (const s of (slideGroups['GROUP_DISCUSSION'] || [])) {
-                const sl = buildContentSlide(s, null, C.amber);
-                // ── Discussion role prompt (rotates) ──
+                const gdSlide = pres.addSlide();
+                const gdInfo = Digester.slideTypes[s.type] || { label: 'Discussion', icon: '' };
+                // Build cards from discussion text
+                const gdLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                const gdCards = gdLines.slice(0, 3).map((line, i) => ({
+                    title: 'Prompt ' + (i + 1),
+                    body: line, accentColor: 'F59E0B'
+                }));
+                if (gdCards.length === 0) gdCards.push({ title: 'Discussion', body: s.text || '', accentColor: 'F59E0B' });
+                // Build left panel with role prompt if available
+                let gdLeftBody = 'Discuss with your group using your assigned role.';
+                let gdRoleNote = '';
                 if (typeof TEAM_ROLE_PROMPTS !== 'undefined') {
                     const rIdx = discIdx % 4;
                     const rKey = roleKeys[rIdx];
                     const rName = roleNames[rIdx];
                     const prompts = TEAM_ROLE_PROMPTS.discussion[rKey];
                     if (prompts && prompts.length > 0) {
-                        const prompt = prompts[discIdx % prompts.length];
-                        sl.addText(rName + ':  "' + prompt + '"', {
-                            x: 0.5, y: 4.55, w: 9, h: 0.26,
-                            fontSize: 10, italic: true, color: roleColors[rKey], fontFace: theme ? theme.fonts.body : 'Calibri'
-                        });
+                        gdRoleNote = rName + ': "' + prompts[discIdx % prompts.length] + '"';
+                        gdLeftBody = gdRoleNote;
                     }
                 }
-                if (typeof SENTENCE_FRAMES !== 'undefined') {
+                // Add sentence frame as a card if available
+                if (typeof SENTENCE_FRAMES !== 'undefined' && SENTENCE_FRAMES.explaining) {
                     const eIdx = discIdx % SENTENCE_FRAMES.explaining.length;
-                    sl.addText('"' + SENTENCE_FRAMES.explaining[eIdx] + '"', {
-                        x: 0.6, y: 4.82, w: 8.8, h: 0.22,
-                        fontSize: 10, italic: true, color: isDark ? C.accent : C.teal, fontFace: theme ? theme.fonts.body : 'Calibri'
-                    });
+                    gdCards.push({ title: 'Sentence Frame', body: '"' + SENTENCE_FRAMES.explaining[eIdx] + '"', accentColor: '0D9488' });
                 }
+                LE.layouts.splitPanel(gdSlide, pres, {
+                    title: gdInfo.label || 'Group Discussion',
+                    category: 'community',
+                    left: { icon: '💬', heading: 'DISCUSS', body: gdLeftBody },
+                    cards: gdCards.slice(0, 3),
+                    footerText: (gdInfo.label || 'Discussion') + '  •  Slide ' + s.num
+                }, LC, theme);
                 discIdx++;
             }
 
@@ -3171,78 +3363,59 @@
                 }, LC, theme);
             }
 
-            // ─── Math Toolbox — Interactive Links ───
+            // ─── Math Toolbox — Layout Engine: Card Grid ───
             if (toolboxLinks.length > 0) {
-                slide = pres.addSlide();
-                header(slide, "Math Toolbox — Try It!", C.teal);
-                slide.addText("Use these interactive tools to explore today's math concepts:", {
-                    x: 0.5, y: 0.9, w: 9, h: 0.3, fontSize: 12, color: C.textMid, fontFace: 'Calibri'
-                });
-                yPos = 1.3;
-                for (const tool of toolboxLinks) {
-                    if (yPos > 4.3) break;
+                const tbSlide = pres.addSlide();
+                const tbCards = toolboxLinks.slice(0, 6).map(tool => {
                     const url = MathToolbox.getUrl(tool);
-                    // Card for each tool
-                    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                        x: 0.5, y: yPos, w: 9, h: 0.65,
-                        fill: { color: isDark ? C.card : 'F0FDFA' },
-                        line: { color: isDark ? C.accent : C.teal, width: 0.6 },
-                        rectRadius: 0.06
-                    });
-                    slide.addText([
-                        { text: tool.label, options: { fontSize: 14, bold: true, color: isDark ? C.accent : C.teal, hyperlink: { url: url } } }
-                    ], { x: 0.75, y: yPos + 0.04, w: 8.5, h: 0.3, fontFace: theme ? theme.fonts.body : 'Calibri' });
-                    slide.addText(url, { x: 0.75, y: yPos + 0.35, w: 8.5, h: 0.22, fontSize: 10, color: isDark ? C.text2 : C.textMid, fontFace: theme ? theme.fonts.body : 'Calibri' });
-                    yPos += 0.75;
-                }
-                if (topicVisuals.length > 0) {
-                    try {
-                        slide.addImage({ data: topicVisuals[0].img, x: 6.5, y: 3.8, w: 3.0, h: 1.4, sizing: { type: 'contain', w: 3.0, h: 1.4 } });
-                    } catch (e) {}
-                }
-                footer(slide, "Math Toolbox  •  Interactive Math Models", C.teal);
+                    return {
+                        title: tool.label,
+                        body: url,
+                        accentColor: '0D9488'
+                    };
+                });
+                LE.layouts.cardGrid(tbSlide, pres, {
+                    title: 'Math Toolbox — Try It!',
+                    category: 'delivery',
+                    cards: tbCards,
+                    footerText: 'Math Toolbox  •  Interactive Math Models'
+                }, LC, theme);
             }
 
-            // ─── Sentence Frames (support slide) ───
+            // ─── Sentence Frames — Layout Engine: Card Grid ───
             if (typeof SENTENCE_FRAMES !== 'undefined') {
-                slide = pres.addSlide();
-                header(slide, "Sentence Frames", C.teal);
-                yPos = 0.95;
-                const cats = {
-                    problem_solving: { label: "Problem Solving", color: C.teal },
-                    explaining: { label: "Explaining & Justifying", color: C.blue },
-                    comparing: { label: "Comparing", color: C.amber },
-                    vocabulary: { label: "Vocabulary", color: C.navy },
-                    reflection: { label: "Reflection", color: C.pink }
+                const sfSlide = pres.addSlide();
+                const sfCats = {
+                    problem_solving: { label: 'Problem Solving', color: '0D9488' },
+                    explaining: { label: 'Explaining', color: '3B82F6' },
+                    comparing: { label: 'Comparing', color: 'F59E0B' },
+                    vocabulary: { label: 'Vocabulary', color: '1E2761' },
+                    reflection: { label: 'Reflection', color: 'E8436D' }
                 };
-                for (const [key, cat] of Object.entries(cats)) {
-                    if (!SENTENCE_FRAMES[key] || yPos > 4.3) continue;
-                    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                        x: 0.4, y: yPos, w: 9.2, h: 0.26,
-                        fill: { color: isDark ? C.card : 'F8FAFC' },
-                        rectRadius: 0.04
-                    });
-                    slide.addText(cat.label.toUpperCase(), {
-                        x: 0.5, y: yPos, w: 9, h: 0.26,
-                        fontSize: 11, bold: true, color: cat.color, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 1
-                    });
-                    yPos += 0.3;
-                    for (const f of SENTENCE_FRAMES[key].slice(0, 2)) {
-                        if (yPos > 5.0) break;
-                        slide.addText('"' + f + '"', {
-                            x: 0.65, y: yPos, w: 8.7, h: 0.3,
-                            fontSize: 12, italic: true, color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri'
-                        });
-                        yPos += 0.32;
-                    }
-                    yPos += 0.08;
+                const sfCards = [];
+                for (const [key, cat] of Object.entries(sfCats)) {
+                    if (!SENTENCE_FRAMES[key]) continue;
+                    const frames = SENTENCE_FRAMES[key].slice(0, 2).map(f => '"' + f + '"').join('\n\n');
+                    sfCards.push({ title: cat.label, body: frames, accentColor: cat.color });
                 }
-                footer(slide, "Sentence Frames  •  Academic Language Support", C.teal);
+                LE.layouts.cardGrid(sfSlide, pres, {
+                    title: 'Sentence Frames',
+                    category: 'community',
+                    cards: sfCards.slice(0, 6),
+                    footerText: 'Sentence Frames  •  Academic Language Support'
+                }, LC, theme);
             }
 
-            // ─── Timer (ALL) ───
+            // ─── Timer — Layout Engine: Hero Statement ───
             for (const s of (slideGroups['TIMER'] || [])) {
-                buildContentSlide(s, "Timer", C.textMid);
+                const timerSlide = pres.addSlide();
+                LE.layouts.heroStatement(timerSlide, pres, {
+                    statement: s.text || 'Timer',
+                    category: 'delivery',
+                    categoryLabel: 'WORK TIME',
+                    subtitle: 'Stay focused — you\'ve got this!',
+                    footerText: 'Timer  •  Slide ' + s.num
+                }, LC, theme);
             }
 
             // ─── Exit Ticket — Layout Engine: Problem Workspace (isExitTicket) ───
@@ -3338,9 +3511,22 @@
                 }, LC, theme);
             }
 
-            // ─── Homework (ALL) ───
+            // ─── Homework — Layout Engine: Split Panel ───
             for (const s of (slideGroups['HOMEWORK'] || [])) {
-                buildContentSlide(s, "Homework");
+                const hwSlide = pres.addSlide();
+                const hwLines = (s.text || '').split(/\n+/).filter(l => l.trim());
+                const hwCards = hwLines.slice(0, 3).map((line, i) => ({
+                    title: 'Task ' + (i + 1),
+                    body: line.replace(/^\d+[\.\)]\s*/, '').trim()
+                }));
+                if (hwCards.length === 0) hwCards.push({ title: 'Assignment', body: s.text || 'Complete homework' });
+                LE.layouts.splitPanel(hwSlide, pres, {
+                    title: 'Homework',
+                    category: 'assessment',
+                    left: { icon: '📝', heading: 'TONIGHT\'S WORK', body: 'Practice makes progress.' },
+                    cards: hwCards,
+                    footerText: 'Homework  •  Slide ' + s.num
+                }, LC, theme);
             }
 
             // ════════════════════════════════════════════════════════
@@ -3490,7 +3676,7 @@
                             yPos += 0.28;
                             for (const prob of item.problems[dok.key].slice(0, 2)) {
                                 if (yPos > 5.0) break;
-                                slide.addText(prob.stem, {
+                                frText(slide, prob.stem, {
                                     x: 0.7, y: yPos, w: 8.8, h: 0.4,
                                     fontSize: 13, color: isDark ? C.text : C.textDark, bullet: true, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                                 });
@@ -4114,7 +4300,7 @@
                         x: 0.5, y: 1.55, w: 9, h: 1.4,
                         fill: { color: T2.softBg }, line: { color: T2.teal, width: 1.2 }, rectRadius: 0.08
                     });
-                    sl.addText(checkQ, {
+                    globalFrText(sl, checkQ, {
                         x: 0.7, y: 1.65, w: 8.6, h: 1.2,
                         fontSize: 20, bold: true, color: T2.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
                     });
@@ -4216,7 +4402,7 @@
                     line: { color: isAnswer ? T2.green : T2.border, width: isAnswer ? 1.2 : 0.5 },
                     rectRadius: 0.06
                 });
-                sl.addText(line, {
+                globalFrText(sl, line, {
                     x: 0.6, y: stepY + 0.06, w: 8.8, h: 0.65,
                     fontSize: 14, color: isAnswer ? T2.green : T2.textDark,
                     wrap: true, valign: 'middle', fontFace: 'Calibri',
@@ -4245,7 +4431,7 @@
                 x: 0.4, y: 1.2, w: 9.2, h: 1.4,
                 fill: { color: T2.softBg }, line: { color: T2.teal, width: 1.5 }, rectRadius: 0.08
             });
-            sl.addText(partnerProblem, {
+            globalFrText(sl, partnerProblem, {
                 x: 0.6, y: 1.3, w: 8.8, h: 1.2,
                 fontSize: 18, bold: true, color: T2.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
             });
@@ -4510,7 +4696,7 @@
                 x: 0.5, y: 1.2, w: 9, h: 1.5,
                 fill: { color: T3.softGreen }, line: { color: T3.green, width: 1.5 }, rectRadius: 0.1
             });
-            sl.addText('✓  ' + foundationProblem, {
+            globalFrText(sl, '✓  ' + foundationProblem, {
                 x: 0.7, y: 1.3, w: 8.6, h: 1.3,
                 fontSize: 22, bold: true, color: T3.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
             });
@@ -4550,7 +4736,7 @@
                     x: 0.5, y: 1.2, w: 9, h: 1.5,
                     fill: { color: T3.softPurple }, line: { color: T3.purple, width: 0.8 }, rectRadius: 0.1
                 });
-                sl.addText('←————|————|————|————|————→\n0    1/4   1/2   3/4    1', {
+                globalFrText(sl, '←————|————|————|————|————→\n0    1/4   1/2   3/4    1', {
                     x: 0.8, y: 1.35, w: 8.4, h: 1.1,
                     fontSize: 20, color: T3.purple, align: 'center', valign: 'middle', fontFace: 'Courier New'
                 });
@@ -4666,7 +4852,7 @@
                     line: { color: isAnswer ? T3.green : T3.purple, width: isAnswer ? 1.2 : 0.5 },
                     rectRadius: 0.06
                 });
-                sl.addText(line, {
+                globalFrText(sl, line, {
                     x: 0.6, y: exY + 0.05, w: 8.8, h: 0.62,
                     fontSize: 15, color: isAnswer ? T3.green : T3.purple,
                     wrap: true, valign: 'middle', fontFace: 'Calibri', bold: isAnswer
@@ -4707,7 +4893,7 @@
                     x: 0.55, y: fpY + 0.22, w: 0.42, h: 0.42,
                     fontSize: 14, bold: true, color: T3.white, align: 'center', valign: 'middle', fontFace: 'Calibri'
                 });
-                sl.addText(fluencyProblems[fpi].stem, {
+                globalFrText(sl, fluencyProblems[fpi].stem, {
                     x: 1.1, y: fpY + 0.08, w: 7.2, h: 0.75,
                     fontSize: 14, color: T3.navy, wrap: true, valign: 'middle', fontFace: 'Calibri'
                 });
@@ -4751,7 +4937,7 @@
             const celebSteps = objectives.scaffoldedSteps.slice(0, 4);
             let celY = 3.4;
             for (const step of celebSteps) {
-                sl.addText('☐  ' + step, {
+                globalFrText(sl, '☐  ' + step, {
                     x: 1.0, y: celY, w: 8.0, h: 0.22,
                     fontSize: 10, color: 'C4B5FD', fontFace: 'Calibri', wrap: true
                 });
