@@ -1063,6 +1063,10 @@
                     <button class="download-btn" id="tier3Btn" style="background: #7C3AED;">🎯 Tier 3 — Intensive (.pptx)</button>
                 </div>
                 <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DIALOGUE & ERROR ANALYSIS</div>
+                    <div style="font-size: 0.72em; color: var(--text-dim); margin-bottom: 8px; opacity: 0.7;">Included in rebuilt lesson. 4 slides: Structured Dialogue, Dual Error Analysis, Teacher Cookbook, Strategy Pivot</div>
+                </div>
+                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
                     <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DIFFERENTIATED WORKSHEETS (PDF)</div>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
                         <button class="download-btn worksheet-btn" data-level="1" style="background: #7C3AED; font-size: 0.82em; padding: 8px 14px;">L1 Foundational</button>
@@ -1102,6 +1106,8 @@
     <script src="js/problem-generator.js"></script>
     <script src="js/worksheet-pdf-engine.js"></script>
     <script src="js/lesson-components-data.js"></script>
+    <script src="js/structured-dialogues-data.js"></script>
+    <script src="js/dialogue-engine.js"></script>
     <script>
         // ==================== TEACHING INSIGHTS DATABASE ====================
         // TEACHING_INSIGHTS is now loaded from js/teaching-insights-data.js
@@ -3572,6 +3578,355 @@
             for (const s of (slideGroups['HOMEWORK'] || [])) {
                 buildContentSlide(s, "Homework");
             }
+
+            // ════════════════════════════════════════════════════════
+            //  STRUCTURED DIALOGUES & ERROR ANALYSIS SLIDES
+            //  Evidence-based from WWC Algebra Practice Guide
+            //  4 slide types: Dialogue, Error Analysis, Coop Menu, Strategy Pivot
+            // ════════════════════════════════════════════════════════
+
+            if (typeof DialogueEngine !== 'undefined') {
+                const deTopics = analysis.topics || [];
+                const primaryTopic = deTopics[0] || '';
+
+                // ─── SLIDE 1: Structured Dialogue (3-Phase Facilitation) ───
+                {
+                    const solved = DialogueEngine.getSolvedProblem(primaryTopic);
+                    const questions = DialogueEngine.getDialogueQuestions(primaryTopic);
+
+                    slide = pres.addSlide();
+                    header(slide, 'Structured Dialogue', C.teal);
+
+                    // Subtitle
+                    slide.addText('3-Phase Discussion Protocol  •  ' + (primaryTopic || 'Topic'), {
+                        x: 0.35, y: 0.72, w: 9, h: 0.3, fontSize: 10, italic: true,
+                        color: isDark ? C.textMid : '64748B',
+                        fontFace: theme ? theme.fonts.body : 'Calibri'
+                    });
+
+                    // Solved problem display (if available)
+                    if (solved) {
+                        const solvedBg = isDark ? C.card : 'F0FDFA';
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: 0.3, y: 1.08, w: 9.4, h: 1.2,
+                            fill: { color: solvedBg }, rectRadius: 0.08,
+                            line: { color: C.teal, width: 1 }
+                        });
+                        slide.addText('SOLVED PROBLEM — ' + solved.student + '\'s Work', {
+                            x: 0.5, y: 1.12, w: 5, h: 0.22, fontSize: 8, bold: true,
+                            color: C.teal, fontFace: theme ? theme.fonts.heading : 'Calibri'
+                        });
+                        slide.addText(solved.problem, {
+                            x: 0.5, y: 1.32, w: 9, h: 0.28, fontSize: 11, bold: true,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri'
+                        });
+                        // Steps
+                        const stepText = solved.steps.map((s, i) => (i + 1) + '. ' + s).join('\n');
+                        slide.addText(stepText, {
+                            x: 0.5, y: 1.62, w: 9, h: 0.6, fontSize: 9,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            lineSpacing: 12, valign: 'top'
+                        });
+                    }
+
+                    // Three-phase question columns
+                    const phaseY = solved ? 2.4 : 1.1;
+                    const phases = [
+                        { label: 'PHASE 1: ORIENTATION', time: '2-3 min', q: questions.orientation, color: '0D9488' },
+                        { label: 'PHASE 2: ANALYSIS', time: '5-8 min', q: questions.analysis, color: '3B82F6' },
+                        { label: 'PHASE 3: CONNECTION', time: '3-5 min', q: questions.connection, color: '7C3AED' }
+                    ];
+
+                    phases.forEach((p, i) => {
+                        const colX = 0.3 + i * 3.15;
+                        const colW = 3.0;
+                        const cardBg = isDark ? C.card : 'F8FAFC';
+
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: colX, y: phaseY, w: colW, h: 2.8,
+                            fill: { color: cardBg }, rectRadius: 0.06,
+                            line: { color: p.color, width: 0.8 }
+                        });
+                        // Phase header bar
+                        slide.addShape(pres.shapes.RECTANGLE, {
+                            x: colX, y: phaseY, w: colW, h: 0.32,
+                            fill: { color: p.color }, rectRadius: 0.06
+                        });
+                        slide.addText(p.label, {
+                            x: colX + 0.08, y: phaseY + 0.02, w: colW - 0.4, h: 0.15, fontSize: 8, bold: true,
+                            color: 'FFFFFF', fontFace: theme ? theme.fonts.heading : 'Calibri'
+                        });
+                        slide.addText(p.time, {
+                            x: colX + 0.08, y: phaseY + 0.16, w: colW - 0.16, h: 0.12, fontSize: 7, italic: true,
+                            color: 'E0E7FF', fontFace: theme ? theme.fonts.body : 'Calibri'
+                        });
+
+                        // Questions
+                        const qText = p.q.slice(0, 4).map(q => '• ' + q).join('\n\n');
+                        slide.addText(qText, {
+                            x: colX + 0.1, y: phaseY + 0.4, w: colW - 0.2, h: 2.3, fontSize: 9,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            lineSpacing: 11, valign: 'top', paraSpaceAfter: 4
+                        });
+                    });
+
+                    footer(slide, 'Structured Dialogue  •  WWC Algebra Practice Guide  •  Orientation → Analysis → Connection', C.teal);
+                }
+
+                // ─── SLIDE 2: Dual Error Analysis (Student A vs B) ───
+                {
+                    const errorPair = DialogueEngine.getErrorPair(primaryTopic);
+
+                    slide = pres.addSlide();
+                    header(slide, errorPair && errorPair.isStrategyComparison ? 'Strategy Comparison' : 'Dual Error Analysis', C.pink);
+
+                    slide.addText(errorPair && errorPair.isStrategyComparison
+                        ? 'Compare Two Correct Approaches  •  Which is More Efficient?'
+                        : 'Who Is Correct?  •  Find the Error  •  Explain & Fix', {
+                        x: 0.35, y: 0.72, w: 9, h: 0.3, fontSize: 10, italic: true,
+                        color: isDark ? C.textMid : '64748B',
+                        fontFace: theme ? theme.fonts.body : 'Calibri'
+                    });
+
+                    if (errorPair) {
+                        // Problem statement
+                        const probBg = isDark ? C.card : 'FFFBEB';
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: 0.3, y: 1.05, w: 9.4, h: 0.45,
+                            fill: { color: probBg }, rectRadius: 0.06,
+                            line: { color: C.amber, width: 0.8 }
+                        });
+                        slide.addText(errorPair.problem, {
+                            x: 0.5, y: 1.1, w: 9, h: 0.35, fontSize: 12, bold: true,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri'
+                        });
+
+                        // Student A column
+                        const colAX = 0.3, colBX = 5.15, colW = 4.7;
+                        const colY = 1.6, colH = 2.6;
+                        const cardA = isDark ? C.card : 'F0F9FF';
+                        const cardB = isDark ? C.card : 'FFF1F2';
+
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: colAX, y: colY, w: colW, h: colH,
+                            fill: { color: cardA }, rectRadius: 0.06,
+                            line: { color: '3B82F6', width: 0.8 }
+                        });
+                        slide.addText(errorPair.studentA.name + '\'s Work', {
+                            x: colAX + 0.12, y: colY + 0.06, w: colW - 0.24, h: 0.25, fontSize: 12, bold: true,
+                            color: '3B82F6', fontFace: theme ? theme.fonts.heading : 'Calibri'
+                        });
+                        const stepsA = errorPair.studentA.steps.map((s, i) => 'Step ' + (i + 1) + ': ' + s).join('\n');
+                        slide.addText(stepsA, {
+                            x: colAX + 0.12, y: colY + 0.35, w: colW - 0.24, h: colH - 0.45, fontSize: 10,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            lineSpacing: 13, valign: 'top'
+                        });
+
+                        // Student B column
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: colBX, y: colY, w: colW, h: colH,
+                            fill: { color: cardB }, rectRadius: 0.06,
+                            line: { color: 'E8436D', width: 0.8 }
+                        });
+                        slide.addText(errorPair.studentB.name + '\'s Work', {
+                            x: colBX + 0.12, y: colY + 0.06, w: colW - 0.24, h: 0.25, fontSize: 12, bold: true,
+                            color: 'E8436D', fontFace: theme ? theme.fonts.heading : 'Calibri'
+                        });
+                        const stepsB = errorPair.studentB.steps.map((s, i) => 'Step ' + (i + 1) + ': ' + s).join('\n');
+                        slide.addText(stepsB, {
+                            x: colBX + 0.12, y: colY + 0.35, w: colW - 0.24, h: colH - 0.45, fontSize: 10,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            lineSpacing: 13, valign: 'top'
+                        });
+
+                        // Error type badge (teacher note in small text)
+                        if (errorPair.errorType) {
+                            const errInfo = DialogueEngine.getErrorTypeInfo(errorPair.errorType);
+                            if (errInfo) {
+                                slide.addText('Error Type: ' + errInfo.name, {
+                                    x: 0.3, y: 4.3, w: 3.5, h: 0.2, fontSize: 7, italic: true,
+                                    color: isDark ? C.textMid : '94A3B8',
+                                    fontFace: theme ? theme.fonts.body : 'Calibri'
+                                });
+                            }
+                        }
+
+                        // Analysis prompts at bottom
+                        const errQuestions = DialogueEngine.getErrorQuestions(errorPair.errorType);
+                        const promptText = errQuestions.slice(0, 3).map(q => '• ' + q).join('   ');
+                        slide.addText(promptText, {
+                            x: 0.3, y: 4.55, w: 9.4, h: 0.5, fontSize: 9,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            valign: 'top'
+                        });
+                    } else {
+                        // Generic error analysis template (no topic-specific data)
+                        slide.addText('Upload a lesson to generate topic-specific dual error analysis.\n\nFormat: Two students solve the same problem. One solution is correct, one has a deliberate error.\nStudents must identify which is correct, find the error, and explain the fix.', {
+                            x: 0.5, y: 1.5, w: 9, h: 2.5, fontSize: 13,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            lineSpacing: 18
+                        });
+                    }
+
+                    footer(slide, 'Dual Error Analysis  •  WWC Recommendation 1 & 3  •  Compare → Identify → Explain → Fix', C.pink);
+                }
+
+                // ─── SLIDE 3: Cooperative Structure Menu (Teacher Cookbook) ───
+                {
+                    const structures = DialogueEngine.getCooperativeStructures();
+                    const formats = DialogueEngine.getFormatOptions();
+
+                    slide = pres.addSlide();
+                    header(slide, 'Teacher Cookbook — Strategy Menu', C.amber);
+
+                    slide.addText('Choose a delivery format and cooperative structure based on your class needs today.', {
+                        x: 0.35, y: 0.72, w: 9, h: 0.3, fontSize: 10, italic: true,
+                        color: isDark ? C.textMid : '64748B',
+                        fontFace: theme ? theme.fonts.body : 'Calibri'
+                    });
+
+                    // Delivery formats (4 cards across the top)
+                    slide.addText('DELIVERY FORMAT', {
+                        x: 0.3, y: 1.08, w: 3, h: 0.2, fontSize: 8, bold: true,
+                        color: C.amber, fontFace: theme ? theme.fonts.heading : 'Calibri'
+                    });
+
+                    const fmtKeys = Object.keys(DIALOGUE_FORMATS || {});
+                    fmtKeys.forEach((key, i) => {
+                        const fmt = DIALOGUE_FORMATS[key];
+                        const fX = 0.3 + i * 2.4;
+                        const fBg = isDark ? C.card : 'FFFBEB';
+
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: fX, y: 1.32, w: 2.25, h: 1.05,
+                            fill: { color: fBg }, rectRadius: 0.05,
+                            line: { color: C.amber, width: 0.5 }
+                        });
+                        slide.addText(fmt.name, {
+                            x: fX + 0.08, y: 1.35, w: 2.1, h: 0.2, fontSize: 9, bold: true,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.heading : 'Calibri'
+                        });
+                        slide.addText(fmt.bestFor, {
+                            x: fX + 0.08, y: 1.55, w: 2.1, h: 0.18, fontSize: 7, italic: true,
+                            color: C.teal, fontFace: theme ? theme.fonts.body : 'Calibri'
+                        });
+                        slide.addText(fmt.howItWorks, {
+                            x: fX + 0.08, y: 1.75, w: 2.1, h: 0.55, fontSize: 7.5,
+                            color: isDark ? C.text : C.textMid, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            valign: 'top', lineSpacing: 10
+                        });
+                    });
+
+                    // Cooperative structures table
+                    slide.addText('COOPERATIVE STRUCTURES', {
+                        x: 0.3, y: 2.52, w: 4, h: 0.2, fontSize: 8, bold: true,
+                        color: C.amber, fontFace: theme ? theme.fonts.heading : 'Calibri'
+                    });
+
+                    const coopRows = [];
+                    coopRows.push([
+                        { text: 'Structure', options: { bold: true, fontSize: 7.5, color: 'FFFFFF', fill: { color: C.amber } } },
+                        { text: 'With Dialogues', options: { bold: true, fontSize: 7.5, color: 'FFFFFF', fill: { color: C.amber } } },
+                        { text: 'With Error Analysis', options: { bold: true, fontSize: 7.5, color: 'FFFFFF', fill: { color: C.amber } } },
+                        { text: 'Best For', options: { bold: true, fontSize: 7.5, color: 'FFFFFF', fill: { color: C.amber } } }
+                    ]);
+
+                    structures.forEach(s => {
+                        const rowBg = isDark ? C.card : 'FFFFFF';
+                        coopRows.push([
+                            { text: s.name, options: { fontSize: 7.5, bold: true, color: isDark ? C.text : C.textDark, fill: { color: rowBg } } },
+                            { text: s.withDialogue, options: { fontSize: 7, color: isDark ? C.text : C.textMid, fill: { color: rowBg } } },
+                            { text: s.withError, options: { fontSize: 7, color: isDark ? C.text : C.textMid, fill: { color: rowBg } } },
+                            { text: s.bestFor, options: { fontSize: 7, italic: true, color: C.teal, fill: { color: rowBg } } }
+                        ]);
+                    });
+
+                    slide.addTable(coopRows, {
+                        x: 0.3, y: 2.75, w: 9.4,
+                        colW: [1.8, 2.7, 2.7, 2.2],
+                        border: { pt: 0.3, color: C.border },
+                        rowH: [0.22, ...Array(structures.length).fill(0.38)],
+                        autoPage: false
+                    });
+
+                    footer(slide, 'Teacher Cookbook  •  Choose based on class needs  •  WWC Example 2.10', C.amber);
+                }
+
+                // ─── SLIDE 4: Strategy Pivot — Differentiation & Grouping ───
+                {
+                    const diffMods = DialogueEngine.getDifferentiationMods();
+                    const cra = DialogueEngine.getCRAAlignment();
+                    const craLevel = DialogueEngine.getCRALevel(primaryTopic, analysis.grade || 7);
+
+                    slide = pres.addSlide();
+                    header(slide, 'Strategy Pivot — Differentiation Guide', C.blue);
+
+                    slide.addText('Modify dialogues and error analysis based on student needs. Current CRA level: ' + (craLevel || 'representational').toUpperCase(), {
+                        x: 0.35, y: 0.72, w: 9, h: 0.3, fontSize: 10, italic: true,
+                        color: isDark ? C.textMid : '64748B',
+                        fontFace: theme ? theme.fonts.body : 'Calibri'
+                    });
+
+                    // Differentiation table
+                    const diffRows = [];
+                    diffRows.push([
+                        { text: 'Student Group', options: { bold: true, fontSize: 8, color: 'FFFFFF', fill: { color: C.blue } } },
+                        { text: 'Dialogue Modification', options: { bold: true, fontSize: 8, color: 'FFFFFF', fill: { color: C.blue } } },
+                        { text: 'Error Analysis Modification', options: { bold: true, fontSize: 8, color: 'FFFFFF', fill: { color: C.blue } } }
+                    ]);
+
+                    diffMods.forEach(d => {
+                        const rowBg = isDark ? C.card : 'FFFFFF';
+                        diffRows.push([
+                            { text: d.label, options: { fontSize: 8, bold: true, color: isDark ? C.text : C.textDark, fill: { color: rowBg } } },
+                            { text: d.dialogueMod, options: { fontSize: 7.5, color: isDark ? C.text : C.textMid, fill: { color: rowBg } } },
+                            { text: d.errorMod, options: { fontSize: 7.5, color: isDark ? C.text : C.textMid, fill: { color: rowBg } } }
+                        ]);
+                    });
+
+                    slide.addTable(diffRows, {
+                        x: 0.3, y: 1.1, w: 9.4,
+                        colW: [2.0, 3.7, 3.7],
+                        border: { pt: 0.3, color: C.border },
+                        rowH: [0.22, ...Array(diffMods.length).fill(0.42)],
+                        autoPage: false
+                    });
+
+                    // CRA alignment summary at bottom
+                    const craData = cra[craLevel];
+                    if (craData) {
+                        const craBg = isDark ? C.card : 'EFF6FF';
+                        const craY = 3.6;
+                        slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+                            x: 0.3, y: craY, w: 9.4, h: 1.4,
+                            fill: { color: craBg }, rectRadius: 0.06,
+                            line: { color: C.blue, width: 0.5 }
+                        });
+                        slide.addText('CRA ALIGNMENT — ' + craData.phase.toUpperCase() + ' STAGE (' + craData.grades + ')', {
+                            x: 0.5, y: craY + 0.06, w: 9, h: 0.22, fontSize: 9, bold: true,
+                            color: C.blue, fontFace: theme ? theme.fonts.heading : 'Calibri'
+                        });
+                        slide.addText('Dialogues: ' + craData.dialogueApplication, {
+                            x: 0.5, y: craY + 0.32, w: 9, h: 0.35, fontSize: 8.5,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            lineSpacing: 11, valign: 'top'
+                        });
+                        slide.addText('Error Analysis: ' + craData.errorApplication, {
+                            x: 0.5, y: craY + 0.7, w: 9, h: 0.35, fontSize: 8.5,
+                            color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri',
+                            lineSpacing: 11, valign: 'top'
+                        });
+                        slide.addText('Recommended Visuals: ' + craData.visualTypes.join(', '), {
+                            x: 0.5, y: craY + 1.08, w: 9, h: 0.22, fontSize: 8, italic: true,
+                            color: isDark ? C.textMid : '64748B',
+                            fontFace: theme ? theme.fonts.body : 'Calibri'
+                        });
+                    }
+
+                    footer(slide, 'Strategy Pivot  •  CRA Framework  •  Piaget Developmental Alignment', C.blue);
+                }
+            } // end DialogueEngine check
 
             // ════════════════════════════════════════════════════════
             //  PART 2: TEACHER REFERENCE (after lesson content)
