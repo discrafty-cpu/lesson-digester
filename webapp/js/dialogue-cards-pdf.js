@@ -185,6 +185,59 @@ const DialogueCardsPDF = (() => {
             phaseQuestions = DialogueEngine.getDialogueQuestions(topic);
         }
 
+        // If no RISA script, build a dialogue script from the solved problem
+        // getSolvedProblem returns { problem, student, steps } (flattened correct solution)
+        // getErrorPair returns { problem, studentA, studentB, errorType, ... }
+        if (!script && solvedProblem) {
+            script = [];
+            const problem = solvedProblem.problem || '';
+            const steps = solvedProblem.steps || [];
+
+            // Also try to get the error pair for Speaker B's lines
+            let errorPair = null;
+            if (typeof DialogueEngine !== 'undefined') {
+                errorPair = DialogueEngine.getErrorPair(topic);
+            }
+
+            // Speaker A reads the problem and walks through correct steps
+            if (problem) {
+                script.push({ speaker: 'A', line: 'The problem says: "' + problem + '"' });
+            }
+            if (steps.length > 0) {
+                script.push({ speaker: 'A', line: 'My first step was: ' + steps[0] });
+            }
+            if (steps.length > 2) {
+                script.push({ speaker: 'A', line: 'Next I did: ' + steps[Math.floor(steps.length / 2)] });
+            }
+            if (steps.length > 1) {
+                script.push({ speaker: 'A', line: 'So my answer is: ' + steps[steps.length - 1] });
+            }
+
+            // Speaker B describes the incorrect approach
+            if (errorPair) {
+                const wrongStudent = errorPair.studentA.isCorrect ? errorPair.studentB : errorPair.studentA;
+                const wrongSteps = wrongStudent.steps || [];
+                if (wrongSteps.length > 0) {
+                    script.push({ speaker: 'B', line: 'I did it differently. I started with: ' + wrongSteps[0] });
+                }
+                if (wrongSteps.length > 1) {
+                    script.push({ speaker: 'B', line: 'Then I got: ' + wrongSteps[wrongSteps.length - 1] });
+                }
+                script.push({ speaker: 'B', line: 'Hmm, our answers are different. Can we figure out which step went wrong?' });
+                script.push({ speaker: 'A', line: 'Let me compare step by step... I think the issue is in step _____.' });
+            } else {
+                script.push({ speaker: 'B', line: 'Can you explain why you chose that strategy?' });
+                script.push({ speaker: 'B', line: 'I think the key step was _____ because _____.' });
+                script.push({ speaker: 'A', line: 'Does our answer make sense? Let me check by _____.' });
+            }
+
+            // Build vocab from the problem
+            if (!vocab.length && problem) {
+                const mathTerms = problem.match(/\b(ratio|rate|proportion|equation|variable|expression|fraction|percent|slope|intercept|coefficient|term|function|exponent|inequality)\w*/gi);
+                if (mathTerms) vocab = [...new Set(mathTerms.map(t => t.toLowerCase()))];
+            }
+        }
+
         return { script, vocab, title, solvedProblem, phaseQuestions };
     }
 
