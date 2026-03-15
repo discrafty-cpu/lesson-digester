@@ -1081,6 +1081,7 @@
     <script src="js/standards-db.js"></script>
     <script src="js/benchmark-descriptors.js"></script>
     <script src="js/pptx-themes.js"></script>
+    <script src="js/math-visual-engine.js"></script>
     <script src="js/digester-core.js"></script>
     <script src="js/teaching-insights-data.js"></script>
     <script src="js/rubric-descriptors.js"></script>
@@ -2188,187 +2189,35 @@
         }
 
         // ==================== SVG MATH VISUAL GENERATOR ====================
-        // Generates SVG-based math visuals as base64 data URIs for embedding in PPTX
+        // Bridge to MathVisualEngine — theme-aware, CRA-capable visuals
+        // The full engine is in js/math-visual-engine.js
         const MathVisuals = {
-            // ── Number Line ──
-            numberLine: function(min, max, marks, label) {
-                const w = 600, h = 120, pad = 40;
-                const lineY = 60, lineW = w - 2 * pad;
-                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
-                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
-                // Main line
-                svg += '<line x1="' + pad + '" y1="' + lineY + '" x2="' + (w - pad) + '" y2="' + lineY + '" stroke="#1E2761" stroke-width="2"/>';
-                // Arrows
-                svg += '<polygon points="' + (w - pad) + ',' + lineY + ' ' + (w - pad - 8) + ',' + (lineY - 5) + ' ' + (w - pad - 8) + ',' + (lineY + 5) + '" fill="#1E2761"/>';
-                svg += '<polygon points="' + pad + ',' + lineY + ' ' + (pad + 8) + ',' + (lineY - 5) + ' ' + (pad + 8) + ',' + (lineY + 5) + '" fill="#1E2761"/>';
-                // Tick marks and labels
-                const range = max - min;
-                for (const m of marks) {
-                    const x = pad + ((m - min) / range) * lineW;
-                    svg += '<line x1="' + x + '" y1="' + (lineY - 10) + '" x2="' + x + '" y2="' + (lineY + 10) + '" stroke="#1E2761" stroke-width="1.5"/>';
-                    svg += '<text x="' + x + '" y="' + (lineY + 28) + '" text-anchor="middle" font-size="12" fill="#1E2761">' + m + '</text>';
-                }
-                if (label) {
-                    svg += '<text x="' + (w / 2) + '" y="16" text-anchor="middle" font-size="13" font-weight="bold" fill="#0D9488">' + label + '</text>';
-                }
-                svg += '</svg>';
-                return 'data:image/svg+xml;base64,' + btoa(svg);
+            // Get the current theme for passing to the engine
+            _themeOpts: function() {
+                const theme = (typeof PptxThemes !== 'undefined') ? PptxThemes.getSelected() : null;
+                return { theme: theme };
             },
-
-            // ── Fraction Bar ──
-            fractionBar: function(numerator, denominator, label) {
-                const w = 400, h = 100, pad = 20;
-                const barH = 36, barW = w - 2 * pad, barY = 40;
-                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
-                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
-                // Whole bar outline
-                svg += '<rect x="' + pad + '" y="' + barY + '" width="' + barW + '" height="' + barH + '" fill="#F0F9FF" stroke="#1E2761" stroke-width="1.5" rx="4"/>';
-                // Filled portion
-                const fillW = (numerator / denominator) * barW;
-                svg += '<rect x="' + pad + '" y="' + barY + '" width="' + fillW + '" height="' + barH + '" fill="#0D9488" rx="4" opacity="0.7"/>';
-                // Division lines
-                for (let i = 1; i < denominator; i++) {
-                    const x = pad + (i / denominator) * barW;
-                    svg += '<line x1="' + x + '" y1="' + barY + '" x2="' + x + '" y2="' + (barY + barH) + '" stroke="#1E2761" stroke-width="1"/>';
-                }
-                // Label
-                svg += '<text x="' + (w / 2) + '" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="#1E2761">' + (label || (numerator + '/' + denominator)) + '</text>';
-                svg += '<text x="' + (w / 2) + '" y="' + (barY + barH + 18) + '" text-anchor="middle" font-size="11" fill="#475569">' + numerator + ' out of ' + denominator + ' parts</text>';
-                svg += '</svg>';
-                return 'data:image/svg+xml;base64,' + btoa(svg);
-            },
-
-            // ── Area Model (for multiplication) ──
-            areaModel: function(a, b, label) {
-                const w = 400, h = 320, pad = 50;
-                const gridW = w - 2 * pad, gridH = h - 2 * pad - 30;
-                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
-                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
-                // Title
-                svg += '<text x="' + (w / 2) + '" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#1E2761">' + (label || (a + ' x ' + b)) + '</text>';
-                // Break numbers into tens and ones
-                const aTens = Math.floor(a / 10) * 10, aOnes = a % 10;
-                const bTens = Math.floor(b / 10) * 10, bOnes = b % 10;
-                const parts = [];
-                if (aTens > 0 && bTens > 0) parts.push({ r: aTens, c: bTens, color: '#0D9488' });
-                if (aTens > 0 && bOnes > 0) parts.push({ r: aTens, c: bOnes, color: '#3B82F6' });
-                if (aOnes > 0 && bTens > 0) parts.push({ r: aOnes, c: bTens, color: '#D4870F' });
-                if (aOnes > 0 && bOnes > 0) parts.push({ r: aOnes, c: bOnes, color: '#E8436D' });
-                // Simple 2x2 grid
-                const cols = (bOnes > 0 && bTens > 0) ? 2 : 1;
-                const rows = (aOnes > 0 && aTens > 0) ? 2 : 1;
-                const cellW = gridW / cols, cellH = gridH / rows;
-                const startY = 35;
-                let idx = 0;
-                for (let r = 0; r < rows; r++) {
-                    for (let c = 0; c < cols; c++) {
-                        if (idx >= parts.length) break;
-                        const p = parts[idx++];
-                        const cx = pad + c * cellW, cy = startY + r * cellH;
-                        svg += '<rect x="' + cx + '" y="' + cy + '" width="' + cellW + '" height="' + cellH + '" fill="' + p.color + '" opacity="0.2" stroke="#1E2761" stroke-width="1.5"/>';
-                        svg += '<text x="' + (cx + cellW / 2) + '" y="' + (cy + cellH / 2 + 6) + '" text-anchor="middle" font-size="16" font-weight="bold" fill="' + p.color + '">' + (p.r * p.c) + '</text>';
-                        svg += '<text x="' + (cx + cellW / 2) + '" y="' + (cy + cellH / 2 + 22) + '" text-anchor="middle" font-size="10" fill="#475569">' + p.r + ' x ' + p.c + '</text>';
-                    }
-                }
-                // Row / col labels
-                const rowLabels = aTens > 0 && aOnes > 0 ? [aTens, aOnes] : [a];
-                const colLabels = bTens > 0 && bOnes > 0 ? [bTens, bOnes] : [b];
-                for (let r = 0; r < rowLabels.length; r++) {
-                    svg += '<text x="' + (pad - 8) + '" y="' + (startY + r * cellH + cellH / 2 + 5) + '" text-anchor="end" font-size="12" font-weight="bold" fill="#1E2761">' + rowLabels[r] + '</text>';
-                }
-                for (let c = 0; c < colLabels.length; c++) {
-                    svg += '<text x="' + (pad + c * cellW + cellW / 2) + '" y="' + (startY - 6) + '" text-anchor="middle" font-size="12" font-weight="bold" fill="#1E2761">' + colLabels[c] + '</text>';
-                }
-                // Total
-                svg += '<text x="' + (w / 2) + '" y="' + (h - 8) + '" text-anchor="middle" font-size="13" fill="#0D9488">Total: ' + (a * b) + '</text>';
-                svg += '</svg>';
-                return 'data:image/svg+xml;base64,' + btoa(svg);
-            },
-
-            // ── Percent Bar ──
-            percentBar: function(percent, label) {
-                const w = 500, h = 80, pad = 20;
-                const barH = 30, barW = w - 2 * pad, barY = 30;
-                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
-                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
-                svg += '<text x="' + pad + '" y="20" font-size="12" font-weight="bold" fill="#1E2761">' + (label || (percent + '%')) + '</text>';
-                svg += '<rect x="' + pad + '" y="' + barY + '" width="' + barW + '" height="' + barH + '" fill="#F0F9FF" stroke="#1E2761" stroke-width="1" rx="4"/>';
-                const fillW = (percent / 100) * barW;
-                svg += '<rect x="' + pad + '" y="' + barY + '" width="' + fillW + '" height="' + barH + '" fill="#D4870F" rx="4" opacity="0.7"/>';
-                // 0%, 25%, 50%, 75%, 100% marks
-                for (let p = 0; p <= 100; p += 25) {
-                    const x = pad + (p / 100) * barW;
-                    svg += '<text x="' + x + '" y="' + (barY + barH + 14) + '" text-anchor="middle" font-size="9" fill="#475569">' + p + '%</text>';
-                }
-                svg += '</svg>';
-                return 'data:image/svg+xml;base64,' + btoa(svg);
-            },
-
-            // ── Ratio Table ──
-            ratioTable: function(labelA, labelB, pairs, title) {
-                const w = 400, h = 120, pad = 20;
-                const cellW = 60, cellH = 28;
-                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
-                svg += '<rect width="' + w + '" height="' + h + '" fill="white"/>';
-                if (title) svg += '<text x="' + (w / 2) + '" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#1E2761">' + title + '</text>';
-                const startX = pad, startY = 24;
-                // Header column
-                svg += '<rect x="' + startX + '" y="' + startY + '" width="' + (cellW + 10) + '" height="' + cellH + '" fill="#1E2761"/>';
-                svg += '<text x="' + (startX + (cellW + 10) / 2) + '" y="' + (startY + 19) + '" text-anchor="middle" font-size="11" fill="white" font-weight="bold">' + labelA + '</text>';
-                svg += '<rect x="' + startX + '" y="' + (startY + cellH) + '" width="' + (cellW + 10) + '" height="' + cellH + '" fill="#1E2761"/>';
-                svg += '<text x="' + (startX + (cellW + 10) / 2) + '" y="' + (startY + cellH + 19) + '" text-anchor="middle" font-size="11" fill="white" font-weight="bold">' + labelB + '</text>';
-                // Data cells
-                for (let i = 0; i < Math.min(pairs.length, 5); i++) {
-                    const cx = startX + (cellW + 10) + i * cellW;
-                    svg += '<rect x="' + cx + '" y="' + startY + '" width="' + cellW + '" height="' + cellH + '" fill="#F0FDFA" stroke="#0D9488" stroke-width="1"/>';
-                    svg += '<text x="' + (cx + cellW / 2) + '" y="' + (startY + 19) + '" text-anchor="middle" font-size="12" fill="#1E2761">' + pairs[i][0] + '</text>';
-                    svg += '<rect x="' + cx + '" y="' + (startY + cellH) + '" width="' + cellW + '" height="' + cellH + '" fill="#FFF7ED" stroke="#D4870F" stroke-width="1"/>';
-                    svg += '<text x="' + (cx + cellW / 2) + '" y="' + (startY + cellH + 19) + '" text-anchor="middle" font-size="12" fill="#1E2761">' + pairs[i][1] + '</text>';
-                }
-                svg += '</svg>';
-                return 'data:image/svg+xml;base64,' + btoa(svg);
-            },
-
-            // ── Pick the right visual for a topic ──
+            // Drop-in replacement: delegates to MathVisualEngine
             getVisualsForTopic: function(topic) {
-                const t = topic.toLowerCase();
-                const visuals = [];
-                if (t.includes('fraction') || t.includes('equivalen')) {
-                    visuals.push({ img: this.fractionBar(3, 4, '3/4'), caption: 'Fraction Model' });
-                    visuals.push({ img: this.fractionBar(2, 3, '2/3'), caption: 'Equivalent Fractions' });
+                if (typeof MathVisualEngine !== 'undefined') {
+                    return MathVisualEngine.getVisualsForTopic(topic, this._themeOpts());
                 }
-                if (t.includes('number line') || t.includes('locate') || t.includes('compar') || t.includes('rational') || t.includes('irrational')) {
-                    visuals.push({ img: this.numberLine(-5, 5, [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5], 'Number Line'), caption: 'Number Line' });
-                }
-                if (t.includes('percent')) {
-                    visuals.push({ img: this.percentBar(75, '75% = 3/4'), caption: 'Percent Model' });
-                }
-                if (t.includes('ratio') || t.includes('rate') || t.includes('proportion')) {
-                    visuals.push({ img: this.ratioTable('x', 'y', [[1, 3], [2, 6], [3, 9], [4, 12], ['?', '?']], 'Ratio Table'), caption: 'Ratio Table' });
-                }
-                if (t.includes('area') || t.includes('multipli') || t.includes('circumference') || t.includes('circle')) {
-                    visuals.push({ img: this.areaModel(23, 15, '23 x 15'), caption: 'Area Model' });
-                }
-                if (t.includes('pythagor')) {
-                    visuals.push({ img: this.numberLine(0, 15, [0, 3, 5, 12, 13, 15], 'a=3, b=4, c=5'), caption: 'Pythagorean Triple' });
-                }
-                if (t.includes('factor') || t.includes('prime') || t.includes('gcf') || t.includes('lcm')) {
-                    visuals.push({ img: this.areaModel(12, 8, 'Factor Pairs of 12 x 8'), caption: 'Factor Model' });
-                }
-                if (t.includes('mean') || t.includes('median') || t.includes('range')) {
-                    visuals.push({ img: this.numberLine(0, 20, [2, 5, 8, 10, 12, 15, 18], 'Data Points'), caption: 'Data Distribution' });
-                }
-                if (t.includes('equation') || t.includes('inequalit') || t.includes('solve') || t.includes('system')) {
-                    visuals.push({ img: this.numberLine(-10, 10, [-10, -5, 0, 5, 10], 'Solution Set'), caption: 'Solution Number Line' });
-                }
-                if (t.includes('similar') || t.includes('scal')) {
-                    visuals.push({ img: this.ratioTable('Original', 'Scaled', [[2, 6], [3, 9], [5, 15]], 'Scale Factor = 3'), caption: 'Scaling Table' });
-                }
-                // Default if nothing matched
-                if (visuals.length === 0) {
-                    visuals.push({ img: this.numberLine(0, 10, [0, 2, 4, 6, 8, 10], topic), caption: 'Number Line' });
-                }
-                return visuals;
+                // Fallback if engine not loaded
+                return [{ img: this._fallbackNumberLine(topic), caption: 'Number Line' }];
+            },
+            _fallbackNumberLine: function(label) {
+                const w = 600, ht = 100, pad = 40, lineY = 50, lineW = w - 2 * pad;
+                let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + ht + '" viewBox="0 0 ' + w + ' ' + ht + '">';
+                svg += '<rect width="' + w + '" height="' + ht + '" fill="white"/>';
+                svg += '<line x1="' + pad + '" y1="' + lineY + '" x2="' + (w-pad) + '" y2="' + lineY + '" stroke="#1E2761" stroke-width="2"/>';
+                [0,2,4,6,8,10].forEach(function(m) {
+                    var x = pad + (m / 10) * lineW;
+                    svg += '<line x1="' + x + '" y1="' + (lineY-8) + '" x2="' + x + '" y2="' + (lineY+8) + '" stroke="#1E2761" stroke-width="1.5"/>';
+                    svg += '<text x="' + x + '" y="' + (lineY+24) + '" text-anchor="middle" font-size="12" fill="#1E2761">' + m + '</text>';
+                });
+                if (label) svg += '<text x="' + (w/2) + '" y="16" text-anchor="middle" font-size="13" font-weight="bold" fill="#0D9488">' + label + '</text>';
+                svg += '</svg>';
+                return 'data:image/svg+xml;base64,' + btoa(svg);
             }
         };
 
@@ -2573,8 +2422,8 @@
                         if (rem < h) break;
                         sl.addText(line.text.toUpperCase(), {
                             x, y: curY, w, h,
-                            fontSize: 9, bold: true, color: ac,
-                            charSpacing: 3, fontFace: 'Calibri'
+                            fontSize: 11, bold: true, color: ac,
+                            charSpacing: 3, fontFace: theme ? theme.fonts.heading : 'Calibri'
                         });
                         sl.addShape(pres.shapes.RECTANGLE, {
                             x, y: curY + h - 0.03, w: w * 0.38, h: 0.025,
@@ -2594,7 +2443,7 @@
                         });
                         sl.addText('🎯  ' + line.text, {
                             x: x + 0.12, y: curY + 0.04, w: w - 0.24, h: h - 0.08,
-                            fontSize: 13, bold: true, color: isDark ? C.text : C.navy,
+                            fontSize: 16, bold: true, color: isDark ? C.text : C.navy,
                             wrap: true, valign: 'middle', fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                         curY += h + 0.10;
@@ -2611,7 +2460,7 @@
                         });
                         sl.addText(line.text, {
                             x: x + 0.15, y: curY + 0.05, w: w - 0.30, h: h - 0.10,
-                            fontSize: 14, bold: true, color: isDark ? C.text : C.navy,
+                            fontSize: 17, bold: true, color: isDark ? C.text : C.navy,
                             wrap: true, valign: 'middle', fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                         curY += h + 0.10;
@@ -2642,7 +2491,7 @@
                         if (rem < h) break;
                         sl.addText(line.text, {
                             x, y: curY, w, h,
-                            fontSize: 12, color: C.textMid, italic: true,
+                            fontSize: 14, color: isDark ? C.textMid : C.textMid, italic: true,
                             wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15
                         });
                         curY += h;
@@ -2665,8 +2514,8 @@
                         if (rem < h) break;
                         sl.addText(line.text, {
                             x, y: curY, w, h,
-                            fontSize: 13, color: C.textDark,
-                            wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.15
+                            fontSize: 16, color: isDark ? C.text : C.textDark,
+                            wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15
                         });
                         curY += h;
                     }
@@ -2788,7 +2637,7 @@
                     // Visual card
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.8, y: 3.0, w: 8.4, h: 2.1,
-                        fill: { color: 'F8FAFC' },
+                        fill: { color: isDark ? C.card : 'F8FAFC' },
                         line: { color: C.border, width: 0.5 },
                         rectRadius: 0.08
                     });
@@ -2806,7 +2655,7 @@
                         renderParsedLines(sl, parsedLines, 0.5, 0.9, 5.3, 4.2, ac);
                         sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                             x: 6.0, y: 0.9, w: 3.6, h: 3.8,
-                            fill: { color: 'F8FAFC' },
+                            fill: { color: isDark ? C.card : 'F8FAFC' },
                             line: { color: C.border, width: 0.5 },
                             rectRadius: 0.08
                         });
@@ -2879,14 +2728,14 @@
                         ).join('     ');
                         slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                             x: 0.5, y: 3.95, w: 9, h: 0.4,
-                            fill: { color: '0F1A4A' },
-                            line: { color: '2D4A9A', width: 0.5 },
+                            fill: { color: isDark ? C.card : '0F1A4A' },
+                            line: { color: isDark ? C.border : '2D4A9A', width: 0.5 },
                             rectRadius: 0.06
                         });
                         slide.addText(fwText, {
                             x: 0.5, y: 3.95, w: 9, h: 0.4,
-                            fontSize: 8, color: 'A5B4FC', align: "center",
-                            wrap: true, fontFace: 'Calibri'
+                            fontSize: 10, color: isDark ? C.text2 : 'A5B4FC', align: "center",
+                            wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                     }
                 }
@@ -2911,21 +2760,21 @@
                     // Left column: Scaffold reminders in styled cards
                     const topPrereqs = focusData.prerequisites.slice(-2);
                     slide.addText("WARM UP YOUR BRAIN", {
-                        x: 0.4, y: 0.88, w: 4.5, h: 0.28,
-                        fontSize: 10, bold: true, color: C.teal, fontFace: 'Calibri', charSpacing: 2
+                        x: 0.4, y: 0.88, w: 4.5, h: 0.32,
+                        fontSize: 15, bold: true, color: isDark ? C.accent : C.teal, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 2
                     });
                     yPos = 1.2;
                     for (const p of topPrereqs) {
                         slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-                            x: 0.4, y: yPos, w: 4.5, h: 0.7,
-                            fill: { color: 'F0FDFA' },
-                            line: { color: C.teal, width: 0.8 },
+                            x: 0.4, y: yPos, w: 4.5, h: 0.8,
+                            fill: { color: isDark ? C.card : 'F0FDFA' },
+                            line: { color: isDark ? C.accent : C.teal, width: 0.8 },
                             rectRadius: 0.06
                         });
                         slide.addText([
-                            { text: "Grade " + p.grade + ": ", options: { bold: true, fontSize: 10, color: C.teal } },
-                            { text: p.scaffold, options: { fontSize: 10, color: C.textDark } }
-                        ], { x: 0.55, y: yPos + 0.05, w: 4.2, h: 0.55, wrap: true, valign: 'top', fontFace: 'Calibri' });
+                            { text: "Grade " + p.grade + ": ", options: { bold: true, fontSize: 14, color: isDark ? C.accent : C.teal } },
+                            { text: p.scaffold, options: { fontSize: 14, color: isDark ? C.text : C.textDark } }
+                        ], { x: 0.55, y: yPos + 0.05, w: 4.2, h: 0.65, wrap: true, valign: 'top', fontFace: theme ? theme.fonts.body : 'Calibri' });
                         yPos += 0.78;
                     }
 
@@ -2942,28 +2791,28 @@
                     // Right column: Focus problems in numbered cards
                     slide.addText("TRY THESE", {
                         x: 5.2, y: 0.88, w: 4.4, h: 0.28,
-                        fontSize: 10, bold: true, color: C.navy, fontFace: 'Calibri', charSpacing: 2
+                        fontSize: 15, bold: true, color: isDark ? C.text : C.navy, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 2
                     });
                     let fpY = 1.2;
                     for (let fi = 0; fi < Math.min(2, focusData.focusProblems.length); fi++) {
                         slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                             x: 5.2, y: fpY, w: 4.4, h: 1.5,
-                            fill: { color: C.white },
-                            line: { color: C.navy, width: 1.2 },
+                            fill: { color: isDark ? C.card : C.white },
+                            line: { color: isDark ? C.primary : C.navy, width: 1.2 },
                             rectRadius: 0.08
                         });
                         // Number badge
                         slide.addShape(pres.shapes.OVAL, {
                             x: 5.35, y: fpY + 0.08, w: 0.35, h: 0.35,
-                            fill: { color: C.navy }
+                            fill: { color: isDark ? C.primary : C.navy }
                         });
                         slide.addText((fi + 1).toString(), {
                             x: 5.35, y: fpY + 0.08, w: 0.35, h: 0.35,
-                            fontSize: 12, bold: true, color: C.white, align: 'center', valign: 'middle', fontFace: 'Calibri'
+                            fontSize: 14, bold: true, color: isDark ? C.bg : C.white, align: 'center', valign: 'middle', fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                         slide.addText(focusData.focusProblems[fi], {
                             x: 5.85, y: fpY + 0.08, w: 3.6, h: 1.3,
-                            fontSize: 11, color: C.textDark, wrap: true, valign: 'top', fontFace: 'Calibri', lineSpacingMultiple: 1.2
+                            fontSize: 15, color: isDark ? C.text : C.textDark, wrap: true, valign: 'top', fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.2
                         });
                         fpY += 1.65;
                     }
@@ -3038,16 +2887,16 @@
                         ltY += 0.06;
                         sl.addText('SUCCESS CRITERIA', {
                             x: 0.6, y: ltY, w: 8.8, h: 0.26,
-                            fontSize: 9, bold: true, color: C.amber,
-                            charSpacing: 3, fontFace: 'Calibri'
+                            fontSize: 11, bold: true, color: isDark ? C.accent : C.amber,
+                            charSpacing: 3, fontFace: theme ? theme.fonts.heading : 'Calibri'
                         });
                         ltY += 0.32;
                         const maxCrit = Math.min(objectives.successCriteria.length, Math.floor((4.85 - ltY) / 0.36));
                         for (let ci = 0; ci < maxCrit; ci++) {
                             sl.addText('✓  ' + objectives.successCriteria[ci], {
                                 x: 0.8, y: ltY, w: 8.4, h: 0.34,
-                                fontSize: 11, color: 'B8C9F5',
-                                wrap: true, fontFace: 'Calibri'
+                                fontSize: 12, color: isDark ? C.text2 : 'B8C9F5',
+                                wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                             });
                             ltY += 0.36;
                         }
@@ -3080,21 +2929,21 @@
                     // Topic label bar
                     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.4, y: yPos, w: 9.2, h: 0.3,
-                        fill: { color: 'F0FDFA' },
+                        fill: { color: isDark ? C.card : 'F0FDFA' },
                         rectRadius: 0.04
                     });
                     slide.addText(topic.toUpperCase(), {
                         x: 0.55, y: yPos, w: 8.9, h: 0.3,
-                        fontSize: 10, bold: true, color: C.teal, fontFace: 'Calibri', charSpacing: 1
+                        fontSize: 12, bold: true, color: isDark ? C.accent : C.teal, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 1
                     });
                     yPos += 0.38;
                     let cIdx = 1;
                     for (const c of criteria.slice(0, 3)) {
                         if (yPos > 5.0) break;
                         slide.addText([
-                            { text: "  " + cIdx + ".  ", options: { bold: true, fontSize: 12, color: C.teal } },
-                            { text: c, options: { fontSize: 12, color: C.textDark } }
-                        ], { x: 0.5, y: yPos, w: 9, h: 0.38, wrap: true, fontFace: 'Calibri' });
+                            { text: "  " + cIdx + ".  ", options: { bold: true, fontSize: 14, color: isDark ? C.accent : C.teal } },
+                            { text: c, options: { fontSize: 14, color: isDark ? C.text : C.textDark } }
+                        ], { x: 0.5, y: yPos, w: 9, h: 0.38, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri' });
                         yPos += 0.42;
                         cIdx++;
                     }
@@ -3112,19 +2961,19 @@
                 // Left column card: Who Uses This Math?
                 slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                     x: 0.35, y: 0.9, w: 4.5, h: 2.5,
-                    fill: { color: 'F0FDFA' },
-                    line: { color: C.teal, width: 1 },
+                    fill: { color: isDark ? C.card : 'F0FDFA' },
+                    line: { color: isDark ? C.accent : C.teal, width: 1 },
                     rectRadius: 0.08
                 });
                 slide.addText("WHO USES THIS MATH?", {
                     x: 0.55, y: 0.98, w: 4.1, h: 0.28,
-                    fontSize: 10, bold: true, color: C.teal, fontFace: 'Calibri', charSpacing: 1.5
+                    fontSize: 12, bold: true, color: isDark ? C.accent : C.teal, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 1.5
                 });
                 yPos = 1.32;
                 for (const career of rel.careers.slice(0, 3)) {
                     slide.addText(career, {
                         x: 0.6, y: yPos, w: 4.0, h: 0.52,
-                        fontSize: 11, color: C.textDark, bullet: true, wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.1
+                        fontSize: 13, color: isDark ? C.text : C.textDark, bullet: true, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.1
                     });
                     yPos += 0.55;
                 }
@@ -3132,19 +2981,19 @@
                 // Right column card: In Your Life
                 slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                     x: 5.15, y: 0.9, w: 4.5, h: 2.5,
-                    fill: { color: 'EFF6FF' },
-                    line: { color: C.blue, width: 1 },
+                    fill: { color: isDark ? C.card : 'EFF6FF' },
+                    line: { color: isDark ? C.primary : C.blue, width: 1 },
                     rectRadius: 0.08
                 });
                 slide.addText("IN YOUR LIFE", {
                     x: 5.35, y: 0.98, w: 4.1, h: 0.28,
-                    fontSize: 10, bold: true, color: C.navy, fontFace: 'Calibri', charSpacing: 1.5
+                    fontSize: 12, bold: true, color: isDark ? C.text : C.navy, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 1.5
                 });
                 yPos = 1.32;
                 for (const rl of rel.realLife.slice(0, 3)) {
                     slide.addText(rl, {
                         x: 5.4, y: yPos, w: 4.0, h: 0.52,
-                        fontSize: 11, color: C.textDark, bullet: true, wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.1
+                        fontSize: 13, color: isDark ? C.text : C.textDark, bullet: true, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.1
                     });
                     yPos += 0.55;
                 }
@@ -3152,17 +3001,17 @@
                 // Bottom: Where This Leads (progression) — full-width card
                 slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                     x: 0.35, y: 3.6, w: 9.3, h: 1.0,
-                    fill: { color: 'FFFBEB' },
-                    line: { color: C.amber, width: 1 },
+                    fill: { color: isDark ? C.card : 'FFFBEB' },
+                    line: { color: isDark ? C.accent : C.amber, width: 1 },
                     rectRadius: 0.08
                 });
                 slide.addText("WHERE THIS LEADS", {
                     x: 0.55, y: 3.66, w: 8.9, h: 0.25,
-                    fontSize: 10, bold: true, color: C.amber, fontFace: 'Calibri', charSpacing: 1.5
+                    fontSize: 12, bold: true, color: isDark ? C.accent : C.amber, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 1.5
                 });
                 slide.addText(rel.progression, {
                     x: 0.55, y: 3.95, w: 8.9, h: 0.55,
-                    fontSize: 11, color: C.textDark, wrap: true, fontFace: 'Calibri'
+                    fontSize: 13, color: isDark ? C.text : C.textDark, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                 });
                 footer(slide, "Relevance  •  Connecting math to the real world", C.amber);
             }
@@ -3184,19 +3033,19 @@
                     if (insight && insight.essential_understandings) {
                         slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                             x: 0.4, y: yPos, w: 9.2, h: 0.28,
-                            fill: { color: 'FFFBEB' },
+                            fill: { color: isDark ? C.card : 'FFFBEB' },
                             rectRadius: 0.04
                         });
                         slide.addText(topic.toUpperCase(), {
                             x: 0.55, y: yPos, w: 8.9, h: 0.28,
-                            fontSize: 9, bold: true, color: C.amber, fontFace: 'Calibri', charSpacing: 1
+                            fontSize: 12, bold: true, color: isDark ? C.accent : C.amber, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 1
                         });
                         yPos += 0.34;
                         for (const u of insight.essential_understandings) {
                             if (yPos > 5.0) break;
                             slide.addText(u, {
                                 x: 0.6, y: yPos, w: 8.8, h: 0.38,
-                                fontSize: 11, color: C.textDark, bullet: true, fontFace: 'Calibri', wrap: true
+                                fontSize: 13, color: isDark ? C.text : C.textDark, bullet: true, fontFace: theme ? theme.fonts.body : 'Calibri', wrap: true
                             });
                             yPos += 0.42;
                         }
@@ -3241,8 +3090,8 @@
                 for (const d of social.script) {
                     if (yPos > 4.7) break;
                     const isA = d.speaker === "A";
-                    const bgCol = isA ? 'F0FDFA' : 'FFFBEB';
-                    const borderCol = isA ? C.teal : C.amber;
+                    const bgCol = isDark ? C.card : (isA ? 'F0FDFA' : 'FFFBEB');
+                    const borderCol = isA ? (isDark ? C.accent : C.teal) : (isDark ? C.primary : C.amber);
                     const xOff = isA ? 0.5 : 1.8;
                     // Speech bubble card
                     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
@@ -3252,9 +3101,9 @@
                         rectRadius: 0.06
                     });
                     slide.addText([
-                        { text: "Student " + d.speaker + ": ", options: { bold: true, fontSize: 12, color: borderCol } },
-                        { text: d.line, options: { fontSize: 12, color: C.textDark } }
-                    ], { x: xOff + 0.15, y: yPos + 0.02, w: 7.2, h: 0.42, wrap: true, fontFace: 'Calibri' });
+                        { text: "Student " + d.speaker + ": ", options: { bold: true, fontSize: 14, color: borderCol } },
+                        { text: d.line, options: { fontSize: 14, color: isDark ? C.text : C.textDark } }
+                    ], { x: xOff + 0.15, y: yPos + 0.02, w: 7.2, h: 0.42, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri' });
                     yPos += 0.56;
                 }
                 footer(slide, "RISA: Routine • Integrated • Structured • Academic", C.teal);
@@ -3298,19 +3147,19 @@
             for (const s of problemSlides) {
                 const vis = topicVisuals.length > 0 ? topicVisuals[visualIdx % topicVisuals.length] : null;
                 const sl = pres.addSlide();
-                sl.background = { color: C.white };
+                sl.background = { color: isDark ? C.bg : C.white };
                 // Top accent bar
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.06, fill: { color: C.navy } });
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 0.08, h: 0.85, fill: { color: C.navy } });
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.06, fill: { color: isDark ? C.primary : C.navy } });
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 0.08, h: 0.85, fill: { color: isDark ? C.primary : C.navy } });
 
                 // Problem number badge — large, top-left
                 sl.addShape(pres.shapes.OVAL, {
                     x: 0.2, y: 0.12, w: 0.5, h: 0.5,
-                    fill: { color: C.navy }
+                    fill: { color: isDark ? C.primary : C.navy }
                 });
                 sl.addText((frameIdx + 1).toString(), {
                     x: 0.2, y: 0.12, w: 0.5, h: 0.5,
-                    fontSize: 16, bold: true, color: C.white, align: 'center', valign: 'middle', fontFace: 'Calibri'
+                    fontSize: 16, bold: true, color: isDark ? C.bg : C.white, align: 'center', valign: 'middle', fontFace: theme ? theme.fonts.body : 'Calibri'
                 });
 
                 const hasOrigImg = s.images && s.images.length > 0;
@@ -3319,12 +3168,12 @@
                     // Image RIGHT side, problem text LEFT — both large
                     sl.addText(s.text, {
                         x: 0.4, y: 0.85, w: 5.5, h: 3.3,
-                        fontSize: 17, color: C.textDark, wrap: true, valign: 'top',
-                        fontFace: 'Calibri', lineSpacingMultiple: 1.4, bold: false
+                        fontSize: 17, color: isDark ? C.text : C.textDark, wrap: true, valign: 'top',
+                        fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.4, bold: false
                     });
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 6.1, y: 0.85, w: 3.5, h: 3.3,
-                        fill: { color: 'F8FAFC' },
+                        fill: { color: isDark ? C.card : 'F8FAFC' },
                         line: { color: C.border, width: 0.5 },
                         rectRadius: 0.08
                     });
@@ -3335,7 +3184,7 @@
                     // Visual LEFT, problem text RIGHT
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.35, y: 0.85, w: 3.8, h: 3.3,
-                        fill: { color: 'F8FAFC' },
+                        fill: { color: isDark ? C.card : 'F8FAFC' },
                         line: { color: C.border, width: 0.5 },
                         rectRadius: 0.08
                     });
@@ -3344,28 +3193,28 @@
                     } catch(e) {}
                     sl.addText(s.text, {
                         x: 4.4, y: 0.85, w: 5.2, h: 3.3,
-                        fontSize: 17, color: C.textDark, wrap: true, valign: 'middle',
-                        fontFace: 'Calibri', lineSpacingMultiple: 1.4
+                        fontSize: 17, color: isDark ? C.text : C.textDark, wrap: true, valign: 'middle',
+                        fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.4
                     });
                 } else {
                     // No image — LARGE problem text centered, generous white space
                     sl.addText(s.text, {
                         x: 0.6, y: 0.85, w: 8.8, h: 2.8,
-                        fontSize: 20, color: C.textDark, wrap: true, valign: 'middle',
-                        fontFace: 'Calibri', lineSpacingMultiple: 1.5
+                        fontSize: 20, color: isDark ? C.text : C.textDark, wrap: true, valign: 'middle',
+                        fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.5
                     });
                 }
 
                 // Work space box — dotted border, "Show your work" label
                 sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                     x: 0.35, y: 4.2, w: 9.3, h: 0.85,
-                    fill: { color: 'FAFBFC' },
-                    line: { color: 'CBD5E1', width: 0.75, dashType: 'dash' },
+                    fill: { color: isDark ? C.card : 'FAFBFC' },
+                    line: { color: isDark ? C.border : 'CBD5E1', width: 0.75, dashType: 'dash' },
                     rectRadius: 0.06
                 });
                 sl.addText("Show your work:", {
                     x: 0.55, y: 4.25, w: 2.5, h: 0.22,
-                    fontSize: 8, color: '94A3B8', fontFace: 'Calibri', italic: true
+                    fontSize: 10, color: isDark ? C.text2 : '94A3B8', fontFace: theme ? theme.fonts.body : 'Calibri', italic: true
                 });
 
                 // Role prompt bottom-left of work box
@@ -3378,7 +3227,7 @@
                         const prompt = prompts[frameIdx % prompts.length];
                         sl.addText(rName + ':  "' + prompt + '"', {
                             x: 3.1, y: 4.26, w: 6.4, h: 0.22,
-                            fontSize: 8, italic: true, color: roleColors[rKey], fontFace: 'Calibri', align: 'right'
+                            fontSize: 10, italic: true, color: roleColors[rKey], fontFace: theme ? theme.fonts.body : 'Calibri', align: 'right'
                         });
                     }
                 }
@@ -3389,7 +3238,7 @@
                     const hint = frames[frameIdx % frames.length];
                     sl.addText('"' + hint + '"', {
                         x: 0.55, y: 4.5, w: 8.9, h: 0.22,
-                        fontSize: 8, italic: true, color: C.teal, fontFace: 'Calibri'
+                        fontSize: 10, italic: true, color: isDark ? C.accent : C.teal, fontFace: theme ? theme.fonts.body : 'Calibri'
                     });
                 }
 
@@ -3428,7 +3277,7 @@
                         const prompt = prompts[discIdx % prompts.length];
                         sl.addText(rName + ':  "' + prompt + '"', {
                             x: 0.5, y: 4.55, w: 9, h: 0.26,
-                            fontSize: 8, italic: true, color: roleColors[rKey], fontFace: 'Calibri'
+                            fontSize: 10, italic: true, color: roleColors[rKey], fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                     }
                 }
@@ -3436,7 +3285,7 @@
                     const eIdx = discIdx % SENTENCE_FRAMES.explaining.length;
                     sl.addText('"' + SENTENCE_FRAMES.explaining[eIdx] + '"', {
                         x: 0.6, y: 4.82, w: 8.8, h: 0.22,
-                        fontSize: 8, italic: true, color: C.teal, fontFace: 'Calibri'
+                        fontSize: 10, italic: true, color: isDark ? C.accent : C.teal, fontFace: theme ? theme.fonts.body : 'Calibri'
                     });
                 }
                 discIdx++;
@@ -3483,14 +3332,14 @@
                     // Card for each tool
                     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.5, y: yPos, w: 9, h: 0.65,
-                        fill: { color: 'F0FDFA' },
-                        line: { color: C.teal, width: 0.6 },
+                        fill: { color: isDark ? C.card : 'F0FDFA' },
+                        line: { color: isDark ? C.accent : C.teal, width: 0.6 },
                         rectRadius: 0.06
                     });
                     slide.addText([
-                        { text: tool.label, options: { fontSize: 13, bold: true, color: C.teal, hyperlink: { url: url } } }
-                    ], { x: 0.75, y: yPos + 0.04, w: 8.5, h: 0.3, fontFace: 'Calibri' });
-                    slide.addText(url, { x: 0.75, y: yPos + 0.35, w: 8.5, h: 0.22, fontSize: 8, color: C.textMid, fontFace: 'Calibri' });
+                        { text: tool.label, options: { fontSize: 14, bold: true, color: isDark ? C.accent : C.teal, hyperlink: { url: url } } }
+                    ], { x: 0.75, y: yPos + 0.04, w: 8.5, h: 0.3, fontFace: theme ? theme.fonts.body : 'Calibri' });
+                    slide.addText(url, { x: 0.75, y: yPos + 0.35, w: 8.5, h: 0.22, fontSize: 10, color: isDark ? C.text2 : C.textMid, fontFace: theme ? theme.fonts.body : 'Calibri' });
                     yPos += 0.75;
                 }
                 if (topicVisuals.length > 0) {
@@ -3517,19 +3366,19 @@
                     if (!SENTENCE_FRAMES[key] || yPos > 4.3) continue;
                     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.4, y: yPos, w: 9.2, h: 0.26,
-                        fill: { color: 'F8FAFC' },
+                        fill: { color: isDark ? C.card : 'F8FAFC' },
                         rectRadius: 0.04
                     });
                     slide.addText(cat.label.toUpperCase(), {
                         x: 0.5, y: yPos, w: 9, h: 0.26,
-                        fontSize: 9, bold: true, color: cat.color, fontFace: 'Calibri', charSpacing: 1
+                        fontSize: 11, bold: true, color: cat.color, fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 1
                     });
                     yPos += 0.3;
                     for (const f of SENTENCE_FRAMES[key].slice(0, 2)) {
                         if (yPos > 5.0) break;
                         slide.addText('"' + f + '"', {
                             x: 0.65, y: yPos, w: 8.7, h: 0.3,
-                            fontSize: 10, italic: true, color: C.textDark, fontFace: 'Calibri'
+                            fontSize: 12, italic: true, color: isDark ? C.text : C.textDark, fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                         yPos += 0.32;
                     }
@@ -3545,34 +3394,38 @@
 
             // ─── Exit Ticket — dark, dramatic, high-stakes feel ───
             const exitSlides = slideGroups['EXIT_TICKET'] || [];
+            const exitBg = isDark ? C.bg : '1A0A0F';
+            const exitAccent = isDark ? C.accent : C.pink;
+            const exitLine = isDark ? C.border : '4A3040';
+            const exitText = isDark ? C.text : C.white;
             if (exitSlides.length > 0) {
                 for (const s of exitSlides) {
                     const sl = pres.addSlide();
-                    sl.background = { color: '1A0A0F' }; // very dark, almost black
-                    sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: C.pink } });
+                    sl.background = { color: exitBg };
+                    sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: exitAccent } });
                     sl.addText("EXIT TICKET", {
                         x: 0.5, y: 0.2, w: 9, h: 0.38,
-                        fontSize: 13, bold: true, color: C.pink, align: 'center', fontFace: 'Calibri', charSpacing: 5
+                        fontSize: 16, bold: true, color: exitAccent, align: 'center', fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 5
                     });
-                    sl.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 0.6, w: 3, h: 0.03, fill: { color: C.pink } });
+                    sl.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 0.6, w: 3, h: 0.03, fill: { color: exitAccent } });
                     // Big question text
                     sl.addText(s.text, {
                         x: 0.6, y: 0.75, w: 8.8, h: 2.8,
-                        fontSize: 22, bold: true, color: C.white,
-                        wrap: true, valign: 'middle', align: 'center', fontFace: 'Calibri', lineSpacingMultiple: 1.4
+                        fontSize: 22, bold: true, color: exitText,
+                        wrap: true, valign: 'middle', align: 'center', fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.4
                     });
                     // Write lines
                     for (let li = 0; li < 3; li++) {
                         sl.addShape(pres.shapes.RECTANGLE, {
                             x: 0.8, y: 3.7 + li * 0.38, w: 8.4, h: 0.02,
-                            fill: { color: '4A3040' }
+                            fill: { color: exitLine }
                         });
                     }
                     sl.addText("Your answer:", {
                         x: 0.8, y: 3.56, w: 3, h: 0.22,
-                        fontSize: 8, color: C.pink, italic: true, fontFace: 'Calibri'
+                        fontSize: 10, color: exitAccent, italic: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                     });
-                    sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: C.pink } });
+                    sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: exitAccent } });
                     if (s.images && s.images.length > 0) {
                         try { addFittedImage(sl, s.images[0], 3.5, 4.25, 3, 0.9); } catch(e) {}
                     }
@@ -3580,98 +3433,102 @@
             } else {
                 // No original exit ticket — generate a clean one from topics
                 const sl = pres.addSlide();
-                sl.background = { color: '1A0A0F' };
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: C.pink } });
+                sl.background = { color: exitBg };
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: exitAccent } });
                 sl.addText("EXIT TICKET", {
                     x: 0.5, y: 0.2, w: 9, h: 0.38,
-                    fontSize: 13, bold: true, color: C.pink, align: 'center', fontFace: 'Calibri', charSpacing: 5
+                    fontSize: 16, bold: true, color: exitAccent, align: 'center', fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 5
                 });
-                sl.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 0.6, w: 3, h: 0.03, fill: { color: C.pink } });
+                sl.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 0.6, w: 3, h: 0.03, fill: { color: exitAccent } });
                 const exitQ = analysis.topics.length > 0
                     ? "Explain how you would " + getVerbForTopic(analysis.topics[0]) + " " + analysis.topics[0] + ". Give an example."
                     : "What is the most important thing you learned today? Give an example.";
                 sl.addText(exitQ, {
                     x: 0.6, y: 0.8, w: 8.8, h: 2.6,
-                    fontSize: 22, bold: true, color: C.white,
-                    wrap: true, valign: 'middle', align: 'center', fontFace: 'Calibri', lineSpacingMultiple: 1.4
+                    fontSize: 22, bold: true, color: exitText,
+                    wrap: true, valign: 'middle', align: 'center', fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.4
                 });
                 for (let li = 0; li < 3; li++) {
                     sl.addShape(pres.shapes.RECTANGLE, {
                         x: 0.8, y: 3.65 + li * 0.38, w: 8.4, h: 0.02,
-                        fill: { color: '4A3040' }
+                        fill: { color: exitLine }
                     });
                 }
-                sl.addText("Your answer:", { x: 0.8, y: 3.5, w: 3, h: 0.22, fontSize: 8, color: C.pink, italic: true, fontFace: 'Calibri' });
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: C.pink } });
+                sl.addText("Your answer:", { x: 0.8, y: 3.5, w: 3, h: 0.22, fontSize: 10, color: exitAccent, italic: true, fontFace: theme ? theme.fonts.body : 'Calibri' });
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: exitAccent } });
             }
 
             // ─── Learning Log (ALL) — dark, reflective ───
             for (const s of (slideGroups['LEARNING_LOG'] || [])) {
                 const sl = pres.addSlide();
-                sl.background = { color: C.navy };
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: C.teal } });
+                sl.background = { color: isDark ? C.bg : C.navy };
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: isDark ? C.accent : C.teal } });
                 sl.addText("LEARNING LOG", {
                     x: 0.5, y: 0.2, w: 9, h: 0.38,
-                    fontSize: 13, bold: true, color: C.teal, align: 'center', fontFace: 'Calibri', charSpacing: 4
+                    fontSize: 16, bold: true, color: isDark ? C.accent : C.teal, align: 'center', fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 4
                 });
                 sl.addText(s.text, {
                     x: 0.6, y: 0.75, w: 8.8, h: 2.2,
-                    fontSize: 18, color: C.white, wrap: true, valign: 'top', fontFace: 'Calibri', lineSpacingMultiple: 1.4
+                    fontSize: 18, color: isDark ? C.text : C.white, wrap: true, valign: 'top', fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.4
                 });
                 for (let li = 0; li < 4; li++) {
                     sl.addShape(pres.shapes.RECTANGLE, {
                         x: 0.6, y: 3.15 + li * 0.42, w: 8.8, h: 0.02,
-                        fill: { color: '2A3A5C' }
+                        fill: { color: isDark ? C.border : '2A3A5C' }
                     });
                 }
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: C.teal } });
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: isDark ? C.accent : C.teal } });
             }
 
             // ─── Closure — dark, centered "I used to think / Now I know" ───
+            const closureBg = isDark ? C.bg : '0D1B2A';
+            const closureAccent = isDark ? C.accent : C.teal;
+            const closureCardBg = isDark ? C.card : '0A2540';
+            const closureLine = isDark ? C.border : '2A3A5C';
             const closureSlides = slideGroups['CLOSURE'] || [];
             if (closureSlides.length > 0) {
                 for (const s of closureSlides) {
                     const sl = pres.addSlide();
-                    sl.background = { color: '0D1B2A' };
-                    sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: C.teal } });
+                    sl.background = { color: closureBg };
+                    sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: closureAccent } });
                     sl.addText("CLOSURE", {
                         x: 0.5, y: 0.2, w: 9, h: 0.35,
-                        fontSize: 11, bold: true, color: C.teal, align: 'center', fontFace: 'Calibri', charSpacing: 4
+                        fontSize: 15, bold: true, color: closureAccent, align: 'center', fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 4
                     });
                     sl.addText(s.text, {
                         x: 0.6, y: 0.7, w: 8.8, h: 2.0,
-                        fontSize: 18, color: C.white, wrap: true, valign: 'top', fontFace: 'Calibri', lineSpacingMultiple: 1.3
+                        fontSize: 18, color: isDark ? C.text : C.white, wrap: true, valign: 'top', fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.3
                     });
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.5, y: 2.85, w: 9, h: 1.1,
-                        fill: { color: '0A2540' },
-                        line: { color: C.teal, width: 1 },
+                        fill: { color: closureCardBg },
+                        line: { color: closureAccent, width: 1 },
                         rectRadius: 0.08
                     });
                     sl.addText('"I used to think _____.  Now I know _____."\n\nWrite your response:', {
                         x: 0.7, y: 2.92, w: 8.6, h: 0.95,
-                        fontSize: 14, color: C.teal, wrap: true, fontFace: 'Calibri', italic: true, lineSpacingMultiple: 1.2
+                        fontSize: 14, color: closureAccent, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', italic: true, lineSpacingMultiple: 1.2
                     });
                     for (let li = 0; li < 2; li++) {
                         sl.addShape(pres.shapes.RECTANGLE, {
                             x: 0.5, y: 4.1 + li * 0.38, w: 9, h: 0.02,
-                            fill: { color: '2A3A5C' }
+                            fill: { color: closureLine }
                         });
                     }
-                    sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: C.teal } });
+                    sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: closureAccent } });
                 }
             } else {
                 // No original closure — generate one
                 const sl = pres.addSlide();
-                sl.background = { color: '0D1B2A' };
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: C.teal } });
+                sl.background = { color: closureBg };
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: closureAccent } });
                 sl.addText("CLOSURE", {
                     x: 0.5, y: 0.2, w: 9, h: 0.35,
-                    fontSize: 11, bold: true, color: C.teal, align: 'center', fontFace: 'Calibri', charSpacing: 4
+                    fontSize: 15, bold: true, color: closureAccent, align: 'center', fontFace: theme ? theme.fonts.heading : 'Calibri', charSpacing: 4
                 });
                 sl.addText("Before you leave today...", {
                     x: 0.6, y: 0.72, w: 8.8, h: 0.6,
-                    fontSize: 20, bold: true, color: C.white, fontFace: 'Calibri'
+                    fontSize: 20, bold: true, color: isDark ? C.text : C.white, fontFace: theme ? theme.fonts.heading : 'Calibri'
                 });
                 const closurePrompts = [
                     '"I used to think _____. Now I know _____."',
@@ -3682,18 +3539,18 @@
                 for (const cp of closurePrompts) {
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.5, y: cpY, w: 9, h: 0.55,
-                        fill: { color: '0A2540' }, line: { color: C.teal, width: 0.6 }, rectRadius: 0.06
+                        fill: { color: closureCardBg }, line: { color: closureAccent, width: 0.6 }, rectRadius: 0.06
                     });
-                    sl.addText(cp, { x: 0.7, y: cpY + 0.04, w: 8.6, h: 0.45, fontSize: 12, color: C.teal, fontFace: 'Calibri', italic: true, valign: 'middle' });
+                    sl.addText(cp, { x: 0.7, y: cpY + 0.04, w: 8.6, h: 0.45, fontSize: 14, color: closureAccent, fontFace: theme ? theme.fonts.body : 'Calibri', italic: true, valign: 'middle' });
                     cpY += 0.62;
                 }
                 for (let li = 0; li < 2; li++) {
                     sl.addShape(pres.shapes.RECTANGLE, {
                         x: 0.5, y: 3.55 + li * 0.38, w: 9, h: 0.02,
-                        fill: { color: '2A3A5C' }
+                        fill: { color: closureLine }
                     });
                 }
-                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: C.teal } });
+                sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: closureAccent } });
             }
 
             // ─── Homework (ALL) ───
@@ -3707,25 +3564,25 @@
 
             // ─── Divider ───
             slide = pres.addSlide();
-            slide.background = { color: C.navy };
-            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.06, fill: { color: C.pink } });
-            slide.addShape(pres.shapes.RECTANGLE, { x: 3, y: 1.8, w: 4, h: 0.03, fill: { color: C.pink } });
+            slide.background = { color: isDark ? C.bg : C.navy };
+            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.06, fill: { color: isDark ? C.accent : C.pink } });
+            slide.addShape(pres.shapes.RECTANGLE, { x: 3, y: 1.8, w: 4, h: 0.03, fill: { color: isDark ? C.accent : C.pink } });
             slide.addText("Teacher Reference", {
                 x: 0.5, y: 1.95, w: 9, h: 0.9,
-                fontSize: 36, bold: true, color: C.white, align: "center", fontFace: 'Calibri'
+                fontSize: 36, bold: true, color: isDark ? C.text : C.white, align: "center", fontFace: theme ? theme.fonts.heading : 'Calibri'
             });
-            slide.addShape(pres.shapes.RECTANGLE, { x: 3, y: 2.9, w: 4, h: 0.03, fill: { color: C.pink } });
+            slide.addShape(pres.shapes.RECTANGLE, { x: 3, y: 2.9, w: 4, h: 0.03, fill: { color: isDark ? C.accent : C.pink } });
             slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                 x: 1.5, y: 3.3, w: 7, h: 0.5,
-                fill: { color: '253380' },
-                line: { color: C.pink, width: 0.8 },
+                fill: { color: isDark ? C.card : '253380' },
+                line: { color: isDark ? C.accent : C.pink, width: 0.8 },
                 rectRadius: 0.06
             });
             slide.addText("The following slides are for teacher planning only.", {
                 x: 1.5, y: 3.3, w: 7, h: 0.5,
-                fontSize: 13, color: C.amber, align: "center", fontFace: 'Calibri'
+                fontSize: 15, color: isDark ? C.accent : C.amber, align: "center", fontFace: theme ? theme.fonts.body : 'Calibri'
             });
-            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: C.pink } });
+            slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: isDark ? C.accent : C.pink } });
 
             // ─── Leveled Problems (DOK 1, 2, 3) ───
             if (typeof getLeveledProblems === 'function') {
@@ -3743,15 +3600,15 @@
                         for (const dok of dokLevels) {
                             if (!item.problems[dok.key] || yPos > 4.5) continue;
                             slide.addText(dok.label, {
-                                x: 0.5, y: yPos, w: 9, h: 0.22,
-                                fontSize: 10, bold: true, color: dok.color
+                                x: 0.5, y: yPos, w: 9, h: 0.25,
+                                fontSize: 13, bold: true, color: dok.color, fontFace: theme ? theme.fonts.heading : 'Calibri'
                             });
-                            yPos += 0.26;
+                            yPos += 0.28;
                             for (const prob of item.problems[dok.key].slice(0, 2)) {
                                 if (yPos > 5.0) break;
                                 slide.addText(prob.stem, {
                                     x: 0.7, y: yPos, w: 8.8, h: 0.4,
-                                    fontSize: 10, color: C.textDark, bullet: true, wrap: true
+                                    fontSize: 13, color: isDark ? C.text : C.textDark, bullet: true, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                                 });
                                 yPos += 0.44;
                             }
@@ -3767,10 +3624,10 @@
                     for (const item of leveledData.slice(0, 2)) {
                         if (yPos > 4.5) break;
                         slide.addText(item.topic.toUpperCase(), {
-                            x: 0.5, y: yPos, w: 9, h: 0.22,
-                            fontSize: 9, bold: true, color: C.amber
+                            x: 0.5, y: yPos, w: 9, h: 0.25,
+                            fontSize: 12, bold: true, color: isDark ? C.accent : C.amber, fontFace: theme ? theme.fonts.heading : 'Calibri'
                         });
-                        yPos += 0.25;
+                        yPos += 0.28;
                         const allProbs = [
                             ...(item.problems.dok1 || []).slice(0, 2),
                             ...(item.problems.dok2 || []).slice(0, 1),
@@ -3780,9 +3637,9 @@
                             if (yPos > 5.0) break;
                             const shortQ = prob.stem.length > 45 ? prob.stem.substring(0, 42) + '...' : prob.stem;
                             slide.addText([
-                                { text: shortQ + "  ", options: { fontSize: 8, color: C.textMid } },
-                                { text: prob.answer, options: { bold: true, fontSize: 8, color: C.teal } }
-                            ], { x: 0.5, y: yPos, w: 9, h: 0.35, wrap: true });
+                                { text: shortQ + "  ", options: { fontSize: 11, color: isDark ? C.text2 : C.textMid } },
+                                { text: prob.answer, options: { bold: true, fontSize: 11, color: isDark ? C.accent : C.teal } }
+                            ], { x: 0.5, y: yPos, w: 9, h: 0.35, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri' });
                             yPos += 0.38;
                         }
                         yPos += 0.08;
@@ -3803,10 +3660,10 @@
                     if (!insight) continue;
 
                     slide.addText(topic.toUpperCase(), {
-                        x: 0.5, y: yPos, w: 9, h: 0.22,
-                        fontSize: 9, bold: true, color: C.amber
+                        x: 0.5, y: yPos, w: 9, h: 0.25,
+                        fontSize: 12, bold: true, color: isDark ? C.accent : C.amber, fontFace: theme ? theme.fonts.heading : 'Calibri'
                     });
-                    yPos += 0.25;
+                    yPos += 0.28;
 
                     if (insight.misconceptions) {
                         for (const m of insight.misconceptions.slice(0, 2)) {
@@ -3814,20 +3671,20 @@
                             const txt = typeof m === 'string' ? m : m.error;
                             slide.addText("Watch for: " + txt, {
                                 x: 0.6, y: yPos, w: 8.8, h: 0.35,
-                                fontSize: 9, color: C.textDark, bullet: true, wrap: true
+                                fontSize: 12, color: isDark ? C.text : C.textDark, bullet: true, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                             });
                             yPos += 0.38;
                         }
                     }
                     if (insight.differentiation) {
                         slide.addText("Emergent: " + insight.differentiation.emergent.substring(0, 120), {
-                            x: 0.6, y: yPos, w: 8.8, h: 0.32,
-                            fontSize: 8, color: C.teal, wrap: true
+                            x: 0.6, y: yPos, w: 8.8, h: 0.35,
+                            fontSize: 11, color: isDark ? C.accent : C.teal, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
-                        yPos += 0.35;
+                        yPos += 0.38;
                         slide.addText("ELL: " + insight.differentiation.ell.substring(0, 120), {
-                            x: 0.6, y: yPos, w: 8.8, h: 0.32,
-                            fontSize: 8, color: C.blue, wrap: true
+                            x: 0.6, y: yPos, w: 8.8, h: 0.35,
+                            fontSize: 11, color: isDark ? C.primary : C.blue, wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                         yPos += 0.38;
                     }
@@ -3858,7 +3715,7 @@
                         const rubric = rubricData[code];
                         slide.addText(code + ": " + rubric.benchmark + "  (DOK " + rubric.dok + ")", {
                             x: 0.3, y: ry, w: 9.4, h: 0.28,
-                            fontSize: 10, bold: true, color: C.navy
+                            fontSize: 12, bold: true, color: isDark ? C.text : C.navy, fontFace: theme ? theme.fonts.heading : 'Calibri'
                         });
                         ry += 0.32;
                         const rows = [];
