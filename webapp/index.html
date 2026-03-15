@@ -7,7 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js"
+        onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js';s.onerror=function(){var s2=document.createElement('script');s2.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';document.head.appendChild(s2)};document.head.appendChild(s)"></script>
     <style>
         /* ==================== ROOT & UTILITIES ==================== */
         :root {
@@ -1061,10 +1062,6 @@
                     <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">INTERVENTION OUTPUTS</div>
                     <button class="download-btn" id="tier2Btn" style="background: #0D9488; margin-right: 10px;">👥 Tier 2 — Small Group (.pptx)</button>
                     <button class="download-btn" id="tier3Btn" style="background: #7C3AED;">🎯 Tier 3 — Intensive (.pptx)</button>
-                </div>
-                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
-                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DIALOGUE & ERROR ANALYSIS</div>
-                    <div style="font-size: 0.72em; color: var(--text-dim); margin-bottom: 8px; opacity: 0.7;">Included in rebuilt lesson. 4 slides: Structured Dialogue, Dual Error Analysis, Teacher Cookbook, Strategy Pivot</div>
                 </div>
                 <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
                     <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DIFFERENTIATED WORKSHEETS (PDF)</div>
