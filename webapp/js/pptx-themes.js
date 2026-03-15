@@ -42,7 +42,14 @@ const PptxThemes = (() => {
                 questionBg: 'FFFBEB', questionBorder: 'D4870F',
                 exitBg: '1E2761', exitText: 'FFFFFF'
             },
-            swatch: ['1E2761','D4870F','3B82F6','0D9488','E8436D','FFFFFF']
+            swatch: ['1E2761','D4870F','3B82F6','0D9488','E8436D','FFFFFF'],
+            categoryColors: {
+                unitDesign:  { primary: '1E2761', tint: 'EFF6FF' },
+                community:   { primary: '7C3AED', tint: 'F5F3FF' },
+                clarity:     { primary: '0D9488', tint: 'F0FDFA' },
+                delivery:    { primary: 'D4870F', tint: 'FFFBEB' },
+                assessment:  { primary: 'E8436D', tint: 'FEF2F2' }
+            }
         },
 
         'warm-workshop': {
@@ -63,7 +70,14 @@ const PptxThemes = (() => {
                 questionBg: 'FEF3C7', questionBorder: 'D4870F',
                 exitBg: '92400E', exitText: 'FFFFFF'
             },
-            swatch: ['92400E','D4870F','0D9488','E8436D','FEF3C7','FFFFFF']
+            swatch: ['92400E','D4870F','0D9488','E8436D','FEF3C7','FFFFFF'],
+            categoryColors: {
+                unitDesign:  { primary: '92400E', tint: 'FFFBEB' },
+                community:   { primary: '7C2D12', tint: 'FEF3C7' },
+                clarity:     { primary: '0D9488', tint: 'F0FDFA' },
+                delivery:    { primary: 'D4870F', tint: 'FEF9EF' },
+                assessment:  { primary: 'E8436D', tint: 'FEF2F2' }
+            }
         },
 
         'bold-modern': {
@@ -84,7 +98,14 @@ const PptxThemes = (() => {
                 questionBg: '1E293B', questionBorder: '60A5FA',
                 exitBg: '000000', exitText: '3B82F6'
             },
-            swatch: ['000000','3B82F6','60A5FA','FFFFFF','1E293B','334155']
+            swatch: ['000000','3B82F6','60A5FA','FFFFFF','1E293B','334155'],
+            categoryColors: {
+                unitDesign:  { primary: '3B82F6', tint: '1E293B' },
+                community:   { primary: '60A5FA', tint: '1E293B' },
+                clarity:     { primary: '3B82F6', tint: '1E293B' },
+                delivery:    { primary: 'FFFFFF', tint: '1E293B' },
+                assessment:  { primary: '60A5FA', tint: '1E293B' }
+            }
         },
 
         'visual-story': {
@@ -105,7 +126,14 @@ const PptxThemes = (() => {
                 questionBg: 'CCFBF1', questionBorder: '14B8A6',
                 exitBg: '115E59', exitText: 'FFFFFF'
             },
-            swatch: ['0F766E','0D9488','14B8A6','99F6E4','F0FDFA','FFFFFF']
+            swatch: ['0F766E','0D9488','14B8A6','99F6E4','F0FDFA','FFFFFF'],
+            categoryColors: {
+                unitDesign:  { primary: '0F766E', tint: 'F0FDFA' },
+                community:   { primary: '115E59', tint: 'CCFBF1' },
+                clarity:     { primary: '0D9488', tint: 'F0FDFA' },
+                delivery:    { primary: '14B8A6', tint: 'CCFBF1' },
+                assessment:  { primary: '0F766E', tint: 'F0FDFA' }
+            }
         },
 
         'interactive-notebook': {
@@ -126,7 +154,14 @@ const PptxThemes = (() => {
                 questionBg: 'FEF3C7', questionBorder: 'D4870F',
                 exitBg: 'FEF9EF', exitText: '44403C'
             },
-            swatch: ['D4870F','92400E','0D9488','E8436D','FEF9EF','D6C9A6']
+            swatch: ['D4870F','92400E','0D9488','E8436D','FEF9EF','D6C9A6'],
+            categoryColors: {
+                unitDesign:  { primary: 'D4870F', tint: 'FEF9EF' },
+                community:   { primary: '92400E', tint: 'FEF3C7' },
+                clarity:     { primary: '0D9488', tint: 'F0FDFA' },
+                delivery:    { primary: 'D4870F', tint: 'FFFBEB' },
+                assessment:  { primary: 'E8436D', tint: 'FEF2F2' }
+            }
         },
 
         // ─── Vinculum 5 ──────────────────────────────────────────
@@ -151,7 +186,14 @@ const PptxThemes = (() => {
                 cyan: '00D4FF', pink: 'FF3B8B', yellow: 'FFC107',
                 green: '00E676', purple: 'B388FF', orange: 'FF9100'
             },
-            swatch: ['0A0E1A','00D4FF','B388FF','00E676','FF3B8B','FF9100']
+            swatch: ['0A0E1A','00D4FF','B388FF','00E676','FF3B8B','FF9100'],
+            categoryColors: {
+                unitDesign:  { primary: '00D4FF', tint: '1A2236' },
+                community:   { primary: 'B388FF', tint: '1A2236' },
+                clarity:     { primary: '00E676', tint: '1A2236' },
+                delivery:    { primary: '00D4FF', tint: '1A2236' },
+                assessment:  { primary: 'FF3B8B', tint: '1A2236' }
+            }
         },
 
         'neon-forge': {
@@ -174,7 +216,14 @@ const PptxThemes = (() => {
                 cyan: 'E040FB', pink: 'FF4081', yellow: 'FFAB00',
                 green: '76FF03', purple: 'EA80FC', orange: 'FF6D00'
             },
-            swatch: ['08060E','E040FB','FF6D00','76FF03','EA80FC','FFAB00']
+            swatch: ['08060E','E040FB','FF6D00','76FF03','EA80FC','FFAB00'],
+            categoryColors: {
+                unitDesign:  { primary: 'E040FB', tint: '1A1528' },
+                community:   { primary: 'EA80FC', tint: '1A1528' },
+                clarity:     { primary: '76FF03', tint: '1A1528' },
+                delivery:    { primary: 'FF6D00', tint: '1A1528' },
+                assessment:  { primary: 'FF4081', tint: '1A1528' }
+            }
         },
 
         'arctic-frost': {
@@ -197,7 +246,14 @@ const PptxThemes = (() => {
                 cyan: '0077BB', pink: '8844AA', yellow: 'AA7700',
                 green: '007755', purple: '5533BB', orange: 'CC6600'
             },
-            swatch: ['DCE8F4','0077BB','4DB8E8','007755','5533BB','FFFFFF']
+            swatch: ['DCE8F4','0077BB','4DB8E8','007755','5533BB','FFFFFF'],
+            categoryColors: {
+                unitDesign:  { primary: '0077BB', tint: 'FFFFFF' },
+                community:   { primary: '5533BB', tint: 'FFFFFF' },
+                clarity:     { primary: '007755', tint: 'FFFFFF' },
+                delivery:    { primary: '0077BB', tint: 'E0F0FF' },
+                assessment:  { primary: '8844AA', tint: 'FFFFFF' }
+            }
         },
 
         'cra-flow': {
@@ -221,7 +277,14 @@ const PptxThemes = (() => {
                 green: '00E676', purple: 'B388FF', orange: 'FF9100',
                 explore: '00D4FF', practice: '00E676', play: 'FFC107'
             },
-            swatch: ['0A0E1A','00D4FF','00E676','FFC107','B388FF','FF3B8B']
+            swatch: ['0A0E1A','00D4FF','00E676','FFC107','B388FF','FF3B8B'],
+            categoryColors: {
+                unitDesign:  { primary: '00D4FF', tint: '1A2236' },
+                community:   { primary: 'B388FF', tint: '1A2236' },
+                clarity:     { primary: '00E676', tint: '1A2236' },
+                delivery:    { primary: 'FFC107', tint: '1A2236' },
+                assessment:  { primary: 'FF3B8B', tint: '1A2236' }
+            }
         },
 
         'ocean-deep': {
@@ -244,7 +307,14 @@ const PptxThemes = (() => {
                 cyan: '00B4D8', pink: 'FFD166', yellow: 'FFD166',
                 green: '06D6A0', purple: '48CAE4', orange: 'F4845F'
             },
-            swatch: ['0B1D33','00B4D8','06D6A0','48CAE4','FFD166','F4845F']
+            swatch: ['0B1D33','00B4D8','06D6A0','48CAE4','FFD166','F4845F'],
+            categoryColors: {
+                unitDesign:  { primary: '48CAE4', tint: '1A3A5C' },
+                community:   { primary: 'FFD166', tint: '1A3A5C' },
+                clarity:     { primary: '06D6A0', tint: '1A3A5C' },
+                delivery:    { primary: '00B4D8', tint: '1A3A5C' },
+                assessment:  { primary: 'F4845F', tint: '1A3A5C' }
+            }
         }
     };
 

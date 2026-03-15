@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PptxGenJS Layout Engine - Complete Visual Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 40px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .theme-btn {
+            padding: 10px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .theme-btn.active {
+            border-color: #3B82F6;
+            background: #3B82F6;
+            color: white;
+        }
+
+        .theme-btn:hover {
+            border-color: #3B82F6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .slide-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 100%;
+            aspect-ratio: 16/9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-label {
+            padding: 12px 16px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .slide-label span {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .slide-label .domain {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        /* Theme-agnostic base styles */
+        .slide {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .slide-header {
+            padding: 16px 20px;
+            font-size: 24px;
+            font-weight: 700;
+            border-bottom: 2px solid;
+        }
+
+        .slide-content {
+            flex: 1;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .slide-footer {
+            padding: 12px 20px;
+            font-size: 12px;
+            border-top: 1px solid;
+        }
+
+        /* Layout-specific styles */
+        .hero-statement {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 40px;
+        }
+
+        .hero-statement-accent {
+            width: 100%;
+            height: 6px;
+            margin-bottom: 30px;
+        }
+
+        .hero-statement-title {
+            font-size: 44px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .hero-statement-subtitle {
+            font-size: 16px;
+            margin-bottom: 40px;
+            opacity: 0.8;
+        }
+
+        .hero-statement-footer {
+            font-size: 13px;
+            margin-top: 30px;
+            font-weight: 500;
+        }
+
+        .split-panel {
+            display: grid;
+            grid-template-columns: 45% 55%;
+            height: 100%;
+        }
+
+        .split-left {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            border-right: 1px solid;
+        }
+
+        .split-left-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .split-left-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .split-right {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .split-right-card {
+            padding: 16px;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+
+        .split-right-card-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .split-right-card-text {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 0;
+        }
+
+        .card {
+            padding: 20px;
+            border-radius: 6px;
+            border: 2px solid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .card-content {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .checklist-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 12px;
+        }
+
+        .checklist-progress {
+            margin-top: 16px;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid;
+        }
+
+        .checklist-progress-bar {
+            height: 100%;
+            width: 60%;
+            border-radius: 4px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 0;
+        }
+
+        .compare-column {
+            border: 2px solid;
+            border-radius: 4px;
+            padding: 20px;
+        }
+
+        .compare-column-header {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid;
+        }
+
+        .compare-item {
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .phase-timeline {
+            display: flex;
+            gap: 12px;
+            padding: 0;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .phase-card {
+            flex: 1;
+            border: 2px solid;
+            border-radius: 4px;
+            padding: 16px;
+            position: relative;
+            text-align: center;
+        }
+
+        .phase-watermark {
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            font-size: 32px;
+            font-weight: 700;
+            opacity: 0.45;
+        }
+
+        .phase-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .phase-time {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .phase-connector {
+            position: absolute;
+            top: 50%;
+            right: -12px;
+            width: 8px;
+            height: 2px;
+            transform: translateY(-50%);
+        }
+
+        .dialogue {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 0;
+        }
+
+        .dialogue-bubble {
+            padding: 16px;
+            border-radius: 8px;
+            border: 2px solid;
+            position: relative;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .dialogue-bubble::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            top: 12px;
+            left: -12px;
+        }
+
+        .problem-workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 0;
+        }
+
+        .problem-text {
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid;
+        }
+
+        .dot-grid {
+            flex: 1;
+            padding: 20px;
+            background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin-bottom: 16px;
+        }
+
+        .frame-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 20px 16px;
+        }
+
+        .frame-card {
+            border: 2px dashed;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .frame-label {
+            font-weight: 600;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+
+        .frame-text {
+            font-size: 12px;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .rubric {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 0;
+        }
+
+        .rubric-band {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 16px;
+            padding: 16px 20px;
+            border-bottom: 1px solid;
+            align-items: center;
+        }
+
+        .rubric-band:last-child {
+            border-bottom: none;
+        }
+
+        .rubric-level {
+            font-weight: 700;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .rubric-description {
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 12px;
+            border-radius: 4px;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 0;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid;
+        }
+
+        .stat-box {
+            border: 1px solid;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .dashboard-table {
+            flex: 1;
+            padding: 16px 20px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 11px;
+            border-bottom: 2px solid;
+            padding-bottom: 8px;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            font-size: 11px;
+            padding: 6px 0;
+            border-bottom: 1px solid;
+        }
+
+        /* Summary section */
+        .summary-section {
+            max-width: 1400px;
+            margin: 60px auto 0;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .summary-section h2 {
+            margin-bottom: 30px;
+            font-size: 22px;
+            color: #1a1a1a;
+        }
+
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .mapping-card {
+            padding: 20px;
+            border-radius: 6px;
+            background: #f9f9f9;
+            border-left: 4px solid;
+        }
+
+        .mapping-domain {
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .mapping-layouts {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .mapping-layouts li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PptxGenJS Layout Engine - Complete Visual Preview</h1>
+        <p style="color: #666; margin-bottom: 20px;">All 10 layouts across all 10 themes. Switch themes to see how each layout adapts.</p>
+
+        <div class="theme-selector">
+            <button class="theme-btn active" data-theme="classic-academic">Classic Academic</button>
+            <button class="theme-btn" data-theme="warm-workshop">Warm Workshop</button>
+            <button class="theme-btn" data-theme="visual-story">Visual Story</button>
+            <button class="theme-btn" data-theme="interactive-notebook">Interactive Notebook</button>
+            <button class="theme-btn" data-theme="arctic-frost">Arctic Frost</button>
+            <button class="theme-btn" data-theme="bold-modern">Bold Modern</button>
+            <button class="theme-btn" data-theme="vinculum-dark">Vinculum Dark</button>
+            <button class="theme-btn" data-theme="neon-forge">Neon Forge</button>
+            <button class="theme-btn" data-theme="cra-flow">CRA Flow</button>
+            <button class="theme-btn" data-theme="ocean-deep">Ocean Deep</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="grid" id="slides-grid"></div>
+    </div>
+
+    <div class="summary-section">
+        <h2>Practice Profile Domain Mapping</h2>
+        <div class="mapping-grid">
+            <div class="mapping-card" style="border-left-color: #1E2761;">
+                <div class="mapping-domain" style="color: #1E2761;">Unit Design</div>
+                <ul class="mapping-layouts">
+                    <li><strong>phaseTimeline</strong> — Structured Dialogue</li>
+                    <li><strong>dashboardData</strong> — Lesson overview</li>
+                </ul>
+            </div>
+            <div class="mapping-card" style="border-left-color: #D4870F;">
+                <div class="mapping-domain" style="color: #D4870F;">Community</div>
+                <ul class="mapping-layouts">
+                    <li><strong>dialogueBubbles</strong> — Discussion</li>
+                    <li><strong>splitPanel</strong> — Why This Matters</li>
+                </ul>
+            </div>
+            <div class="mapping-card" style="border-left-color: #0D9488;">
+                <div class="mapping-domain" style="color: #0D9488;">Clarity</div>
+                <ul class="mapping-layouts">
+                    <li><strong>heroStatement</strong> — Learning targets</li>
+                    <li><strong>twoColumnCompare</strong> — Before/After</li>
+                </ul>
+            </div>
+            <div class="mapping-card" style="border-left-color: #3B82F6;">
+                <div class="mapping-domain" style="color: #3B82F6;">Delivery</div>
+                <ul class="mapping-layouts">
+                    <li><strong>splitPanel</strong> — Context</li>
+                    <li><strong>cardGrid</strong> — Lesson structure</li>
+                </ul>
+            </div>
+            <div class="mapping-card" style="border-left-color: #E8436D;">
+                <div class="mapping-domain" style="color: #E8436D;">Assessment</div>
+                <ul class="mapping-layouts">
+                    <li><strong>checklistTracker</strong> — Success criteria</li>
+                    <li><strong>rubricBands</strong> — Evaluation levels</li>
+                    <li><strong>problemWorkspace</strong> — Student work</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme definitions
+        const themes = {
+            'classic-academic': {
+                name: 'Classic Academic',
+                category: 'light',
+                bg: '#FFFFFF',
+                primary: '#1E2761',
+                secondary: '#D4870F',
+                accent: '#3B82F6',
+                accent2: '#0D9488',
+                accent3: '#E8436D',
+                text: '#1E293B',
+                textMuted: '#64748B',
+                card: '#FFFFFF',
+                border: '#E2E8F0',
+                domainColors: {
+                    unitDesign: '#1E2761',
+                    community: '#D4870F',
+                    clarity: '#0D9488',
+                    delivery: '#3B82F6',
+                    assessment: '#E8436D'
+                }
+            },
+            'warm-workshop': {
+                name: 'Warm Workshop',
+                category: 'light',
+                bg: '#FFFBEB',
+                primary: '#92400E',
+                secondary: '#D4870F',
+                accent: '#0D9488',
+                accent2: '#0D9488',
+                accent3: '#D97706',
+                text: '#44403C',
+                textMuted: '#78716C',
+                card: '#FFFFFF',
+                border: '#F5E6C8',
+                domainColors: {
+                    unitDesign: '#92400E',
+                    community: '#D4870F',
+                    clarity: '#0D9488',
+                    delivery: '#D97706',
+                    assessment: '#D4870F'
+                }
+            },
+            'visual-story': {
+                name: 'Visual Story',
+                category: 'light',
+                bg: '#F0FDFA',
+                primary: '#0F766E',
+                secondary: '#0D9488',
+                accent: '#14B8A6',
+                accent2: '#0D9488',
+                accent3: '#06B6D4',
+                text: '#134E4A',
+                textMuted: '#4E7C7E',
+                card: '#FFFFFF',
+                border: '#99F6E4',
+                domainColors: {
+                    unitDesign: '#0F766E',
+                    community: '#0D9488',
+                    clarity: '#14B8A6',
+                    delivery: '#06B6D4',
+                    assessment: '#0D9488'
+                }
+            },
+            'interactive-notebook': {
+                name: 'Interactive Notebook',
+                category: 'light',
+                bg: '#FEF9EF',
+                primary: '#D4870F',
+                secondary: '#92400E',
+                accent: '#0D9488',
+                accent2: '#0D9488',
+                accent3: '#A16207',
+                text: '#44403C',
+                textMuted: '#78716C',
+                card: '#FFFFFF',
+                border: '#D6C9A6',
+                domainColors: {
+                    unitDesign: '#D4870F',
+                    community: '#92400E',
+                    clarity: '#0D9488',
+                    delivery: '#A16207',
+                    assessment: '#D4870F'
+                }
+            },
+            'arctic-frost': {
+                name: 'Arctic Frost',
+                category: 'light',
+                bg: '#DCE8F4',
+                primary: '#0077BB',
+                secondary: '#5533BB',
+                accent: '#4DB8E8',
+                accent2: '#0D9488',
+                accent3: '#6366F1',
+                text: '#0C2840',
+                textMuted: '#3D5A80',
+                card: '#FFFFFF',
+                border: '#A0C8E6',
+                domainColors: {
+                    unitDesign: '#0077BB',
+                    community: '#5533BB',
+                    clarity: '#4DB8E8',
+                    delivery: '#6366F1',
+                    assessment: '#0D9488'
+                }
+            },
+            'bold-modern': {
+                name: 'Bold Modern',
+                category: 'dark',
+                bg: '#000000',
+                primary: '#3B82F6',
+                secondary: '#8B5CF6',
+                accent: '#EC4899',
+                accent2: '#10B981',
+                accent3: '#F59E0B',
+                text: '#FFFFFF',
+                textMuted: '#D1D5DB',
+                card: '#1E293B',
+                border: '#334155',
+                domainColors: {
+                    unitDesign: '#3B82F6',
+                    community: '#EC4899',
+                    clarity: '#10B981',
+                    delivery: '#8B5CF6',
+                    assessment: '#F59E0B'
+                }
+            },
+            'vinculum-dark': {
+                name: 'Vinculum Dark',
+                category: 'dark',
+                bg: '#0A0E1A',
+                primary: '#00D4FF',
+                secondary: '#B388FF',
+                accent: '#B388FF',
+                accent2: '#00E676',
+                accent3: '#FF3B8B',
+                text: '#E8EDF5',
+                textMuted: '#A0AEC0',
+                card: '#1A2236',
+                border: '#2D3F5B',
+                domainColors: {
+                    unitDesign: '#00D4FF',
+                    community: '#FF3B8B',
+                    clarity: '#00E676',
+                    delivery: '#B388FF',
+                    assessment: '#00D4FF'
+                }
+            },
+            'neon-forge': {
+                name: 'Neon Forge',
+                category: 'dark',
+                bg: '#08060E',
+                primary: '#E040FB',
+                secondary: '#FF6D00',
+                accent: '#FF6D00',
+                accent2: '#76FF03',
+                accent3: '#00B0FF',
+                text: '#F0E4FF',
+                textMuted: '#B8A8C8',
+                card: '#1A1528',
+                border: '#3A2E52',
+                domainColors: {
+                    unitDesign: '#E040FB',
+                    community: '#FF6D00',
+                    clarity: '#76FF03',
+                    delivery: '#00B0FF',
+                    assessment: '#E040FB'
+                }
+            },
+            'cra-flow': {
+                name: 'CRA Flow',
+                category: 'dark',
+                bg: '#0A0E1A',
+                primary: '#00D4FF',
+                secondary: '#00E676',
+                accent: '#FFC107',
+                accent2: '#00E676',
+                accent3: '#FF6B6B',
+                text: '#E8EDF5',
+                textMuted: '#A0AEC0',
+                card: '#1A2236',
+                border: '#2D3F5B',
+                domainColors: {
+                    unitDesign: '#00D4FF',
+                    community: '#00E676',
+                    clarity: '#FFC107',
+                    delivery: '#FF6B6B',
+                    assessment: '#00D4FF'
+                }
+            },
+            'ocean-deep': {
+                name: 'Ocean Deep',
+                category: 'dark',
+                bg: '#0B1D33',
+                primary: '#00B4D8',
+                secondary: '#06D6A0',
+                accent: '#48CAE4',
+                accent2: '#06D6A0',
+                accent3: '#FF1654',
+                text: '#E0F4FF',
+                textMuted: '#90D5E8',
+                card: '#1A3A5C',
+                border: '#2E5A7A',
+                domainColors: {
+                    unitDesign: '#00B4D8',
+                    community: '#FF1654',
+                    clarity: '#06D6A0',
+                    delivery: '#48CAE4',
+                    assessment: '#00B4D8'
+                }
+            }
+        };
+
+        // Layout definitions
+        const layouts = [
+            {
+                id: 'heroStatement',
+                name: 'Hero Statement',
+                domain: 'clarity',
+                render: (theme) => `
+                    <div class="hero-statement" style="background-color: #0F172A; color: ${theme.category === 'dark' ? theme.text : '#CBD5E1'};">
+                        <div class="hero-statement-accent" style="background-color: ${theme.primary};"></div>
+                        <div class="hero-statement-title" style="color: ${theme.category === 'dark' ? theme.text : 'white'};">I can solve systems of linear equations</div>
+                        <div class="hero-statement-subtitle">8.EE.C.8a • 8.EE.C.8b</div>
+                        <div class="hero-statement-footer" style="color: ${theme.domainColors.clarity};">Learning Target • Lesson Digester</div>
+                    </div>
+                `
+            },
+            {
+                id: 'splitPanel',
+                name: 'Split Panel',
+                domain: 'delivery',
+                render: (theme) => `
+                    <div class="split-panel" style="background-color: ${theme.bg}; color: ${theme.text};">
+                        <div class="split-left" style="background-color: ${theme.category === 'light' ? '#F3F4F6' : '#1A2236'}; border-right-color: ${theme.border};">
+                            <div class="split-left-icon">🎯</div>
+                            <div class="split-left-title">Who Uses This Math?</div>
+                            <div style="font-size: 12px; margin-top: 8px;">Architects, Engineers, Surveyors</div>
+                        </div>
+                        <div class="split-right" style="padding: 20px;">
+                            <div class="split-right-card" style="background-color: ${theme.category === 'light' ? '#F9FAFB' : '#2D3F5B'}; border-left-color: ${theme.domainColors.delivery};">
+                                <div class="split-right-card-title">In Your Life</div>
+                                <div class="split-right-card-text">Building designs, construction planning, navigation</div>
+                            </div>
+                            <div class="split-right-card" style="background-color: ${theme.category === 'light' ? '#F9FAFB' : '#2D3F5B'}; border-left-color: ${theme.accent};">
+                                <div class="split-right-card-title">Where This Leads</div>
+                                <div class="split-right-card-text">Algebra II, Calculus, STEM careers</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'cardGrid',
+                name: 'Card Grid',
+                domain: 'delivery',
+                render: (theme) => `
+                    <div style="background-color: ${theme.bg}; color: ${theme.text}; display: flex; flex-direction: column; height: 100%;">
+                        <div class="slide-header" style="background-color: ${theme.category === 'light' ? 'transparent' : 'transparent'}; color: ${theme.text}; border-bottom-color: ${theme.primary};">Today's Agenda</div>
+                        <div class="slide-content" style="padding: 16px;">
+                            <div class="card-grid">
+                                <div class="card" style="background-color: ${theme.card}; border-color: ${theme.domainColors.delivery};">
+                                    <div class="card-title" style="color: ${theme.domainColors.delivery};">Warm-Up</div>
+                                    <div class="card-content">Review variables and expressions from yesterday</div>
+                                </div>
+                                <div class="card" style="background-color: ${theme.card}; border-color: ${theme.primary};">
+                                    <div class="card-title" style="color: ${theme.primary};">Direct Instruction</div>
+                                    <div class="card-content">Solving systems using substitution method</div>
+                                </div>
+                                <div class="card" style="background-color: ${theme.card}; border-color: ${theme.accent};">
+                                    <div class="card-title" style="color: ${theme.accent};">Practice</div>
+                                    <div class="card-content">Guided practice with partner problems</div>
+                                </div>
+                                <div class="card" style="background-color: ${theme.card}; border-color: ${theme.accent2};">
+                                    <div class="card-title" style="color: ${theme.accent2};">Exit Ticket</div>
+                                    <div class="card-content">Check understanding before leaving</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'checklistTracker',
+                name: 'Checklist Tracker',
+                domain: 'assessment',
+                render: (theme) => `
+                    <div style="background-color: ${theme.bg}; color: ${theme.text}; display: flex; flex-direction: column; height: 100%;">
+                        <div class="slide-header" style="background-color: ${theme.category === 'light' ? 'transparent' : 'transparent'}; color: ${theme.text}; border-bottom-color: ${theme.primary};">Success Criteria</div>
+                        <div class="slide-content">
+                            <div class="checklist">
+                                <div class="checklist-item">
+                                    <div class="checklist-checkbox" style="border-color: ${theme.primary}; background-color: ${theme.primary}; color: white;">✓</div>
+                                    <div>I can identify variables in a system</div>
+                                </div>
+                                <div class="checklist-item">
+                                    <div class="checklist-checkbox" style="border-color: ${theme.primary}; background-color: ${theme.primary}; color: white;">✓</div>
+                                    <div>I can isolate a variable using algebra</div>
+                                </div>
+                                <div class="checklist-item">
+                                    <div class="checklist-checkbox" style="border-color: ${theme.accent}; background-color: ${theme.accent}; color: white;">✓</div>
+                                    <div>I can substitute to find solutions</div>
+                                </div>
+                                <div class="checklist-item">
+                                    <div class="checklist-checkbox" style="border-color: ${theme.border};"></div>
+                                    <div>I can verify my answer is correct</div>
+                                </div>
+                                <div class="checklist-item">
+                                    <div class="checklist-checkbox" style="border-color: ${theme.border};"></div>
+                                    <div>I can explain my steps clearly</div>
+                                </div>
+                            </div>
+                            <div class="checklist-progress" style="border-color: ${theme.border}; background-color: ${theme.category === 'light' ? '#F3F4F6' : '#2D3F5B'};">
+                                <div class="checklist-progress-bar" style="background-color: ${theme.primary};"></div>
+                            </div>
+                            <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">60% Complete</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'twoColumnCompare',
+                name: 'Two Column Compare',
+                domain: 'clarity',
+                render: (theme) => `
+                    <div style="background-color: ${theme.bg}; color: ${theme.text}; display: flex; flex-direction: column; height: 100%;">
+                        <div class="slide-header" style="background-color: ${theme.category === 'light' ? 'transparent' : 'transparent'}; color: ${theme.text}; border-bottom-color: ${theme.primary};">Closure: What We Learned</div>
+                        <div class="slide-content" style="padding: 16px;">
+                            <div class="two-column">
+                                <div class="compare-column" style="background-color: ${theme.card}; border-color: rgba(${hexToRgb(theme.accent)}, 0.25);">
+                                    <div class="compare-column-header" style="color: ${theme.accent}; border-bottom-color: ${theme.accent};">I Used to Think...</div>
+                                    <div class="compare-item">Systems had to be solved graphically</div>
+                                    <div class="compare-item">All methods took the same time</div>
+                                </div>
+                                <div class="compare-column" style="background-color: ${theme.card}; border-color: rgba(${hexToRgb(theme.primary)}, 0.25);">
+                                    <div class="compare-column-header" style="color: ${theme.primary}; border-bottom-color: ${theme.primary};">Now I Know...</div>
+                                    <div class="compare-item">I can use substitution algebraically</div>
+                                    <div class="compare-item">Substitution is often faster and more precise</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'phaseTimeline',
+                name: 'Phase Timeline',
+                domain: 'unitDesign',
+                render: (theme) => `
+                    <div style="background-color: ${theme.bg}; color: ${theme.text}; display: flex; flex-direction: column; height: 100%;">
+                        <div class="slide-header" style="background-color: ${theme.category === 'light' ? 'transparent' : 'transparent'}; color: ${theme.text}; border-bottom-color: ${theme.primary};">Structured Dialogue</div>
+                        <div class="slide-content" style="display: flex; align-items: center; padding: 20px; position: relative;">
+                            <div class="phase-timeline">
+                                <div class="phase-card" style="background-color: ${theme.card}; border-color: ${theme.primary};">
+                                    <div class="phase-watermark" style="color: ${theme.primary}; opacity: 0.45;">1</div>
+                                    <div class="phase-title" style="color: ${theme.primary};">Orientation</div>
+                                    <div class="phase-time">5-7 min</div>
+                                </div>
+                                <div class="phase-connector" style="background-color: ${theme.primary};"></div>
+                                <div class="phase-card" style="background-color: ${theme.card}; border-color: ${theme.accent};">
+                                    <div class="phase-watermark" style="color: ${theme.accent}; opacity: 0.45;">2</div>
+                                    <div class="phase-title" style="color: ${theme.accent};">Analysis</div>
+                                    <div class="phase-time">8-10 min</div>
+                                </div>
+                                <div class="phase-connector" style="background-color: ${theme.accent};"></div>
+                                <div class="phase-card" style="background-color: ${theme.card}; border-color: ${theme.accent2};">
+                                    <div class="phase-watermark" style="color: ${theme.accent2}; opacity: 0.45;">3</div>
+                                    <div class="phase-title" style="color: ${theme.accent2};">Connection</div>
+                                    <div class="phase-time">5 min</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'dialogueBubbles',
+                name: 'Dialogue Bubbles',
+                domain: 'community',
+                render: (theme) => `
+                    <div style="background-color: ${theme.bg}; color: ${theme.text}; display: flex; flex-direction: column; height: 100%;">
+                        <div class="slide-header" style="background-color: ${theme.category === 'light' ? 'transparent' : 'transparent'}; color: ${theme.text}; border-bottom-color: ${theme.primary};">Discussion Starters</div>
+                        <div class="slide-content">
+                            <div class="dialogue">
+                                <div class="dialogue-bubble" style="background-color: ${theme.card}; border-color: ${theme.primary};">
+                                    <span style="color: ${theme.primary}; font-weight: 600;">How does:</span> Why do you think substitution works when the two equations have the same variable?
+                                </div>
+                                <div class="dialogue-bubble" style="background-color: ${theme.card}; border-color: ${theme.accent};">
+                                    <span style="color: ${theme.accent}; font-weight: 600;">Turn & talk:</span> Show your partner your first step. Did they do the same thing?
+                                </div>
+                                <div class="dialogue-bubble" style="background-color: ${theme.card}; border-color: ${theme.accent2};">
+                                    <span style="color: ${theme.accent2}; font-weight: 600;">Whole class:</span> What would happen if we added the equations instead of substituting?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'problemWorkspace',
+                name: 'Problem Workspace',
+                domain: 'assessment',
+                render: (theme) => {
+                    const dotColor = theme.category === 'dark' ? theme.border : '#E2E8F0';
+                    const frameTextColor = theme.category === 'dark' ? theme.text : '#78716C';
+                    return `
+                        <div style="background-color: #0F172A; color: ${theme.text}; display: flex; flex-direction: column; height: 100%;">
+                            <div class="problem-text" style="background-color: #0F172A; color: #CBD5E1; border-bottom-color: ${theme.primary};">
+                                Solve: y = 2x + 1 and y = −x + 7
+                            </div>
+                            <div class="dot-grid" style="color: ${dotColor}; flex: 1;"></div>
+                            <div class="frame-cards">
+                                <div class="frame-card" style="border-color: ${theme.primary}; background-color: rgba(${hexToRgb(theme.primary)}, 0.1);">
+                                    <div class="frame-label" style="color: ${theme.primary};">MY STRATEGY</div>
+                                    <div class="frame-text" style="color: ${frameTextColor};">Set equations equal and solve</div>
+                                </div>
+                                <div class="frame-card" style="border-color: ${theme.accent}; background-color: rgba(${hexToRgb(theme.accent)}, 0.1);">
+                                    <div class="frame-label" style="color: ${theme.accent};">MY ANSWER</div>
+                                    <div class="frame-text" style="color: ${frameTextColor};">x = 2, y = 5</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            {
+                id: 'rubricBands',
+                name: 'Rubric Bands',
+                domain: 'assessment',
+                render: (theme) => `
+                    <div style="background-color: ${theme.bg}; color: ${theme.text}; display: flex; flex-direction: column; height: 100%;">
+                        <div class="slide-header" style="background-color: ${theme.category === 'light' ? 'transparent' : 'transparent'}; color: ${theme.text}; border-bottom-color: ${theme.primary};">Problem-Solving Rubric</div>
+                        <div class="slide-content" style="padding: 0;">
+                            <div class="rubric">
+                                <div class="rubric-band" style="border-bottom-color: ${theme.border};">
+                                    <div class="rubric-level" style="background-color: ${theme.accent3}; color: white;">Emerging</div>
+                                    <div class="rubric-description" style="background-color: ${theme.category === 'light' ? 'rgba(232, 67, 109, 0.15)' : 'rgba(232, 67, 109, 0.2)'}; color: ${theme.text};">Attempts strategy but makes calculation errors or gets stuck</div>
+                                </div>
+                                <div class="rubric-band" style="border-bottom-color: ${theme.border};">
+                                    <div class="rubric-level" style="background-color: ${theme.accent}; color: white;">Developing</div>
+                                    <div class="rubric-description" style="background-color: ${theme.category === 'light' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.2)'}; color: ${theme.text};">Correct method but minor errors in execution or explanation</div>
+                                </div>
+                                <div class="rubric-band" style="border-bottom-color: ${theme.border};">
+                                    <div class="rubric-level" style="background-color: ${theme.primary}; color: white;">Proficient</div>
+                                    <div class="rubric-description" style="background-color: ${theme.category === 'light' ? 'rgba(30, 39, 97, 0.15)' : 'rgba(30, 39, 97, 0.2)'}; color: ${theme.text};">Correct answer with clear steps and sound reasoning</div>
+                                </div>
+                                <div class="rubric-band">
+                                    <div class="rubric-level" style="background-color: ${theme.accent2}; color: white;">Distinguished</div>
+                                    <div class="rubric-description" style="background-color: ${theme.category === 'light' ? 'rgba(13, 148, 136, 0.15)' : 'rgba(13, 148, 136, 0.2)'}; color: ${theme.text};">Correct answer plus justification or alternative methods</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'dashboardData',
+                name: 'Dashboard Data',
+                domain: 'unitDesign',
+                render: (theme) => `
+                    <div style="background-color: ${theme.bg}; color: ${theme.text}; display: flex; flex-direction: column; height: 100%;">
+                        <div class="slide-header" style="background-color: ${theme.category === 'light' ? 'transparent' : 'transparent'}; color: ${theme.text}; border-bottom-color: ${theme.primary};">Lesson Overview</div>
+                        <div class="dashboard" style="flex: 1;">
+                            <div class="dashboard-stats">
+                                <div class="stat-box" style="background-color: ${theme.card}; border-color: ${theme.primary};">
+                                    <div class="stat-value" style="color: ${theme.primary};">18 min</div>
+                                    <div class="stat-label">Direct Instruction</div>
+                                </div>
+                                <div class="stat-box" style="background-color: ${theme.card}; border-color: ${theme.accent};">
+                                    <div class="stat-value" style="color: ${theme.accent};">15 min</div>
+                                    <div class="stat-label">Practice Time</div>
+                                </div>
+                                <div class="stat-box" style="background-color: ${theme.card}; border-color: ${theme.accent2};">
+                                    <div class="stat-value" style="color: ${theme.accent2};">7 min</div>
+                                    <div class="stat-label">Assessment</div>
+                                </div>
+                            </div>
+                            <div class="dashboard-table">
+                                <div class="table-header" style="border-bottom-color: ${theme.primary};">
+                                    <div>Phase</div>
+                                    <div>Duration</div>
+                                    <div>Format</div>
+                                </div>
+                                <div class="table-row" style="border-bottom-color: ${theme.border};">
+                                    <div>Opener</div>
+                                    <div>5 min</div>
+                                    <div>Individual</div>
+                                </div>
+                                <div class="table-row" style="border-bottom-color: ${theme.border};">
+                                    <div>Instruction</div>
+                                    <div>18 min</div>
+                                    <div>Whole Group</div>
+                                </div>
+                                <div class="table-row">
+                                    <div>Practice</div>
+                                    <div>15 min</div>
+                                    <div>Pairs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        // Helper function to convert hex to rgb
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '0, 0, 0';
+        }
+
+        // Render all slides
+        function renderSlides(themeName) {
+            const theme = themes[themeName];
+            const grid = document.getElementById('slides-grid');
+            grid.innerHTML = '';
+
+            layouts.forEach(layout => {
+                const domainColor = theme.domainColors[layout.domain];
+                const container = document.createElement('div');
+                container.className = 'slide-container';
+                container.innerHTML = `
+                    <div class="slide-label">
+                        <span><strong>${layout.name}</strong></span>
+                        <span class="domain" style="background-color: ${domainColor}; color: white;">
+                            ${layout.domain.charAt(0).toUpperCase() + layout.domain.slice(1)}
+                        </span>
+                    </div>
+                    <div class="slide" style="background-color: ${theme.bg}; color: ${theme.text};">
+                        ${layout.render(theme)}
+                    </div>
+                `;
+                grid.appendChild(container);
+            });
+        }
+
+        // Theme switcher
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderSlides(btn.dataset.theme);
+            });
+        });
+
+        // Initial render
+        renderSlides('classic-academic');
+    </script>
+</body>
+</html>

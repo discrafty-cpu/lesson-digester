@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson Digester — Complete 10-Layout System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0F172A; color: #E2E8F0; line-height: 1.6; }
+
+  .hero { padding: 48px 40px 32px; text-align: center; border-bottom: 2px solid #1E293B; }
+  .hero h1 { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #0D9488, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+  .hero p { font-size: 16px; color: #94A3B8; max-width: 700px; margin: 0 auto; }
+
+  .section { padding: 40px; max-width: 1400px; margin: 0 auto; }
+  .section-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .section-subtitle { font-size: 14px; color: #94A3B8; margin-bottom: 28px; }
+
+  /* Shared design constants panel */
+  .constants-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
+  .constant-card { background: #1E293B; border-radius: 10px; padding: 20px; }
+  .constant-card h3 { font-size: 14px; font-weight: 700; color: #0D9488; margin-bottom: 10px; }
+  .constant-card .rule { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #334155; font-size: 12px; }
+  .constant-card .rule:last-child { border: none; }
+  .constant-card .rule .label { color: #94A3B8; }
+  .constant-card .rule .value { color: #E2E8F0; font-weight: 600; font-family: 'Consolas', monospace; }
+
+  /* Layout-to-slide master mapping */
+  .master-map { margin-bottom: 40px; }
+  .map-row { display: flex; align-items: stretch; margin-bottom: 8px; border-radius: 8px; overflow: hidden; min-height: 48px; }
+  .map-layout { width: 200px; display: flex; align-items: center; padding: 10px 14px; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
+  .map-slides { flex: 1; display: flex; align-items: center; flex-wrap: wrap; padding: 8px 14px; gap: 6px; background: #1E293B; }
+  .map-slides .chip { font-size: 11px; padding: 3px 10px; border-radius: 14px; white-space: nowrap; }
+  .map-count { width: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: white; flex-shrink: 0; }
+
+  /* Color coding per layout */
+  .l1 .map-layout, .l1 .map-count { background: #6366F1; } .l1 .chip { background: rgba(99,102,241,0.15); color: #A5B4FC; }
+  .l2 .map-layout, .l2 .map-count { background: #0D9488; } .l2 .chip { background: rgba(13,148,136,0.15); color: #2DD4BF; }
+  .l3 .map-layout, .l3 .map-count { background: #F59E0B; } .l3 .chip { background: rgba(245,158,11,0.15); color: #FBBF24; }
+  .l4 .map-layout, .l4 .map-count { background: #10B981; } .l4 .chip { background: rgba(16,185,129,0.15); color: #34D399; }
+  .l5 .map-layout, .l5 .map-count { background: #EF4444; } .l5 .chip { background: rgba(239,68,68,0.15); color: #FCA5A5; }
+  .l6 .map-layout, .l6 .map-count { background: #8B5CF6; } .l6 .chip { background: rgba(139,92,246,0.15); color: #C4B5FD; }
+  .l7 .map-layout, .l7 .map-count { background: #EC4899; } .l7 .chip { background: rgba(236,72,153,0.15); color: #F9A8D4; }
+  .l8 .map-layout, .l8 .map-count { background: #F97316; } .l8 .chip { background: rgba(249,115,22,0.15); color: #FDBA74; }
+  .l9 .map-layout, .l9 .map-count { background: #14B8A6; } .l9 .chip { background: rgba(20,184,166,0.15); color: #5EEAD4; }
+  .l10 .map-layout, .l10 .map-count { background: #64748B; } .l10 .chip { background: rgba(100,116,139,0.15); color: #CBD5E1; }
+
+  /* Lesson flow timeline */
+  .flow-container { position: relative; padding-left: 60px; }
+  .flow-line { position: absolute; left: 28px; top: 0; bottom: 0; width: 3px; background: #334155; border-radius: 2px; }
+  .flow-item { position: relative; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px; }
+  .flow-dot { width: 18px; height: 18px; border-radius: 50%; position: absolute; left: -41px; top: 6px; border: 3px solid #0F172A; }
+  .flow-card { background: #1E293B; border-radius: 10px; padding: 14px 18px; flex: 1; display: flex; align-items: center; gap: 14px; }
+  .flow-card .flow-layout { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; white-space: nowrap; }
+  .flow-card .flow-slide { font-size: 14px; font-weight: 600; color: #F1F5F9; }
+  .flow-card .flow-profile { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+  .flow-card .flow-num { font-size: 10px; color: #475569; margin-left: auto; white-space: nowrap; }
+  .flow-section { margin: 20px 0 12px; position: relative; }
+  .flow-section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #475569; padding-left: 0; }
+
+  .dot-l1 { background: #6366F1; } .fl-l1 { color: #A5B4FC; }
+  .dot-l2 { background: #0D9488; } .fl-l2 { color: #2DD4BF; }
+  .dot-l3 { background: #F59E0B; } .fl-l3 { color: #FBBF24; }
+  .dot-l4 { background: #10B981; } .fl-l4 { color: #34D399; }
+  .dot-l5 { background: #EF4444; } .fl-l5 { color: #FCA5A5; }
+  .dot-l6 { background: #8B5CF6; } .fl-l6 { color: #C4B5FD; }
+  .dot-l7 { background: #EC4899; } .fl-l7 { color: #F9A8D4; }
+  .dot-l8 { background: #F97316; } .fl-l8 { color: #FDBA74; }
+  .dot-l9 { background: #14B8A6; } .fl-l9 { color: #5EEAD4; }
+  .dot-l10 { background: #64748B; } .fl-l10 { color: #CBD5E1; }
+
+  /* Implementation section */
+  .impl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .impl-card { background: #1E293B; border-radius: 10px; padding: 24px; }
+  .impl-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .impl-card p { font-size: 13px; color: #94A3B8; }
+  .impl-card code { background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #0D9488; }
+  .impl-card .step { display: flex; gap: 10px; margin-top: 10px; padding: 8px; background: #0F172A; border-radius: 6px; }
+  .impl-card .step-num { width: 22px; height: 22px; border-radius: 50%; background: #0D9488; color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+  .impl-card .step-text { font-size: 12px; color: #CBD5E1; }
+
+  /* Reappearance callout */
+  .callout { background: rgba(13,148,136,0.1); border: 1px solid rgba(13,148,136,0.3); border-radius: 10px; padding: 20px; margin: 24px 0; }
+  .callout h3 { font-size: 15px; color: #2DD4BF; margin-bottom: 6px; }
+  .callout p { font-size: 13px; color: #94A3B8; }
+  .callout .pair { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 8px 12px; background: #1E293B; border-radius: 6px; }
+  .callout .pair .arrow { color: #475569; font-size: 18px; }
+  .callout .pair .tag { font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: 600; }
+
+  /* Fraction philosophy callout */
+  .frac-callout { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; padding: 20px; margin: 24px 0; }
+  .frac-callout h3 { font-size: 15px; color: #FBBF24; margin-bottom: 6px; }
+  .frac-callout p { font-size: 13px; color: #94A3B8; }
+  .frac-callout code { background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #F59E0B; }
+  .frac-callout .frac-example { display: flex; align-items: center; gap: 16px; margin-top: 12px; padding: 12px 16px; background: #1E293B; border-radius: 8px; flex-wrap: wrap; }
+  .frac-callout .frac-before { font-family: 'Consolas', monospace; color: #EF4444; font-size: 14px; text-decoration: line-through; }
+  .frac-callout .frac-arrow { color: #475569; font-size: 18px; }
+  .frac-callout .frac-after { font-family: 'Georgia', serif; color: #10B981; font-size: 14px; font-weight: 600; }
+  .frac-callout .vfrac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; line-height: 1; }
+  .frac-callout .vfrac-num, .frac-callout .vfrac-den { display: block; text-align: center; padding: 1px 4px; font-size: 0.85em; }
+  .frac-callout .vfrac-bar { display: block; width: 100%; height: 1.5px; background: #10B981; min-width: 1.2em; }
+
+  @media (max-width: 900px) {
+    .constants-grid, .impl-grid { grid-template-columns: 1fr; }
+    .map-row { flex-direction: column; }
+    .map-layout, .map-count { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+<h1>The Complete 10-Layout System</h1>
+<p>All 10 layouts working together — shared constants, full slide mapping, and lesson flow sequence showing how they create rhythm across a presentation.</p>
+</div>
+
+<!-- SHARED DESIGN CONSTANTS -->
+<div class="section">
+<div class="section-title">Shared Design Constants</div>
+<div class="section-subtitle">These rules bind all 10 layouts into one visual family. Every layout inherits these.</div>
+
+<div class="constants-grid">
+<div class="constant-card">
+<h3>Spacing Grid</h3>
+<div class="rule"><span class="label">Slide size</span><span class="value">10" x 5.625"</span></div>
+<div class="rule"><span class="label">Edge margins</span><span class="value">0.5" all sides</span></div>
+<div class="rule"><span class="label">Content area</span><span class="value">9.0" x 4.625"</span></div>
+<div class="rule"><span class="label">Card gap</span><span class="value">0.15"</span></div>
+<div class="rule"><span class="label">Section gap</span><span class="value">0.3"</span></div>
+<div class="rule"><span class="label">Header height</span><span class="value">0.85"</span></div>
+<div class="rule"><span class="label">Footer height</span><span class="value">0.275"</span></div>
+</div>
+<div class="constant-card">
+<h3>Typography Scale</h3>
+<div class="rule"><span class="label">Hero title</span><span class="value">28-36pt bold</span></div>
+<div class="rule"><span class="label">Slide title</span><span class="value">22-24pt bold</span></div>
+<div class="rule"><span class="label">Card header</span><span class="value">14-16pt bold</span></div>
+<div class="rule"><span class="label">Body text</span><span class="value">13-14pt</span></div>
+<div class="rule"><span class="label">Caption/label</span><span class="value">10-11pt</span></div>
+<div class="rule"><span class="label">Badge/tag</span><span class="value">8-9pt</span></div>
+<div class="rule"><span class="label">Min readable</span><span class="value">12pt (projected)</span></div>
+</div>
+<div class="constant-card">
+<h3>Color Logic</h3>
+<div class="rule"><span class="label">Background</span><span class="value">C.bg / C.white</span></div>
+<div class="rule"><span class="label">Cards</span><span class="value">C.card / light tint</span></div>
+<div class="rule"><span class="label">Primary accent</span><span class="value">C.primary</span></div>
+<div class="rule"><span class="label">Category accent</span><span class="value">per Practice Profile</span></div>
+<div class="rule"><span class="label">Text primary</span><span class="value">C.text / C.textDark</span></div>
+<div class="rule"><span class="label">Text secondary</span><span class="value">C.text2 / C.textMid</span></div>
+<div class="rule"><span class="label">isDark switch</span><span class="value">every element</span></div>
+</div>
+</div>
+
+<!-- VINCULUM FRACTION PHILOSOPHY -->
+<div class="frac-callout">
+<h3>Vinculum Fraction Rendering — Built Into Every Layout</h3>
+<p>All 10 layouts use <code>FractionRenderer</code> to convert inline text fractions to proper vertical notation. No cross-multiplication. No butterfly method. The vinculum (fraction bar) is always visible. The identity property is the universal engine.</p>
+<div class="frac-example">
+  <span class="frac-before">3/4</span>
+  <span class="frac-arrow">&rarr;</span>
+  <span class="frac-after"><span class="vfrac"><span class="vfrac-num">3</span><span class="vfrac-bar"></span><span class="vfrac-den">4</span></span></span>
+  <span style="color:#475569;margin:0 8px;">|</span>
+  <span class="frac-before">5 (whole number)</span>
+  <span class="frac-arrow">&rarr;</span>
+  <span class="frac-after"><span class="vfrac"><span class="vfrac-num">5</span><span class="vfrac-bar"></span><span class="vfrac-den">1</span></span> <span style="font-size:11px;color:#0D9488;">(invisible one)</span></span>
+  <span style="color:#475569;margin:0 8px;">|</span>
+  <span class="frac-before">2/3 x 3/3</span>
+  <span class="frac-arrow">&rarr;</span>
+  <span class="frac-after"><span class="vfrac"><span class="vfrac-num">2</span><span class="vfrac-bar"></span><span class="vfrac-den">3</span></span> &times; <span class="vfrac" style="color:#0D9488;font-weight:700;"><span class="vfrac-num">3</span><span class="vfrac-bar" style="background:#0D9488;"></span><span class="vfrac-den">3</span></span> <span style="font-size:11px;color:#0D9488;">(giant one = 1)</span></span>
+</div>
+<p style="margin-top:10px;">Integration: <code>FractionRenderer.convertTextToPptxRuns(text)</code> for slides, <code>.convertTextToHTML(text)</code> for interactive pages, <code>.drawPDFTextWithFractions(pdf, text, x, y)</code> for PDF worksheets.</p>
+</div>
+</div>
+
+<!-- MASTER LAYOUT -> SLIDE MAPPING -->
+<div class="section">
+<div class="section-title">Layout &rarr; Slide Type Master Map</div>
+<div class="section-subtitle">Every slide type assigned to its optimal layout. Number on right = how many slide types use that layout.</div>
+
+<div class="master-map">
+<div class="map-row l1">
+<div class="map-layout">1. Hero Statement</div>
+<div class="map-slides">
+<span class="chip">Learning Targets</span>
+<span class="chip">Day Dividers</span>
+<span class="chip">Check-in/Breathing</span>
+<span class="chip">Commitment</span>
+<span class="chip">Teacher Ref Divider</span>
+</div>
+<div class="map-count">5</div>
+</div>
+
+<div class="map-row l2">
+<div class="map-layout">2. Split Panel</div>
+<div class="map-slides">
+<span class="chip">Relevance</span>
+<span class="chip">Vocabulary</span>
+<span class="chip">Essential Understandings</span>
+<span class="chip">Focus Skill Detail</span>
+<span class="chip">Story/Narrative</span>
+<span class="chip">Math Toolbox</span>
+<span class="chip">Differentiation</span>
+</div>
+<div class="map-count">7</div>
+</div>
+
+<div class="map-row l3">
+<div class="map-layout">3. Card Grid</div>
+<div class="map-slides">
+<span class="chip">Warm-Up/Focus Skill</span>
+<span class="chip">Agenda</span>
+<span class="chip">Team Roles</span>
+<span class="chip">Activity Launch</span>
+<span class="chip">Homework</span>
+<span class="chip">Title/Cover</span>
+</div>
+<div class="map-count">6</div>
+</div>
+
+<div class="map-row l4">
+<div class="map-layout">4. Checklist Tracker</div>
+<div class="map-slides">
+<span class="chip">Success Criteria (open)</span>
+<span class="chip">Success Criteria (close)</span>
+<span class="chip">Self-Assessment</span>
+<span class="chip">Learning Progression</span>
+</div>
+<div class="map-count">4</div>
+</div>
+
+<div class="map-row l5">
+<div class="map-layout">5. Two-Column Compare</div>
+<div class="map-slides">
+<span class="chip">Dual Error Analysis</span>
+<span class="chip">Closure (used to think/now I know)</span>
+<span class="chip">Notice &amp; Wonder</span>
+<span class="chip">Would You Rather</span>
+</div>
+<div class="map-count">4</div>
+</div>
+
+<div class="map-row l6">
+<div class="map-layout">6. Phase Timeline</div>
+<div class="map-slides">
+<span class="chip">Structured Dialogue</span>
+<span class="chip">CRA Progression</span>
+<span class="chip">Cooperative Structures</span>
+</div>
+<div class="map-count">3</div>
+</div>
+
+<div class="map-row l7">
+<div class="map-layout">7. Dialogue Bubbles</div>
+<div class="map-slides">
+<span class="chip">RISA Social Dialogue</span>
+<span class="chip">RISA Academic Dialogue</span>
+<span class="chip">Sentence Frames</span>
+<span class="chip">Group Discussion</span>
+</div>
+<div class="map-count">4</div>
+</div>
+
+<div class="map-row l8">
+<div class="map-layout">8. Problem Workspace</div>
+<div class="map-slides">
+<span class="chip">Problem Slides</span>
+<span class="chip">Exit Ticket</span>
+<span class="chip">Hinge Questions</span>
+<span class="chip">Guided Practice</span>
+<span class="chip">Warm-Up Review</span>
+</div>
+<div class="map-count">5</div>
+</div>
+
+<div class="map-row l9">
+<div class="map-layout">9. Rubric Bands</div>
+<div class="map-slides">
+<span class="chip">RMS Proficiency Rubric</span>
+<span class="chip">DOK Level Descriptions</span>
+<span class="chip">MCA Benchmark Descriptors</span>
+<span class="chip">Learning Log</span>
+</div>
+<div class="map-count">4</div>
+</div>
+
+<div class="map-row l10">
+<div class="map-layout">10. Dashboard Data</div>
+<div class="map-slides">
+<span class="chip">Slide Map</span>
+<span class="chip">Answer Key</span>
+<span class="chip">Misconceptions Table</span>
+<span class="chip">Cooperative Menu</span>
+</div>
+<div class="map-count">4</div>
+</div>
+</div>
+</div>
+
+<!-- BOOKEND PATTERN -->
+<div class="section">
+<div class="callout">
+<h3>The Bookend Pattern — Slides That Appear Twice</h3>
+<p>Some layouts reappear at the start and end of a lesson, creating intentional symmetry. This is aligned with the Practice Profile's expectation that teachers "gather individual student progress using success criteria multiple times throughout the lesson."</p>
+<div class="pair">
+<span class="tag" style="background:rgba(16,185,129,0.15);color:#34D399;">Checklist Tracker (open)</span>
+<span class="arrow">&rarr; lesson content &rarr;</span>
+<span class="tag" style="background:rgba(16,185,129,0.15);color:#34D399;">Checklist Tracker (close)</span>
+</div>
+<div class="pair">
+<span class="tag" style="background:rgba(99,102,241,0.15);color:#A5B4FC;">Hero: Learning Target</span>
+<span class="arrow">&rarr; lesson content &rarr;</span>
+<span class="tag" style="background:rgba(239,68,68,0.15);color:#FCA5A5;">Compare: Closure</span>
+</div>
+<div class="pair">
+<span class="tag" style="background:rgba(245,158,11,0.15);color:#FBBF24;">Card Grid: Warm-Up</span>
+<span class="arrow">&rarr; lesson content &rarr;</span>
+<span class="tag" style="background:rgba(249,115,22,0.15);color:#FDBA74;">Workspace: Exit Ticket</span>
+</div>
+</div>
+</div>
+
+<!-- LESSON FLOW TIMELINE -->
+<div class="section">
+<div class="section-title">Lesson Flow — How the 10 Layouts Create Rhythm</div>
+<div class="section-subtitle">A typical Digester output, showing which layout fires at each point. Notice how the visual variety creates natural "sections" students can feel.</div>
+
+<div class="flow-container">
+<div class="flow-line"></div>
+
+<div class="flow-section"><h3>Opening (Unit Design + Community)</h3></div>
+
+<div class="flow-item">
+<div class="flow-dot dot-l3"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l3">Card Grid</div><div class="flow-slide">Title / Cover Slide</div><div class="flow-profile">Unit Design — Lesson branding</div></div>
+<div class="flow-num">Slide 1</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l3"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l3">Card Grid</div><div class="flow-slide">Agenda — Today's Plan</div><div class="flow-profile">Unit Design — Scope &amp; sequence</div></div>
+<div class="flow-num">Slide 2</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l1"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l1">Hero Statement</div><div class="flow-slide">Check-in / Breathing</div><div class="flow-profile">Community — Safe learning environment</div></div>
+<div class="flow-num">Slide 3</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l3"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l3">Card Grid</div><div class="flow-slide">Warm-Up / Focus Skill</div><div class="flow-profile">Delivery — Activating prior knowledge</div></div>
+<div class="flow-num">Slide 4</div>
+</div>
+</div>
+
+<div class="flow-section"><h3>Instructional Clarity</h3></div>
+
+<div class="flow-item">
+<div class="flow-dot dot-l1"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l1">Hero Statement</div><div class="flow-slide">Learning Target</div><div class="flow-profile">Clarity — Standards-aligned, clearly communicated</div></div>
+<div class="flow-num">Slide 5</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l4"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l4">Checklist Tracker</div><div class="flow-slide">Success Criteria (Opening)</div><div class="flow-profile">Clarity — Specific, measurable, student-friendly</div></div>
+<div class="flow-num">Slide 6</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l2"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l2">Split Panel</div><div class="flow-slide">Relevance — Why This Matters</div><div class="flow-profile">Clarity — Purpose &amp; connection to students' lives</div></div>
+<div class="flow-num">Slide 7</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l2"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l2">Split Panel</div><div class="flow-slide">Essential Understandings</div><div class="flow-profile">Clarity — Core mathematical ideas</div></div>
+<div class="flow-num">Slide 8</div>
+</div>
+</div>
+
+<div class="flow-section"><h3>Instructional Delivery</h3></div>
+
+<div class="flow-item">
+<div class="flow-dot dot-l2"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l2">Split Panel</div><div class="flow-slide">Vocabulary + Visual Models</div><div class="flow-profile">Delivery — Multiple modes of representation</div></div>
+<div class="flow-num">Slide 9</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l2"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l2">Split Panel</div><div class="flow-slide">Focus Skill — Clear Lesson</div><div class="flow-profile">Delivery — Explicit instruction with exemplars</div></div>
+<div class="flow-num">Slide 10</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l8"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l8">Problem Workspace</div><div class="flow-slide">Guided Practice Problem 1</div><div class="flow-profile">Delivery — Scaffolded practice with sentence frames</div></div>
+<div class="flow-num">Slide 11</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l8"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l8">Problem Workspace</div><div class="flow-slide">Guided Practice Problem 2</div><div class="flow-profile">Delivery — Scaffolded practice with sentence frames</div></div>
+<div class="flow-num">Slide 12</div>
+</div>
+</div>
+
+<div class="flow-section"><h3>Student Voice &amp; Collaboration</h3></div>
+
+<div class="flow-item">
+<div class="flow-dot dot-l3"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l3">Card Grid</div><div class="flow-slide">Team Roles</div><div class="flow-profile">Community — Cooperative structures</div></div>
+<div class="flow-num">Slide 13</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l7"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l7">Dialogue Bubbles</div><div class="flow-slide">RISA Academic Dialogue</div><div class="flow-profile">Delivery — Accountable talk, peer interaction</div></div>
+<div class="flow-num">Slide 14</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l6"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l6">Phase Timeline</div><div class="flow-slide">Structured Dialogue Protocol</div><div class="flow-profile">Delivery — 3-phase facilitation</div></div>
+<div class="flow-num">Slide 15</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l5"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l5">Two-Column Compare</div><div class="flow-slide">Dual Error Analysis</div><div class="flow-profile">Delivery — Deliberate error identification</div></div>
+<div class="flow-num">Slide 16</div>
+</div>
+</div>
+
+<div class="flow-section"><h3>Independent Practice</h3></div>
+
+<div class="flow-item">
+<div class="flow-dot dot-l8"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l8">Problem Workspace</div><div class="flow-slide">Practice Problems 1-3</div><div class="flow-profile">Delivery — DOK-leveled independent work</div></div>
+<div class="flow-num">Slides 17-19</div>
+</div>
+</div>
+
+<div class="flow-section"><h3>Assessment &amp; Closure</h3></div>
+
+<div class="flow-item">
+<div class="flow-dot dot-l8"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l8">Problem Workspace</div><div class="flow-slide">Exit Ticket</div><div class="flow-profile">Assessment — Hinge question / formative check</div></div>
+<div class="flow-num">Slide 20</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l9"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l9">Rubric Bands</div><div class="flow-slide">Learning Log — Self-Reflection</div><div class="flow-profile">Assessment — Student self-assessment</div></div>
+<div class="flow-num">Slide 21</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l4"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l4">Checklist Tracker</div><div class="flow-slide">Success Criteria (Closing)</div><div class="flow-profile">Assessment — Progress check, bookend</div></div>
+<div class="flow-num">Slide 22</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l5"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l5">Two-Column Compare</div><div class="flow-slide">Closure — I Used to Think / Now I Know</div><div class="flow-profile">Assessment — Metacognitive reflection</div></div>
+<div class="flow-num">Slide 23</div>
+</div>
+</div>
+
+<div class="flow-section"><h3>Teacher Reference (Not Projected)</h3></div>
+
+<div class="flow-item">
+<div class="flow-dot dot-l1"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l1">Hero Statement</div><div class="flow-slide">Teacher Reference Divider</div><div class="flow-profile">Section break — "For Your Planning"</div></div>
+<div class="flow-num">Slide 24</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l9"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l9">Rubric Bands</div><div class="flow-slide">DOK Leveled Problems</div><div class="flow-profile">Assessment — DOK 1/2/3 problem bank</div></div>
+<div class="flow-num">Slide 25</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l10"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l10">Dashboard Data</div><div class="flow-slide">Answer Key</div><div class="flow-profile">Assessment — Answers + brief explanations</div></div>
+<div class="flow-num">Slide 26</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l10"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l10">Dashboard Data</div><div class="flow-slide">Misconceptions &amp; Differentiation</div><div class="flow-profile">Assessment — Error patterns + strategies</div></div>
+<div class="flow-num">Slide 27</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l9"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l9">Rubric Bands</div><div class="flow-slide">RMS Proficiency Rubric</div><div class="flow-profile">Assessment — 4-level proficiency scale</div></div>
+<div class="flow-num">Slide 28</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l2"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l2">Split Panel</div><div class="flow-slide">Strategy Pivot — Differentiation</div><div class="flow-profile">Delivery — CRA alignment + student groups</div></div>
+<div class="flow-num">Slide 29</div>
+</div>
+</div>
+<div class="flow-item">
+<div class="flow-dot dot-l10"></div>
+<div class="flow-card">
+<div><div class="flow-layout fl-l10">Dashboard Data</div><div class="flow-slide">Slide Map</div><div class="flow-profile">Unit Design — Lesson arc overview</div></div>
+<div class="flow-num">Slide 30</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- IMPLEMENTATION PLAN -->
+<div class="section">
+<div class="section-title">Implementation Architecture</div>
+<div class="section-subtitle">How these 10 layouts become code in the Lesson Digester</div>
+
+<div class="impl-grid">
+<div class="impl-card">
+<h3>Existing: <code>layout-engine.js</code></h3>
+<p>A centralized layout engine that replaces ad-hoc positioning. Each layout becomes a function that accepts content and theme, returning positioned PptxGenJS elements.</p>
+<div class="step"><div class="step-num">1</div><div class="step-text">10 layout functions, each taking (slide, pres, content, C, theme)</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-text">Shared constants: MARGINS, GAPS, FONT_SCALE, HEADER_H, FOOTER_H</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-text">Layout registry: slideType &rarr; layoutFunction mapping</div></div>
+</div>
+<div class="impl-card">
+<h3>Existing: <code>fraction-renderer.js</code></h3>
+<p>Vinculum fraction notation converter. All text with inline fractions passes through this before reaching any output target.</p>
+<div class="step"><div class="step-num">1</div><div class="step-text"><code>convertTextToPptxRuns(text)</code> &rarr; superscript/subscript fraction runs for PPTX slides</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-text"><code>convertTextToHTML(text)</code> &rarr; vertical stacked fraction spans for interactive pages</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-text"><code>drawPDFTextWithFractions(pdf, text, x, y)</code> &rarr; stacked fractions in PDF worksheets</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-text">Helpers: <code>invisibleOne(n)</code>, <code>giantOne(n,d,f)</code>, <code>complexFraction(a,b,c,d)</code></div></div>
+</div>
+<div class="impl-card">
+<h3>Updated: <code>pptx-themes.js</code></h3>
+<p>Each theme extended with Practice Profile category colors, so layouts can color-code by domain automatically.</p>
+<div class="step"><div class="step-num">1</div><div class="step-text">Add categoryColors: { unitDesign, community, clarity, delivery, assessment }</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-text">Each category gets a primary + tint color per theme</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-text">Layouts pull category color based on slide type</div></div>
+</div>
+<div class="impl-card">
+<h3>Build Order (Recommended)</h3>
+<p>Start with the layouts that cover the most slides and are most visible to students.</p>
+<div class="step"><div class="step-num">1</div><div class="step-text"><strong>Problem Workspace</strong> (5 slides, most used) — uses FractionRenderer for all math text</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-text"><strong>Split Panel</strong> (7 slides, content workhorse)</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-text"><strong>Hero Statement</strong> (5 slides, highest visual impact)</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-text"><strong>Card Grid &rarr; Checklist &rarr; Dialogue &rarr; Compare &rarr; Timeline &rarr; Rubric &rarr; Dashboard</strong></div></div>
+</div>
+</div>
+</div>
+
+<div style="text-align:center; padding: 40px 40px 80px; color: #475569; font-size: 14px;">
+  All 10 layouts &times; 10 themes = 100 visual combinations, all unified by shared design constants + Vinculum fraction rendering.
+</div>
+
+</body>
+</html>
