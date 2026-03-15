@@ -7,6 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
     <style>
         /* ==================== ROOT & UTILITIES ==================== */
         :root {
@@ -1062,6 +1063,18 @@
                     <button class="download-btn" id="tier3Btn" style="background: #7C3AED;">🎯 Tier 3 — Intensive (.pptx)</button>
                 </div>
                 <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DIFFERENTIATED WORKSHEETS (PDF)</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                        <button class="download-btn worksheet-btn" data-level="1" style="background: #7C3AED; font-size: 0.82em; padding: 8px 14px;">L1 Foundational</button>
+                        <button class="download-btn worksheet-btn" data-level="2" style="background: #6D28D9; font-size: 0.82em; padding: 8px 14px;">L2 Supported</button>
+                        <button class="download-btn worksheet-btn" data-level="3" style="background: #5B21B6; font-size: 0.82em; padding: 8px 14px;">L3 Scaffolded</button>
+                        <button class="download-btn worksheet-btn" data-level="4" style="background: #3B82F6; font-size: 0.82em; padding: 8px 14px;">L4 Grade-Level</button>
+                        <button class="download-btn worksheet-btn" data-level="5" style="background: #0D9488; font-size: 0.82em; padding: 8px 14px;">L5 Enriched</button>
+                        <button class="download-btn worksheet-btn" data-level="6" style="background: #059669; font-size: 0.82em; padding: 8px 14px;">L6 Advanced</button>
+                    </div>
+                    <button class="download-btn" id="allWorksheetsBtn" style="background: linear-gradient(135deg, #7C3AED, #3B82F6, #0D9488); width: 100%;">📦 Download All 6 Worksheets (.zip)</button>
+                </div>
+                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
                     <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DATA & PROGRESS MONITORING</div>
                     <button class="download-btn" id="trackerBtn" style="background: #1E6B3C;">📊 Teacher Progress Tracker (.xlsx)</button>
                 </div>
@@ -1086,6 +1099,8 @@
     <script src="js/teaching-insights-data.js"></script>
     <script src="js/rubric-descriptors.js"></script>
     <script src="js/leveled-problems-data.js"></script>
+    <script src="js/problem-generator.js"></script>
+    <script src="js/worksheet-pdf-engine.js"></script>
     <script src="js/lesson-components-data.js"></script>
     <script>
         // ==================== TEACHING INSIGHTS DATABASE ====================
@@ -5459,6 +5474,44 @@
                     btn.textContent = '❌ Error: ' + err.message;
                     setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 4000);
                 }
+            }
+        });
+
+        // ── Individual Worksheet Level buttons ──
+        document.querySelectorAll('.worksheet-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!currentAnalysis) return;
+                const level = parseInt(btn.dataset.level);
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ Generating...';
+                btn.disabled = true;
+                try {
+                    WorksheetPDFEngine.downloadLevel(currentAnalysis, level);
+                    btn.textContent = '✅ Downloaded!';
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3000);
+                } catch (err) {
+                    console.error('Worksheet error:', err);
+                    btn.textContent = '❌ Error';
+                    setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 4000);
+                }
+            });
+        });
+
+        // ── Download All 6 Worksheets as ZIP ──
+        document.getElementById('allWorksheetsBtn')?.addEventListener('click', async () => {
+            if (!currentAnalysis) return;
+            const btn = document.getElementById('allWorksheetsBtn');
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Generating 6 worksheets...';
+            btn.disabled = true;
+            try {
+                await WorksheetPDFEngine.downloadAll(currentAnalysis);
+                btn.textContent = '✅ ZIP Downloaded!';
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3500);
+            } catch (err) {
+                console.error('Worksheet ZIP error:', err);
+                btn.textContent = '❌ Error: ' + err.message;
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 4000);
             }
         });
 
