@@ -436,3 +436,6 @@ const FractionRenderer = (() => {
     };
 
 })();
+
+// Expose on window so IIFE-pattern modules (e.g. LayoutEngine) can find it via root.FractionRenderer
+if (typeof window !== 'undefined') window.FractionRenderer = FractionRenderer;
