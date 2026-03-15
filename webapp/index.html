@@ -272,6 +272,197 @@
         .results-section.delay-7 { animation-delay: 0.7s; }
         .results-section.delay-8 { animation-delay: 0.8s; }
 
+        /* ==================== POST-DROP THEME PICKER ==================== */
+        .file-accepted {
+            background: rgba(20,184,166,0.06);
+            border: 2px solid var(--teal);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .file-accepted .file-icon {
+            width: 48px; height: 48px;
+            background: rgba(20,184,166,0.15);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+        .file-accepted .file-info-row { flex: 1; }
+        .file-accepted .file-name { font-weight: 600; color: var(--text); font-size: 1rem; }
+        .file-accepted .file-meta { font-size: 0.8rem; color: var(--text-dim); }
+        .file-accepted .check-icon { color: var(--teal); font-size: 22px; }
+
+        .theme-strip { margin-top: 16px; }
+        .theme-strip-label {
+            font-size: 0.8rem; color: var(--text-dim);
+            margin-bottom: 8px; font-weight: 600;
+        }
+        .theme-group-label {
+            font-size: 0.7rem; color: var(--text-dim);
+            text-transform: uppercase; letter-spacing: 1px;
+            margin: 10px 0 6px; font-weight: 700;
+        }
+        .theme-strip-row {
+            display: flex; gap: 8px;
+            overflow-x: auto; padding-bottom: 6px;
+        }
+        .theme-chip {
+            flex-shrink: 0; padding: 8px 12px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: var(--card);
+            cursor: pointer; transition: all 0.2s;
+            text-align: center; min-width: 80px;
+        }
+        .theme-chip:hover { border-color: var(--text-dim); }
+        .theme-chip.selected {
+            border-color: var(--amber);
+            background: rgba(212,135,15,0.08);
+        }
+        .theme-dots {
+            display: flex; gap: 3px;
+            justify-content: center; margin-bottom: 4px;
+        }
+        .theme-dots span {
+            width: 10px; height: 10px;
+            border-radius: 50%; display: inline-block;
+        }
+        .theme-chip-name {
+            font-size: 0.65rem; color: var(--text-dim);
+            font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .theme-chip.selected .theme-chip-name { color: var(--amber); }
+
+        .analyze-btn {
+            margin-top: 16px; width: 100%;
+            padding: 14px; border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--amber), #D4870F);
+            color: var(--navy); font-size: 1rem;
+            font-weight: 700; cursor: pointer;
+            letter-spacing: 0.3px; transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(212,135,15,0.25);
+        }
+        .analyze-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(212,135,15,0.35);
+        }
+        .analyze-btn:disabled {
+            opacity: 0.5; cursor: not-allowed;
+            transform: none; box-shadow: none;
+        }
+
+        #configurePanel { display: none; margin-bottom: 40px; animation: slide-in-up 0.4s ease; }
+        #configurePanel.visible { display: block; }
+
+        /* ==================== TABBED RESULTS ==================== */
+        .results-tabs {
+            display: flex; gap: 2px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px; margin-bottom: 24px;
+            overflow-x: auto;
+            position: sticky; top: 0;
+            z-index: 50;
+        }
+        .results-tab {
+            padding: 10px 16px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; color: var(--text-dim);
+            transition: all 0.2s; white-space: nowrap;
+            display: flex; align-items: center; gap: 6px;
+            border: none; background: none;
+            font-family: inherit;
+        }
+        .results-tab:hover { background: rgba(212,135,15,0.06); color: var(--text); }
+        .results-tab.active {
+            background: var(--navy);
+            color: var(--amber);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .results-tab .tab-badge {
+            background: rgba(212,135,15,0.2);
+            color: var(--amber); font-size: 0.7rem;
+            padding: 1px 6px; border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .tab-panel { display: none; animation: tab-fade-in 0.3s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes tab-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Compact misconception chips */
+        .miscon-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px; margin: 12px 0;
+        }
+        .miscon-chip {
+            padding: 12px 14px; border-radius: 10px;
+            background: rgba(212,135,15,0.04);
+            border-left: 3px solid #EC4899;
+            font-size: 0.85rem; color: var(--text-dim);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .miscon-chip:hover { background: rgba(236,72,153,0.08); }
+        .miscon-chip .miscon-label {
+            font-weight: 600; color: #EC4899;
+            font-size: 0.75rem; text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .miscon-chip .miscon-body { font-size: 0.82rem; color: var(--text-dim); }
+        .miscon-expand {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 0;
+        }
+        .miscon-chip.open .miscon-expand {
+            max-height: 300px; margin-top: 8px;
+        }
+        .miscon-chip.open {
+            grid-column: 1 / -1;
+            background: rgba(236,72,153,0.08);
+        }
+        .miscon-expand-detail {
+            font-size: 0.78rem; color: var(--text-dim);
+            line-height: 1.5;
+        }
+        .miscon-expand-detail strong { color: var(--text); }
+
+        /* Download grid for Downloads tab */
+        .dl-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px; margin: 12px 0;
+        }
+        .dl-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px; text-align: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .dl-card:hover {
+            border-color: var(--amber);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .dl-card .dl-icon { font-size: 24px; margin-bottom: 6px; }
+        .dl-card .dl-label { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+        .dl-card .dl-sub { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+
+        @media (max-width: 768px) {
+            .miscon-grid { grid-template-columns: 1fr; }
+            .dl-grid { grid-template-columns: repeat(2, 1fr); }
+            .results-tabs { gap: 0; }
+            .results-tab { padding: 8px 12px; font-size: 0.78rem; }
+        }
+
         .section-heading {
             font-size: 1.3rem;
             font-weight: 700;
@@ -993,6 +1184,23 @@
             <input type="file" id="fileInput" class="file-input" accept=".pptx" />
         </div>
 
+        <!-- POST-DROP CONFIGURE PANEL -->
+        <div id="configurePanel">
+            <div class="file-accepted">
+                <div class="file-icon">📊</div>
+                <div class="file-info-row">
+                    <div class="file-name" id="acceptedFileName"></div>
+                    <div class="file-meta" id="acceptedFileMeta"></div>
+                </div>
+                <div class="check-icon">✓</div>
+            </div>
+            <div class="theme-strip">
+                <div class="theme-strip-label">Choose Presentation Style</div>
+                <div id="themeStripMount"></div>
+            </div>
+            <button class="analyze-btn" id="analyzeBtn">⚡ Analyze &amp; Build</button>
+        </div>
+
         <!-- PROGRESS BAR -->
         <div class="progress-container" id="progressContainer">
             <div class="progress-label" id="progressLabel">Analyzing your lesson...</div>
@@ -1003,47 +1211,51 @@
 
         <!-- RESULTS PANEL -->
         <div class="results-panel" id="resultsPanel">
-            <!-- File Info -->
-            <div class="results-section delay-1">
-                <h2 class="section-heading">📄 Lesson Details</h2>
+            <!-- Tab Bar -->
+            <div class="results-tabs" id="resultsTabs">
+                <button class="results-tab active" data-tab="tabOverview">📄 Overview</button>
+                <button class="results-tab" data-tab="tabStandards">🎯 Standards</button>
+                <button class="results-tab" data-tab="tabInsights">💡 Insights</button>
+                <button class="results-tab" data-tab="tabScript">⚙️ Script</button>
+                <button class="results-tab" data-tab="tabDownloads">📥 Downloads</button>
+            </div>
+
+            <!-- TAB: Overview (Lesson Details + Slide Map + Topics) -->
+            <div class="tab-panel active" id="tabOverview">
                 <div class="file-info" id="fileInfo"></div>
-            </div>
-
-            <!-- Slide Map -->
-            <div class="results-section delay-2">
-                <h2 class="section-heading">📺 Slide Classification</h2>
+                <h3 class="section-heading" style="margin-top:24px;">📺 Slide Classification</h3>
                 <div class="slide-map" id="slideMap"></div>
+                <div id="topicsSection" style="margin-top:24px;">
+                    <h3 class="section-heading">🔍 Topics Detected</h3>
+                    <div id="detectedGradeBadge" style="margin-bottom:10px;"></div>
+                    <div class="tags-container" id="topicsContainer"></div>
+                </div>
             </div>
 
-            <!-- Topics Detected -->
-            <div class="results-section delay-3" id="topicsSection">
-                <h2 class="section-heading">🔍 Topics Detected</h2>
-                <div id="detectedGradeBadge" style="margin-bottom:10px;"></div>
-                <div class="tags-container" id="topicsContainer"></div>
+            <!-- TAB: Standards (Standards Alignment + Rubric) -->
+            <div class="tab-panel" id="tabStandards">
+                <div id="standardsSection">
+                    <h3 class="section-heading">🎯 Standards Alignment</h3>
+                    <div class="standards-list" id="standardsList"></div>
+                </div>
+                <div id="rubricSection" style="margin-top:24px;">
+                    <h3 class="section-heading">📊 RMS Proficiency Rubric</h3>
+                    <button class="rubric-expand-all" id="rubricExpandAll">Expand All</button>
+                    <div id="rubricContainer"></div>
+                </div>
             </div>
 
-            <!-- Standards Aligned -->
-            <div class="results-section delay-4" id="standardsSection">
-                <h2 class="section-heading">🎯 Standards Alignment</h2>
-                <div class="standards-list" id="standardsList"></div>
+            <!-- TAB: Insights (Teaching Insights) -->
+            <div class="tab-panel" id="tabInsights">
+                <div id="insightsSection">
+                    <h3 class="section-heading">💡 Teaching Insights</h3>
+                    <div id="insightsContainer"></div>
+                </div>
             </div>
 
-            <!-- Proficiency Rubric -->
-            <div class="results-section delay-5" id="rubricSection">
-                <h2 class="section-heading">📊 RMS Proficiency Rubric</h2>
-                <button class="rubric-expand-all" id="rubricExpandAll">Expand All</button>
-                <div id="rubricContainer"></div>
-            </div>
-
-            <!-- Teaching Insights -->
-            <div class="results-section delay-6" id="insightsSection">
-                <h2 class="section-heading">💡 Teaching Insights</h2>
-                <div id="insightsContainer"></div>
-            </div>
-
-            <!-- Build Script -->
-            <div class="results-section delay-7" id="scriptSection">
-                <h2 class="section-heading">⚙️ Build Script</h2>
+            <!-- TAB: Script -->
+            <div class="tab-panel" id="tabScript">
+                <h3 class="section-heading">⚙️ Build Script</h3>
                 <div class="script-container">
                     <div class="script-header">
                         <div class="script-title">rebuild.py — Generated Build Script</div>
@@ -1053,39 +1265,47 @@
                 </div>
             </div>
 
-            <!-- Style Selector + Download -->
-            <div class="results-section delay-8" id="downloadSection">
-                <div id="styleSelectorMount"></div>
-                <button class="download-btn" id="downloadBtn">⬇️ Download Rebuilt Lesson (.pptx)</button>
-                <button class="download-btn" id="notesBtn" style="background: var(--teal); margin-left: 12px;">📝 Download Student Notes</button>
-                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
-                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">INTERVENTION OUTPUTS</div>
-                    <button class="download-btn" id="tier2Btn" style="background: #0D9488; margin-right: 10px;">👥 Tier 2 — Small Group (.pptx)</button>
-                    <button class="download-btn" id="tier3Btn" style="background: #7C3AED;">🎯 Tier 3 — Intensive (.pptx)</button>
+            <!-- TAB: Downloads -->
+            <div class="tab-panel" id="tabDownloads">
+                <h3 class="section-heading">📥 Downloads</h3>
+                <div id="styleSelectorMount" style="margin-bottom:20px;"></div>
+
+                <div style="font-size:0.78em; color:var(--text-dim); margin-bottom:8px; font-weight:600; letter-spacing:0.05em;">PRESENTATION OUTPUTS</div>
+                <div class="dl-grid">
+                    <div class="dl-card" id="downloadBtn"><div class="dl-icon">📊</div><div class="dl-label">Rebuilt Lesson</div><div class="dl-sub">.pptx</div></div>
+                    <div class="dl-card" id="notesBtn"><div class="dl-icon">📝</div><div class="dl-label">Student Notes</div><div class="dl-sub">.pptx</div></div>
+                    <div class="dl-card" id="tier2Btn"><div class="dl-icon">👥</div><div class="dl-label">Tier 2</div><div class="dl-sub">.pptx · small group</div></div>
+                    <div class="dl-card" id="tier3Btn"><div class="dl-icon">🎯</div><div class="dl-label">Tier 3</div><div class="dl-sub">.pptx · intensive</div></div>
                 </div>
-                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
-                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DIFFERENTIATED WORKSHEETS (PDF)</div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-                        <button class="download-btn worksheet-btn" data-level="1" style="background: #7C3AED; font-size: 0.82em; padding: 8px 14px;">L1 Foundational</button>
-                        <button class="download-btn worksheet-btn" data-level="2" style="background: #6D28D9; font-size: 0.82em; padding: 8px 14px;">L2 Supported</button>
-                        <button class="download-btn worksheet-btn" data-level="3" style="background: #5B21B6; font-size: 0.82em; padding: 8px 14px;">L3 Scaffolded</button>
-                        <button class="download-btn worksheet-btn" data-level="4" style="background: #3B82F6; font-size: 0.82em; padding: 8px 14px;">L4 Grade-Level</button>
-                        <button class="download-btn worksheet-btn" data-level="5" style="background: #0D9488; font-size: 0.82em; padding: 8px 14px;">L5 Enriched</button>
-                        <button class="download-btn worksheet-btn" data-level="6" style="background: #059669; font-size: 0.82em; padding: 8px 14px;">L6 Advanced</button>
-                    </div>
-                    <button class="download-btn" id="allWorksheetsBtn" style="background: linear-gradient(135deg, #7C3AED, #3B82F6, #0D9488); width: 100%;">📦 Download All 6 Worksheets (.zip)</button>
+
+                <div style="font-size:0.78em; color:var(--text-dim); margin:16px 0 8px; font-weight:600; letter-spacing:0.05em;">DIFFERENTIATED WORKSHEETS (PDF)</div>
+                <div class="dl-grid" style="grid-template-columns: repeat(6,1fr);">
+                    <div class="dl-card worksheet-dl" data-level="1"><div class="dl-icon" style="font-size:14px;font-weight:700;">L1</div><div class="dl-label">Foundation</div></div>
+                    <div class="dl-card worksheet-dl" data-level="2"><div class="dl-icon" style="font-size:14px;font-weight:700;">L2</div><div class="dl-label">Supported</div></div>
+                    <div class="dl-card worksheet-dl" data-level="3"><div class="dl-icon" style="font-size:14px;font-weight:700;">L3</div><div class="dl-label">Scaffolded</div></div>
+                    <div class="dl-card worksheet-dl" data-level="4"><div class="dl-icon" style="font-size:14px;font-weight:700;">L4</div><div class="dl-label">Grade-Level</div></div>
+                    <div class="dl-card worksheet-dl" data-level="5"><div class="dl-icon" style="font-size:14px;font-weight:700;">L5</div><div class="dl-label">Enriched</div></div>
+                    <div class="dl-card worksheet-dl" data-level="6"><div class="dl-icon" style="font-size:14px;font-weight:700;">L6</div><div class="dl-label">Advanced</div></div>
                 </div>
-                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
-                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DIALOGUE & ERROR ANALYSIS</div>
-                    <div style="font-size: 0.72em; color: var(--text-dim); margin-bottom: 10px;">Included in rebuilt lesson. 4 slides: Structured Dialogue, Dual Error Analysis, Teacher Cookbook, Strategy Pivot</div>
-                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                        <button class="download-btn" id="dialogueCardsPdfBtn" style="background: #6D28D9; flex: 1; font-size: 0.82em; padding: 8px 14px;">🗣️ Dialogue Cards (PDF)</button>
-                        <button class="download-btn" id="interactiveDialogueBtn" style="background: #2563EB; flex: 1; font-size: 0.82em; padding: 8px 14px;">💬 Interactive Dialogue</button>
-                    </div>
+                <div class="dl-card" id="allWorksheetsBtn" style="margin-top:8px; background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(59,130,246,0.1)); text-align:center; padding:12px;">
+                    <div class="dl-label">📦 Download All 6 Worksheets (.zip)</div>
                 </div>
-                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
-                    <div style="font-size: 0.78em; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.05em;">DATA & PROGRESS MONITORING</div>
-                    <button class="download-btn" id="trackerBtn" style="background: #1E6B3C;">📊 Teacher Progress Tracker (.xlsx)</button>
+
+                <div style="font-size:0.78em; color:var(--text-dim); margin:16px 0 8px; font-weight:600; letter-spacing:0.05em;">DIALOGUE & ERROR ANALYSIS</div>
+                <div class="dl-grid">
+                    <div class="dl-card" id="dialogueCardsPdfBtn"><div class="dl-icon">🗣️</div><div class="dl-label">Dialogue Cards</div><div class="dl-sub">.pdf</div></div>
+                    <div class="dl-card" id="interactiveDialogueBtn"><div class="dl-icon">💬</div><div class="dl-label">Interactive Dialogue</div><div class="dl-sub">.pptx</div></div>
+                    <div class="dl-card" id="trackerBtn"><div class="dl-icon">📈</div><div class="dl-label">Progress Tracker</div><div class="dl-sub">.xlsx</div></div>
+                </div>
+
+                <!-- Hidden buttons for event listener compatibility -->
+                <div style="display:none;">
+                    <button class="download-btn worksheet-btn" data-level="1" style="background: #7C3AED; font-size: 0.82em; padding: 8px 14px;">L1 Foundational</button>
+                    <button class="download-btn worksheet-btn" data-level="2" style="background: #6D28D9; font-size: 0.82em; padding: 8px 14px;">L2 Supported</button>
+                    <button class="download-btn worksheet-btn" data-level="3" style="background: #5B21B6; font-size: 0.82em; padding: 8px 14px;">L3 Scaffolded</button>
+                    <button class="download-btn worksheet-btn" data-level="4" style="background: #3B82F6; font-size: 0.82em; padding: 8px 14px;">L4 Grade-Level</button>
+                    <button class="download-btn worksheet-btn" data-level="5" style="background: #0D9488; font-size: 0.82em; padding: 8px 14px;">L5 Enriched</button>
+                    <button class="download-btn worksheet-btn" data-level="6" style="background: #059669; font-size: 0.82em; padding: 8px 14px;">L6 Advanced</button>
                 </div>
             </div>
         </div>
@@ -1442,6 +1662,35 @@
 
         document.getElementById('copyBtn').addEventListener('click', copyBuildScript);
 
+        document.getElementById('analyzeBtn').addEventListener('click', () => {
+            if (!window._pendingFile) return;
+            document.getElementById('configurePanel').classList.remove('visible');
+            document.getElementById('configurePanel').style.display = 'none';
+            document.getElementById('progressContainer').classList.add('visible');
+            analyzePPTX(window._pendingFile);
+        });
+
+        // Tab switching
+        document.getElementById('resultsTabs').addEventListener('click', (e) => {
+            const tab = e.target.closest('.results-tab');
+            if (!tab) return;
+            const targetId = tab.dataset.tab;
+            document.querySelectorAll('.results-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(targetId).classList.add('active');
+        });
+
+        // Worksheet card clicks
+        document.addEventListener('click', (e) => {
+            const worksheetCard = e.target.closest('.worksheet-dl');
+            if (worksheetCard) {
+                const level = worksheetCard.dataset.level;
+                const oldBtn = document.querySelector('.worksheet-btn[data-level="' + level + '"]');
+                if (oldBtn) oldBtn.click();
+            }
+        });
+
         // ==================== FILE HANDLING ====================
         function handleFileSelect(e) {
             const file = e.target.files[0];
@@ -1456,14 +1705,69 @@
                 return;
             }
 
-            document.getElementById('progressContainer').classList.add('visible');
-            document.getElementById('resultsPanel').classList.remove('visible');
-            document.getElementById('emptyState').style.display = 'none';
+            // Store file for later analysis
+            window._pendingFile = file;
 
-            analyzePPTX(file);
+            // Show configure panel
+            document.getElementById('dropZone').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultsPanel').classList.remove('visible');
+
+            const configPanel = document.getElementById('configurePanel');
+            document.getElementById('acceptedFileName').textContent = file.name;
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+            document.getElementById('acceptedFileMeta').textContent = sizeMB + ' MB · Ready to analyze';
+
+            // Mount theme strip
+            mountThemeStrip();
+
+            configPanel.classList.add('visible');
         }
 
         // ==================== PPTX PARSING ====================
+
+        function mountThemeStrip() {
+            const mount = document.getElementById('themeStripMount');
+            if (!mount || typeof PptxThemes === 'undefined') return;
+            const themes = PptxThemes.all();
+            const selectedId = PptxThemes.getSelectedId();
+            const originals = themes.filter(t => t.group === 'original');
+            const vinculum = themes.filter(t => t.group === 'vinculum');
+
+            function buildRow(list) {
+                return list.map(t => {
+                    const sw = t.swatch || [];
+                    const c1 = sw[0] || t.colors.primary || '0F172A';
+                    const c2 = sw[1] || t.colors.secondary || 'F59E0B';
+                    const c3 = sw[2] || t.colors.accent || '3B82F6';
+                    const sel = t.id === selectedId ? ' selected' : '';
+                    const shortName = t.name.replace(/^Vinculum\s+/, '');
+                    return '<div class="theme-chip' + sel + '" data-theme-id="' + t.id + '">' +
+                        '<div class="theme-dots">' +
+                        '<span style="background:#' + c1 + '"></span>' +
+                        '<span style="background:#' + c2 + '"></span>' +
+                        '<span style="background:#' + c3 + '"></span>' +
+                        '</div>' +
+                        '<div class="theme-chip-name">' + shortName + '</div>' +
+                        '</div>';
+                }).join('');
+            }
+
+            mount.innerHTML =
+                '<div class="theme-group-label">Original</div>' +
+                '<div class="theme-strip-row">' + buildRow(originals) + '</div>' +
+                '<div class="theme-group-label">Vinculum</div>' +
+                '<div class="theme-strip-row">' + buildRow(vinculum) + '</div>';
+
+            // Click handler for theme chips
+            mount.querySelectorAll('.theme-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    mount.querySelectorAll('.theme-chip').forEach(c => c.classList.remove('selected'));
+                    chip.classList.add('selected');
+                    PptxThemes.select(chip.dataset.themeId);
+                });
+            });
+        }
         async function analyzePPTX(file) {
             try {
                 updateProgress(10, 'Loading file...');
@@ -2033,17 +2337,17 @@
 
             // Topics
             if (currentAnalysis.topics.length > 0) {
-                document.getElementById('topicsSection').style.display = 'block';
+                // Topics shown in tab panel
                 document.getElementById('topicsContainer').innerHTML = currentAnalysis.topics
                     .map(topic => `<span class="tag tag-teal">${topic}</span>`)
                     .join('');
             } else {
-                document.getElementById('topicsSection').style.display = 'none';
+                // Topics hidden in tab panel
             }
 
             // Standards
             if (standards.length > 0) {
-                document.getElementById('standardsSection').style.display = 'block';
+                // Standards shown in tab panel
                 let stdHTML = standards
                     .map(std => `
                         <div class="standard-item">
@@ -2081,7 +2385,7 @@
                 }
                 document.getElementById('standardsList').innerHTML = stdHTML;
             } else {
-                document.getElementById('standardsSection').style.display = 'none';
+                // Standards hidden in tab panel
             }
 
             // Proficiency Rubric
@@ -2091,7 +2395,7 @@
                 const rubricKeys = Object.keys(rubrics);
 
                 if (rubricKeys.length > 0) {
-                    document.getElementById('rubricSection').style.display = 'block';
+                    // Rubric shown in tab panel
 
                     const levelOrder = [
                         { key: 'exemplary',  label: 'Exemplary',   score: '10' },
@@ -2144,15 +2448,15 @@
                         expandBtn.textContent = allExpanded ? 'Expand All' : 'Collapse All';
                     };
                 } else {
-                    document.getElementById('rubricSection').style.display = 'none';
+                    // Rubric hidden in tab panel
                 }
             } else {
-                document.getElementById('rubricSection').style.display = 'none';
+                // Rubric hidden in tab panel
             }
 
             // Teaching Insights
             if (Object.keys(currentAnalysis.insights).length > 0) {
-                document.getElementById('insightsSection').style.display = 'block';
+                // Insights shown in tab panel
                 let insightsHTML = '';
 
                 for (const [topic, insight] of Object.entries(currentAnalysis.insights)) {
@@ -2162,27 +2466,23 @@
 
                             <div style="margin-bottom: 20px;">
                                 <h4 style="color: var(--text); margin-bottom: 12px; font-weight: 700;">Common Misconceptions</h4>
-                                <div class="misconceptions-list">
+                                <div class="miscon-grid">
                                     ${insight.misconceptions.map(m => {
-                                        // Handle both string and object formats
-                                        if (typeof m === 'string') {
-                                            return `<div class="misconception-card">
-                                                <div class="misconception-title">❌ ${m}</div>
-                                            </div>`;
-                                        }
-                                        return `<div class="misconception-card">
-                                            <div class="misconception-title">❌ ${m.error}</div>
-                                            ${m.why ? `<div class="misconception-item">
-                                                <span class="insight-label">Why:</span>
-                                                <span class="insight-text">${m.why}</span>
-                                            </div>` : ''}
-                                            ${m.address ? `<div class="misconception-item">
-                                                <span class="insight-label">How to Address:</span>
-                                                <span class="insight-text">${m.address}</span>
-                                            </div>` : ''}
-                                        </div>`;
+                                        const errorText = typeof m === 'string' ? m : m.error;
+                                        const why = typeof m === 'object' && m.why ? m.why : '';
+                                        const address = typeof m === 'object' && m.address ? m.address : '';
+                                        const hasDetail = why || address;
+                                        return '<div class="miscon-chip' + (hasDetail ? '' : '') + '" ' + (hasDetail ? 'onclick="this.classList.toggle(\'open\')"' : '') + '>' +
+                                            '<div class="miscon-label">❌ Error</div>' +
+                                            '<div class="miscon-body">' + errorText + '</div>' +
+                                            (hasDetail ? '<div class="miscon-expand"><div class="miscon-expand-detail">' +
+                                                (why ? '<strong>Why:</strong> ' + why + '<br>' : '') +
+                                                (address ? '<strong>Address:</strong> ' + address : '') +
+                                            '</div></div>' : '') +
+                                        '</div>';
                                     }).join('')}
                                 </div>
+                                ${insight.misconceptions.some(m => typeof m === 'object' && (m.why || m.address)) ? '<div style="text-align:center;font-size:0.72rem;color:var(--text-dim);margin-top:4px;">Click any card to expand details</div>' : ''}
                             </div>
 
                             <div style="margin-bottom: 20px;">
@@ -2215,7 +2515,7 @@
 
                 document.getElementById('insightsContainer').innerHTML = insightsHTML;
             } else {
-                document.getElementById('insightsSection').style.display = 'none';
+                // Insights hidden in tab panel
             }
 
             // Build Script
