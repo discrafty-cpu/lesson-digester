@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Dialogue — Select Your Role</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+        /* ── Header ── */
+        .header { background: linear-gradient(135deg, #0d9488, #3b82f6); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 1.2em; font-weight: 700; color: white; }
+        .back-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85em; transition: background 0.2s; }
+        .back-btn:hover { background: rgba(255,255,255,0.35); }
+
+        /* ── Setup Screen ── */
+        .setup { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        .setup h2 { font-size: 1.4em; margin-bottom: 8px; color: #f1f5f9; }
+        .setup p { color: #94a3b8; margin-bottom: 24px; font-size: 0.95em; }
+
+        .question-label { font-size: 0.85em; font-weight: 600; color: #0d9488; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+
+        .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 32px; }
+        .option { background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .option:hover { border-color: #3b82f6; background: #1e3a5f; }
+        .option.selected { border-color: #0d9488; background: #0d3d38; }
+        .option .num { font-size: 2em; font-weight: 800; display: block; margin-bottom: 4px; }
+        .option .label { font-size: 0.82em; color: #94a3b8; }
+        .option.selected .label { color: #5eead4; }
+
+        /* Comfort levels */
+        .comfort-options { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 32px; }
+        .comfort { background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 14px 18px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 14px; }
+        .comfort:hover { border-color: #3b82f6; }
+        .comfort.selected { border-color: #0d9488; background: #0d3d38; }
+        .comfort .dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1em; color: white; flex-shrink: 0; }
+        .comfort .info .title { font-weight: 600; font-size: 0.95em; }
+        .comfort .info .desc { font-size: 0.8em; color: #94a3b8; margin-top: 2px; }
+
+        .go-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #0d9488, #3b82f6); color: white; border: none; border-radius: 12px; font-size: 1.1em; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+        .go-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .go-btn:hover:not(:disabled) { opacity: 0.9; }
+
+        /* ── Card Screen ── */
+        .card-screen { display: none; max-width: 650px; margin: 0 auto; padding: 20px; }
+        .card-screen.active { display: block; }
+
+        .role-card { border-radius: 16px; padding: 24px; margin-bottom: 16px; position: relative; overflow: hidden; }
+        .role-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; }
+
+        .role-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.82em; font-weight: 700; color: white; margin-bottom: 12px; }
+        .role-job { font-size: 0.85em; color: #94a3b8; margin-bottom: 14px; font-style: italic; }
+
+        .dialogue-line { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; font-size: 1.05em; line-height: 1.5; }
+        .dialogue-line .blank { background: rgba(255,255,255,0.1); border-bottom: 2px dashed #64748b; padding: 2px 20px; border-radius: 4px; }
+
+        .frames-section { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .frames-label { font-size: 0.78em; font-weight: 600; color: #0d9488; text-transform: uppercase; margin-bottom: 8px; }
+        .frame { font-size: 0.9em; color: #cbd5e1; padding: 6px 0; border-bottom: 1px dotted #334155; }
+
+        .vocab-bar { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; }
+        .vocab-bar .label { font-size: 0.78em; font-weight: 600; color: #d4870f; text-transform: uppercase; margin-bottom: 6px; }
+        .vocab-bar .words { font-size: 1em; color: #f1f5f9; font-weight: 600; }
+
+        .change-btn { display: block; margin: 20px auto; background: #334155; border: none; color: #94a3b8; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 0.9em; }
+        .change-btn:hover { background: #475569; color: white; }
+
+        .print-btn { display: block; margin: 10px auto 30px; background: transparent; border: 1px solid #334155; color: #64748b; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 0.82em; }
+        .print-btn:hover { border-color: #0d9488; color: #0d9488; }
+
+        /* Topic display */
+        .topic-display { text-align: center; margin-bottom: 24px; }
+        .topic-display .topic-name { font-size: 1.1em; font-weight: 700; color: #f1f5f9; }
+        .topic-display .topic-sub { font-size: 0.82em; color: #64748b; margin-top: 4px; }
+
+        @media print {
+            body { background: white; color: #1e293b; }
+            .header, .back-btn, .change-btn, .print-btn { display: none; }
+            .role-card { border: 1px solid #ddd; break-inside: avoid; }
+            .dialogue-line { background: #f8fafc; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Math Dialogue</h1>
+        <button class="back-btn" onclick="goBack()">Back to Lesson</button>
+    </div>
+
+    <!-- SETUP SCREEN -->
+    <div class="setup" id="setupScreen">
+        <h2>Set Up Your Dialogue</h2>
+        <p>Answer two quick questions and you'll get your personalized dialogue card.</p>
+
+        <div class="topic-display" id="topicDisplay" style="display:none;">
+            <div class="topic-name" id="topicName"></div>
+            <div class="topic-sub">Today's Topic</div>
+        </div>
+
+        <div class="question-label">How many people in your group?</div>
+        <div class="options" id="groupOptions">
+            <div class="option" data-size="2" onclick="selectGroup(2)">
+                <span class="num">2</span>
+                <span class="label">Partner</span>
+            </div>
+            <div class="option" data-size="3" onclick="selectGroup(3)">
+                <span class="num">3</span>
+                <span class="label">Trio</span>
+            </div>
+            <div class="option" data-size="4" onclick="selectGroup(4)">
+                <span class="num">4</span>
+                <span class="label">Team</span>
+            </div>
+            <div class="option" data-size="5" onclick="selectGroup(5)">
+                <span class="num">5</span>
+                <span class="label">Extended</span>
+            </div>
+        </div>
+
+        <div class="question-label">How well do you understand this topic?</div>
+        <div class="comfort-options" id="comfortOptions">
+            <div class="comfort" data-level="wordBank" onclick="selectComfort('wordBank')">
+                <div class="dot" style="background:#0d9488;">1</div>
+                <div class="info">
+                    <div class="title">I need the words</div>
+                    <div class="desc">I'm confused and need vocabulary and sentence starters to help me talk about this.</div>
+                </div>
+            </div>
+            <div class="comfort" data-level="guided" onclick="selectComfort('guided')">
+                <div class="dot" style="background:#3b82f6;">2</div>
+                <div class="info">
+                    <div class="title">I know a little</div>
+                    <div class="desc">I understand some of it but need help organizing my thoughts.</div>
+                </div>
+            </div>
+            <div class="comfort" data-level="independent" onclick="selectComfort('independent')">
+                <div class="dot" style="background:#7c3aed;">3</div>
+                <div class="info">
+                    <div class="title">I can talk about it</div>
+                    <div class="desc">I understand the topic enough to discuss it with my group.</div>
+                </div>
+            </div>
+            <div class="comfort" data-level="expert" onclick="selectComfort('expert')">
+                <div class="dot" style="background:#d4870f;">4</div>
+                <div class="info">
+                    <div class="title">I can explain and teach</div>
+                    <div class="desc">I really get this and can help others understand it too.</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="go-btn" id="goBtn" disabled onclick="generateCard()">Show My Dialogue Card</button>
+    </div>
+
+    <!-- CARD SCREEN -->
+    <div class="card-screen" id="cardScreen">
+        <div class="topic-display">
+            <div class="topic-name" id="cardTopicName"></div>
+            <div class="topic-sub" id="cardGroupInfo"></div>
+        </div>
+
+        <div class="vocab-bar" id="vocabBar" style="display:none;">
+            <div class="label">Key Vocabulary</div>
+            <div class="words" id="vocabWords"></div>
+        </div>
+
+        <div id="roleCards"></div>
+
+        <button class="change-btn" onclick="resetSetup()">Change My Settings</button>
+        <button class="print-btn" onclick="window.print()">Print This Card</button>
+    </div>
+
+    <!-- Load dialogue data -->
+    <script src="js/structured-dialogues-data.js"></script>
+    <script>
+        // ── State ──
+        let selectedGroup = null;
+        let selectedComfort = null;
+        let currentTopic = null;
+        let currentScript = null;
+        let currentVocab = [];
+
+        // ── Read topic from URL params ──
+        const params = new URLSearchParams(window.location.search);
+        currentTopic = params.get('topic') || '';
+
+        if (currentTopic) {
+            document.getElementById('topicDisplay').style.display = 'block';
+            document.getElementById('topicName').textContent = currentTopic.charAt(0).toUpperCase() + currentTopic.slice(1);
+        }
+
+        // ── RISA dialogue data (inline subset for standalone use) ──
+        // The full RISA_DIALOGUES lives in index.html's inline script.
+        // For standalone mode, we pull from STRUCTURED_DIALOGUE_TOPICS if available.
+        function getDialogue(topic) {
+            let script = null, vocab = [];
+
+            // Try structured dialogues data (loaded above)
+            if (typeof STRUCTURED_DIALOGUE_TOPICS !== 'undefined') {
+                const lower = topic.toLowerCase();
+                const keys = Object.keys(STRUCTURED_DIALOGUE_TOPICS);
+                for (const k of keys) {
+                    if (k.includes(lower) || lower.includes(k) || k.split(' ')[0] === lower.split(' ')[0]) {
+                        const data = STRUCTURED_DIALOGUE_TOPICS[k];
+                        if (data.solvedProblems && data.solvedProblems[0]) {
+                            const sp = data.solvedProblems[0];
+                            script = sp.correctSolution.steps.map((s, i) => ({
+                                speaker: i % 2 === 0 ? 'A' : 'B',
+                                line: s
+                            }));
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // Try RISA if available
+            if (!script && typeof RISA_DIALOGUES !== 'undefined' && RISA_DIALOGUES[topic]) {
+                const d = RISA_DIALOGUES[topic].academic || RISA_DIALOGUES[topic].social;
+                script = d.script;
+                vocab = d.vocabulary || [];
+            }
+
+            // Fallback generic
+            if (!script) {
+                script = [
+                    { speaker: 'A', line: 'What is this problem asking us to do?' },
+                    { speaker: 'B', line: 'I think it\'s asking us to _____.' },
+                    { speaker: 'A', line: 'What strategy should we try first?' },
+                    { speaker: 'B', line: 'We could start by _____.' },
+                    { speaker: 'A', line: 'Does our answer make sense?' },
+                    { speaker: 'B', line: 'Let me check by _____.' }
+                ];
+            }
+
+            return { script, vocab };
+        }
+
+        // ── Role definitions ──
+        const ROLES = {
+            A: { label: 'Speaker A', color: '#0d9488', job: 'Introduce the idea and start the conversation.' },
+            B: { label: 'Speaker B', color: '#3b82f6', job: 'Respond, explain, and build on Speaker A\'s ideas.' },
+            C: { label: 'Questioner', color: '#7c3aed', job: 'Ask clarifying questions. Push the group to explain WHY.' },
+            D: { label: 'Summarizer', color: '#d4870f', job: 'Restate the key idea in your own words at the end.' },
+            E: { label: 'Connector', color: '#e8436d', job: 'Link this conversation to something the class learned before.' }
+        };
+
+        // ── Comfort frames ──
+        const FRAMES = {
+            wordBank: [
+                'A _____ is when you _____.',
+                'The answer is _____ because _____.',
+                'I agree / disagree because _____.',
+                'Can you explain what _____ means?'
+            ],
+            guided: [
+                'I think the first step is...',
+                'This is similar to... because...',
+                'I\'m not sure about... but I think...',
+                'What if we tried...?'
+            ],
+            independent: [
+                'My strategy was... and it works because...',
+                'I notice that... which tells me...',
+                'Another way to think about this is...'
+            ],
+            expert: [
+                'The mathematical reasoning here is...',
+                'This connects to [concept] because...',
+                'A common mistake would be... and here\'s why...'
+            ]
+        };
+
+        // ── Selection handlers ──
+        function selectGroup(size) {
+            selectedGroup = size;
+            document.querySelectorAll('#groupOptions .option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-size="${size}"]`).classList.add('selected');
+            checkReady();
+        }
+
+        function selectComfort(level) {
+            selectedComfort = level;
+            document.querySelectorAll('#comfortOptions .comfort').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-level="${level}"]`).classList.add('selected');
+            checkReady();
+        }
+
+        function checkReady() {
+            document.getElementById('goBtn').disabled = !(selectedGroup && selectedComfort);
+        }
+
+        // ── Generate the card ──
+        function generateCard() {
+            const data = getDialogue(currentTopic);
+            currentScript = data.script;
+            currentVocab = data.vocab;
+
+            const roleKeys = ['A', 'B', 'C', 'D', 'E'].slice(0, selectedGroup);
+
+            // Expand dialogue
+            const expanded = [...currentScript.map(l => ({ role: l.speaker, text: l.line }))];
+            if (selectedGroup >= 3) {
+                expanded.push({ role: 'C', text: 'What do you mean by _____? Can you explain that step?' });
+                expanded.push({ role: 'C', text: 'Why did you choose that method instead of _____?' });
+                expanded.push({ role: 'C', text: 'How do you know your answer is correct?' });
+            }
+            if (selectedGroup >= 4) {
+                expanded.push({ role: 'D', text: 'So what I\'m hearing is that the key idea is _____.' });
+                expanded.push({ role: 'D', text: 'To summarize: the strategy was _____ and the answer is _____.' });
+            }
+            if (selectedGroup >= 5) {
+                expanded.push({ role: 'E', text: 'This reminds me of when we learned about _____.' });
+                expanded.push({ role: 'E', text: 'In real life, this connects to _____ because _____.' });
+            }
+
+            // Build cards HTML
+            let html = '';
+
+            // Vocab bar
+            if (currentVocab.length > 0) {
+                document.getElementById('vocabBar').style.display = 'block';
+                document.getElementById('vocabWords').textContent = currentVocab.join('  |  ');
+            } else {
+                document.getElementById('vocabBar').style.display = 'none';
+            }
+
+            for (const key of roleKeys) {
+                const role = ROLES[key];
+                const lines = expanded.filter(l => l.role === key);
+
+                html += `<div class="role-card" style="background:${role.color}15; border-left: 4px solid ${role.color};">`;
+                html += `<div class="role-badge" style="background:${role.color};">${role.label}</div>`;
+                html += `<div class="role-job">${role.job}</div>`;
+
+                for (const line of lines.slice(0, 5)) {
+                    const formatted = line.text.replace(/_____/g, '<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+                    html += `<div class="dialogue-line">${formatted}</div>`;
+                }
+
+                // Sentence frames based on comfort level
+                const frames = FRAMES[selectedComfort] || [];
+                if (frames.length > 0) {
+                    html += '<div class="frames-section">';
+                    html += '<div class="frames-label">Your sentence starters</div>';
+                    for (const f of frames) {
+                        html += `<div class="frame">${f}</div>`;
+                    }
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            }
+
+            document.getElementById('roleCards').innerHTML = html;
+
+            // Update info
+            const topicLabel = currentTopic ? currentTopic.charAt(0).toUpperCase() + currentTopic.slice(1) : 'Math Discussion';
+            document.getElementById('cardTopicName').textContent = topicLabel;
+            document.getElementById('cardGroupInfo').textContent = `Group of ${selectedGroup}  •  ${document.querySelector(`[data-level="${selectedComfort}"] .title`).textContent}`;
+
+            // Show card screen
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('cardScreen').classList.add('active');
+        }
+
+        function resetSetup() {
+            document.getElementById('setupScreen').style.display = 'block';
+            document.getElementById('cardScreen').classList.remove('active');
+        }
+
+        function goBack() {
+            if (window.history.length > 1) window.history.back();
+            else window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
