@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vinculum-Inspired Lesson Layouts — Drummond Math Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',system-ui,sans-serif; background:#020203; color:#e8edf5; }
+
+  /* ── Hero ── */
+  .hero {
+    text-align:center; padding:56px 24px 36px;
+    background:linear-gradient(135deg,#0a0e1a 0%,#111827 50%,#0a0e1a 100%);
+    border-bottom:1px solid #2a3654;
+    position:relative; overflow:hidden;
+  }
+  .hero::before {
+    content:''; position:absolute; top:-100px; right:-60px;
+    width:400px; height:400px; border-radius:50%;
+    background:radial-gradient(circle,rgba(0,212,255,0.06) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .hero::after {
+    content:''; position:absolute; bottom:-80px; left:-40px;
+    width:300px; height:300px; border-radius:50%;
+    background:radial-gradient(circle,rgba(179,136,255,0.05) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .hero h1 {
+    font-size:2.4rem; font-weight:900; position:relative;
+    background:linear-gradient(135deg,#00d4ff,#b388ff);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .hero .sub { color:#ff9100; font-size:0.95rem; margin-top:8px; font-weight:700; letter-spacing:1px; }
+  .hero .desc {
+    color:#8b9cc0; font-size:0.84rem; margin-top:14px;
+    max-width:720px; margin-left:auto; margin-right:auto; line-height:1.7;
+    position:relative;
+  }
+
+  /* ── Section Navigation ── */
+  .nav-bar {
+    display:flex; justify-content:center; gap:8px; padding:16px 24px;
+    background:#0a0e1a; border-bottom:1px solid #1a2236;
+    position:sticky; top:0; z-index:100;
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  }
+  .nav-btn {
+    padding:8px 18px; border-radius:10px; border:1px solid transparent;
+    background:transparent; color:#5a6b8f; font-size:12px; font-weight:600;
+    font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.2s;
+  }
+  .nav-btn:hover { color:#8b9cc0; background:#1a2236; }
+  .nav-btn.active { background:rgba(0,212,255,0.1); color:#00d4ff; border-color:rgba(0,212,255,0.25); }
+  .nav-btn.new { background:rgba(179,136,255,0.1); color:#b388ff; border-color:rgba(179,136,255,0.25); }
+
+  /* ── Timing bar ── */
+  .timing-bar { display:flex; max-width:920px; margin:28px auto 8px; border-radius:10px; overflow:hidden; border:1px solid #2a3654; }
+  .timing-seg { text-align:center; padding:8px 2px; font-size:0.55rem; font-weight:700; color:#fff; line-height:1.2; }
+  .timing-seg span { display:block; font-size:0.7rem; margin-top:2px; }
+  .timing-legend { text-align:center; color:#5a6b8f; font-size:0.7rem; margin-bottom:32px; padding:0 20px; }
+
+  /* ── Section container ── */
+  .section-divider {
+    max-width:1100px; margin:48px auto 0; padding:0 24px;
+    text-align:center;
+  }
+  .section-divider h2 {
+    font-size:1.6rem; font-weight:900; margin-bottom:8px;
+  }
+  .section-divider .line {
+    width:60px; height:3px; margin:0 auto; border-radius:2px;
+  }
+  .section-divider p { color:#5a6b8f; font-size:0.82rem; margin-top:12px; max-width:600px; margin-left:auto; margin-right:auto; line-height:1.6; }
+
+  /* ── Style section ── */
+  .style-section { max-width:1100px; margin:0 auto 44px; padding:0 24px; }
+  .style-header {
+    display:flex; align-items:center; gap:14px; margin-bottom:14px;
+    padding-bottom:10px; border-bottom:1px solid #1a2236;
+  }
+  .style-num {
+    width:40px; height:40px; border-radius:12px; display:flex; align-items:center;
+    justify-content:center; font-size:1rem; font-weight:800; color:#fff; flex-shrink:0;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .style-name { font-size:1.3rem; font-weight:800; color:#e8edf5; }
+  .style-tag { font-size:0.72rem; color:#5a6b8f; margin-top:2px; font-family:'JetBrains Mono',monospace; }
+  .style-desc { color:#8b9cc0; font-size:0.8rem; line-height:1.6; margin-bottom:14px; max-width:800px; }
+  .eval-badge {
+    display:inline-block; font-size:0.65rem; font-weight:700; padding:3px 10px;
+    border-radius:6px; margin-right:6px; font-family:'JetBrains Mono',monospace;
+  }
+
+  /* ── Slides row ── */
+  .slides-row { display:flex; gap:14px; overflow-x:auto; padding-bottom:12px; }
+  .slides-row::-webkit-scrollbar { height:6px; }
+  .slides-row::-webkit-scrollbar-thumb { background:#2a3654; border-radius:3px; }
+  .slide-mock {
+    width:270px; min-width:270px; height:175px; border-radius:10px;
+    position:relative; overflow:hidden;
+    box-shadow:0 4px 24px rgba(0,0,0,0.4); flex-shrink:0;
+  }
+  .slide-label {
+    position:absolute; bottom:0; left:0; right:0; padding:5px 10px;
+    font-size:0.55rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+    background:rgba(0,0,0,0.7); color:#fff; display:flex; justify-content:space-between;
+    backdrop-filter:blur(4px);
+  }
+  .slide-label .time { color:#ff9100; }
+
+  /* ═══════════════════════════════════════════════
+     ORIGINAL 5 — evaluation badges
+     ═══════════════════════════════════════════════ */
+
+  /* Style 1: Classic Academic */
+  .s1-title { background:linear-gradient(180deg,#1E2761 0%,#1A2050 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; }
+  .s1-title .grade { color:#D4870F; font-size:0.6rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; }
+  .s1-title .topic { color:#fff; font-size:1.05rem; font-weight:700; margin-top:6px; text-align:center; }
+  .s1-title .bar { width:60px; height:2px; background:#D4870F; margin-top:8px; }
+  .s1-title .codes { color:#94A3B8; font-size:0.5rem; margin-top:8px; }
+
+  .s1-content { background:#fff; padding:12px 16px; }
+  .s1-content .hdr { color:#1E2761; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .s1-content .line { height:4px; background:#E2E8F0; border-radius:2px; margin:5px 0; }
+  .s1-content .right-box { float:right; width:42%; background:#F1F5F9; border-radius:6px; height:80px; display:flex; align-items:center; justify-content:center; color:#64748B; font-size:0.5rem; margin-left:10px; }
+
+  .s1-exit { background:linear-gradient(135deg,#1E2761,#253380); padding:14px 16px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .s1-exit .icon { font-size:1.3rem; }
+  .s1-exit .t { color:#D4870F; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+  .s1-exit .box { width:80%; height:45px; border:2px dashed rgba(255,255,255,0.2); border-radius:6px; margin-top:8px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.35); font-size:0.45rem; }
+
+  /* Style 2: Warm Workshop */
+  .s2-title { background:linear-gradient(135deg,#7C2D12,#92400E); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; }
+  .s2-title .badge { background:#FEF3C7; color:#92400E; font-size:0.5rem; font-weight:800; padding:3px 12px; border-radius:20px; }
+  .s2-title .topic { color:#fff; font-size:0.95rem; font-weight:700; margin-top:8px; text-align:center; }
+  .s2-card { background:#FFFBEB; padding:10px; }
+  .s2-card .crd { background:#fff; border-radius:8px; padding:8px 10px; border-left:4px solid; margin-bottom:5px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+
+  /* Style 3: Bold Modern */
+  .s3-title { background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; }
+  .s3-title .big { color:#fff; font-size:1.5rem; font-weight:900; text-transform:uppercase; letter-spacing:2px; text-align:center; line-height:1.1; }
+  .s3-title .accent { width:40px; height:4px; background:#3B82F6; margin-top:10px; }
+  .s3-split { background:#000; display:flex; }
+  .s3-split .left { width:45%; background:#3B82F6; display:flex; align-items:center; justify-content:center; padding:12px; color:#fff; font-size:0.7rem; font-weight:700; text-align:center; line-height:1.4; }
+  .s3-split .right { width:55%; padding:14px; }
+  .s3-split .line { height:4px; background:#1E293B; border-radius:2px; margin:5px 0; }
+
+  /* Style 4: Visual Story */
+  .s4-title { background:linear-gradient(135deg,#0F766E,#115E59); display:flex; flex-direction:column; padding:16px; }
+  .s4-title .eyebrow { color:#99F6E4; font-size:0.5rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; }
+  .s4-title .big { color:#fff; font-size:1.2rem; font-weight:800; margin-top:6px; }
+  .s4-title .img { flex:1; background:linear-gradient(rgba(0,0,0,0.1),rgba(0,0,0,0.3)),repeating-linear-gradient(45deg,#0D9488 0px,#0D9488 1px,transparent 1px,transparent 8px); border-radius:6px; margin-top:8px; min-height:40px; }
+
+  /* Style 5: Interactive Notebook */
+  .s5-title { background:linear-gradient(180deg,#FEF9EF,#FDF6E3); padding:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:2px solid #D6C9A6; }
+  .s5-title .tape { width:50px; height:12px; background:#FCD34D; opacity:0.6; transform:rotate(-3deg); border-radius:2px; margin-bottom:6px; }
+  .s5-title .topic { color:#44403C; font-size:0.95rem; font-weight:700; font-family:'Comic Sans MS',cursive; text-align:center; }
+  .s5-notes { background:repeating-linear-gradient(transparent,transparent 19px,#E7E0D0 19px,#E7E0D0 20px); background-color:#FEF9EF; padding:10px 14px 10px 36px; border:2px solid #D6C9A6; position:relative; }
+  .s5-notes::before { content:''; position:absolute; left:28px; top:0; bottom:0; width:1px; background:#E8436D; opacity:0.3; }
+  .s5-notes .hdr { color:#D4870F; font-size:0.5rem; font-weight:800; text-transform:uppercase; font-family:'Comic Sans MS',cursive; margin-bottom:6px; }
+
+  /* ═══════════════════════════════════════════════
+     NEW 5 — Vinculum-Inspired Layouts
+     ═══════════════════════════════════════════════ */
+
+  /* ── Style 6: Vinculum Dark Core ── */
+  .v1-title {
+    background:linear-gradient(135deg,#0a0e1a 0%,#111827 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:16px; position:relative; overflow:hidden;
+  }
+  .v1-title::before {
+    content:''; position:absolute; top:-40px; right:-30px;
+    width:150px; height:150px; border-radius:50%;
+    background:radial-gradient(circle,rgba(0,212,255,0.08) 0%,transparent 70%);
+  }
+  .v1-title .grade-tag {
+    font-size:0.5rem; font-weight:700; padding:3px 10px; border-radius:6px;
+    background:rgba(0,212,255,0.1); color:#00d4ff; border:1px solid rgba(0,212,255,0.2);
+    font-family:'JetBrains Mono',monospace; letter-spacing:1px;
+  }
+  .v1-title .topic {
+    font-size:1.15rem; font-weight:900; margin-top:10px; text-align:center;
+    background:linear-gradient(135deg,#00d4ff,#b388ff);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .v1-title .std-row { display:flex; gap:4px; margin-top:10px; flex-wrap:wrap; justify-content:center; }
+  .v1-title .std { font-size:0.42rem; padding:2px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-weight:600; }
+  .v1-title .std.ccss { background:rgba(0,212,255,0.08); color:#00d4ff; }
+  .v1-title .std.mn { background:rgba(179,136,255,0.08); color:#b388ff; }
+  .v1-title .std.teks { background:rgba(255,59,139,0.08); color:#ff3b8b; }
+
+  .v1-glass {
+    background:#111827; padding:12px 14px; position:relative;
+  }
+  .v1-glass .card {
+    background:rgba(26,34,54,0.8); border:1px solid #2a3654; border-radius:10px;
+    padding:10px 12px; margin-bottom:6px;
+    backdrop-filter:blur(8px);
+  }
+  .v1-glass .card .hdr {
+    font-size:0.5rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+    margin-bottom:5px; display:flex; align-items:center; gap:6px;
+  }
+  .v1-glass .card .hdr .dot { width:6px; height:6px; border-radius:50%; }
+  .v1-glass .line { height:3px; background:#2a3654; border-radius:2px; margin:4px 0; }
+
+  .v1-practice {
+    background:#0a0e1a; padding:14px; display:flex; flex-direction:column; gap:6px;
+  }
+  .v1-practice .prob {
+    display:flex; align-items:center; gap:8px;
+    background:rgba(26,34,54,0.6); border:1px solid #2a3654;
+    border-radius:8px; padding:8px 10px;
+  }
+  .v1-practice .prob .n {
+    width:22px; height:22px; border-radius:6px; display:flex; align-items:center;
+    justify-content:center; font-size:0.55rem; font-weight:800; flex-shrink:0;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .v1-practice .prob .q { flex:1; }
+  .v1-practice .prob .q .line { height:3px; background:#2a3654; border-radius:2px; margin:3px 0; }
+
+  .v1-exit {
+    background:linear-gradient(135deg,#0a0e1a,#111827); padding:16px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+  }
+  .v1-exit::before {
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse at center,rgba(179,136,255,0.05) 0%,transparent 70%);
+  }
+  .v1-exit .tag {
+    font-size:0.55rem; font-weight:700; padding:4px 14px; border-radius:8px;
+    background:rgba(0,230,118,0.1); color:#00e676; border:1px solid rgba(0,230,118,0.2);
+    font-family:'JetBrains Mono',monospace; letter-spacing:1px; position:relative;
+  }
+  .v1-exit .box {
+    width:80%; height:48px; border:1px dashed #2a3654; border-radius:8px;
+    margin-top:12px; display:flex; align-items:center; justify-content:center;
+    color:#5a6b8f; font-size:0.45rem; position:relative;
+  }
+
+  /* ── Style 7: Neon Forge ── */
+  .v2-title {
+    background:#08060e; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; padding:16px; position:relative; overflow:hidden;
+  }
+  .v2-title::before {
+    content:''; position:absolute; top:-60px; right:-40px; width:180px; height:180px;
+    border-radius:50%; background:radial-gradient(circle,rgba(224,64,251,0.1),transparent 70%);
+  }
+  .v2-title::after {
+    content:''; position:absolute; bottom:-40px; left:-30px; width:140px; height:140px;
+    border-radius:50%; background:radial-gradient(circle,rgba(255,109,0,0.07),transparent 70%);
+  }
+  .v2-title .topic {
+    font-size:1.3rem; font-weight:900; text-align:center; position:relative;
+    background:linear-gradient(135deg,#e040fb,#ff6d00);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .v2-title .sub { color:#c4a8e8; font-size:0.55rem; margin-top:6px; font-weight:600; position:relative; }
+
+  .v2-card {
+    background:#110e1c; padding:10px;
+  }
+  .v2-card .panel {
+    background:#1a1528; border:1px solid #35294d; border-radius:10px;
+    padding:10px 12px; margin-bottom:5px;
+    animation:v2border 6s ease-in-out infinite;
+  }
+  @keyframes v2border {
+    0%,100% { border-color:rgba(224,64,251,0.15); }
+    33% { border-color:rgba(255,109,0,0.25); }
+    66% { border-color:rgba(234,128,252,0.2); }
+  }
+  .v2-card .panel .hdr { font-size:0.5rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+  .v2-card .line { height:3px; background:#35294d; border-radius:2px; margin:3px 0; }
+
+  .v2-split {
+    background:#08060e; display:flex;
+  }
+  .v2-split .left {
+    width:40%; background:linear-gradient(135deg,rgba(224,64,251,0.15),rgba(255,109,0,0.1));
+    display:flex; align-items:center; justify-content:center; padding:12px;
+  }
+  .v2-split .left .text { color:#f0e4ff; font-size:0.7rem; font-weight:800; text-align:center; line-height:1.4; }
+  .v2-split .right { width:60%; padding:12px; }
+  .v2-split .right .line { height:3px; background:#35294d; border-radius:2px; margin:4px 0; }
+
+  /* ── Style 8: Arctic Frost ── */
+  .v3-title {
+    background:linear-gradient(135deg,#dce8f4,#e8f2fc);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:16px; position:relative; overflow:hidden;
+  }
+  .v3-title::before {
+    content:''; position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 200px 150px at 20% 30%, rgba(170,220,255,0.3), transparent),
+      radial-gradient(ellipse 150px 100px at 80% 60%, rgba(200,235,255,0.25), transparent);
+    pointer-events:none;
+  }
+  .v3-title .tag {
+    font-size:0.5rem; font-weight:700; padding:3px 10px; border-radius:6px;
+    background:rgba(255,255,255,0.6); color:#0077bb; border:1px solid rgba(160,200,230,0.5);
+    font-family:'JetBrains Mono',monospace; position:relative;
+    backdrop-filter:blur(8px);
+  }
+  .v3-title .topic {
+    font-size:1.1rem; font-weight:900; margin-top:8px; color:#0c2840;
+    text-align:center; position:relative;
+  }
+  .v3-title .codes { color:#2a5580; font-size:0.45rem; margin-top:6px; position:relative; }
+
+  .v3-glass {
+    background:#e8f2fc; padding:10px 12px;
+  }
+  .v3-glass .card {
+    background:rgba(255,255,255,0.55); border:1px solid rgba(160,200,230,0.4);
+    border-radius:10px; padding:9px 12px; margin-bottom:5px;
+    backdrop-filter:blur(12px);
+    box-shadow:0 2px 12px rgba(30,100,160,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .v3-glass .card .hdr {
+    font-size:0.5rem; font-weight:700; color:#0077bb; text-transform:uppercase;
+    letter-spacing:0.5px; margin-bottom:4px;
+  }
+  .v3-glass .line { height:3px; background:rgba(160,200,230,0.35); border-radius:2px; margin:3px 0; }
+
+  .v3-work {
+    background:linear-gradient(135deg,#dce8f4,#e8f2fc); padding:12px; position:relative;
+  }
+  .v3-work .header { color:#0c2840; font-size:0.55rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .v3-work .zone {
+    background:rgba(255,255,255,0.45); border:1px dashed rgba(160,200,230,0.5);
+    border-radius:8px; padding:14px; text-align:center;
+    backdrop-filter:blur(8px);
+  }
+  .v3-work .zone .hint { color:#5a8ab0; font-size:0.45rem; }
+
+  /* ── Style 9: CRA Flow ── */
+  .v4-title {
+    background:#0a0e1a; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; padding:16px;
+  }
+  .v4-title .brand {
+    font-size:0.6rem; font-weight:800; letter-spacing:2px;
+    background:linear-gradient(135deg,#00d4ff,#b388ff);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .v4-title .topic { color:#e8edf5; font-size:1.1rem; font-weight:800; margin-top:8px; text-align:center; }
+  .v4-title .tabs {
+    display:flex; gap:6px; margin-top:12px;
+  }
+  .v4-title .tab {
+    padding:5px 14px; border-radius:8px; font-size:0.5rem; font-weight:700;
+    border:1px solid transparent;
+  }
+  .v4-title .tab.explore { background:rgba(0,212,255,0.1); color:#00d4ff; border-color:rgba(0,212,255,0.25); }
+  .v4-title .tab.practice { background:rgba(0,230,118,0.1); color:#00e676; border-color:rgba(0,230,118,0.25); }
+  .v4-title .tab.play { background:rgba(255,193,7,0.1); color:#ffc107; border-color:rgba(255,193,7,0.25); }
+
+  .v4-explore {
+    background:#0a0e1a; padding:10px; border-top:3px solid #00d4ff;
+  }
+  .v4-explore .mode-label {
+    font-size:0.45rem; font-weight:700; color:#00d4ff; text-transform:uppercase;
+    letter-spacing:1.5px; margin-bottom:6px; font-family:'JetBrains Mono',monospace;
+  }
+  .v4-explore .visual {
+    background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.15);
+    border-radius:10px; height:90px; display:flex; align-items:center; justify-content:center;
+    color:#00d4ff; font-size:0.6rem; font-weight:700;
+  }
+
+  .v4-practice {
+    background:#0a0e1a; padding:10px; border-top:3px solid #00e676;
+  }
+  .v4-practice .mode-label {
+    font-size:0.45rem; font-weight:700; color:#00e676; text-transform:uppercase;
+    letter-spacing:1.5px; margin-bottom:6px; font-family:'JetBrains Mono',monospace;
+  }
+  .v4-practice .prob-row { display:flex; gap:6px; margin-bottom:5px; }
+  .v4-practice .prob-num {
+    width:20px; height:20px; border-radius:6px; font-size:0.5rem; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(0,230,118,0.1); color:#00e676; flex-shrink:0;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .v4-practice .prob-q .line { height:3px; background:#1a2236; border-radius:2px; margin:3px 0; }
+
+  .v4-play {
+    background:#0a0e1a; padding:12px; border-top:3px solid #ffc107;
+  }
+  .v4-play .mode-label {
+    font-size:0.45rem; font-weight:700; color:#ffc107; text-transform:uppercase;
+    letter-spacing:1.5px; margin-bottom:8px; font-family:'JetBrains Mono',monospace;
+  }
+  .v4-play .game-area {
+    background:rgba(255,193,7,0.05); border:1px solid rgba(255,193,7,0.15);
+    border-radius:10px; padding:14px; display:flex; flex-direction:column; align-items:center;
+  }
+  .v4-play .game-area .title { color:#ffc107; font-size:0.65rem; font-weight:800; }
+  .v4-play .game-area .desc { color:#5a6b8f; font-size:0.4rem; margin-top:4px; }
+  .v4-play .score-bar {
+    display:flex; gap:8px; margin-top:8px;
+  }
+  .v4-play .score-item {
+    text-align:center;
+  }
+  .v4-play .score-item .val { font-size:0.7rem; font-weight:800; font-family:'JetBrains Mono',monospace; }
+  .v4-play .score-item .lbl { font-size:0.35rem; color:#5a6b8f; text-transform:uppercase; letter-spacing:0.5px; }
+
+  /* ── Style 10: Ocean Deep ── */
+  .v5-title {
+    background:linear-gradient(135deg,#0B1D33,#132D4A);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px;
+    position:relative; overflow:hidden;
+  }
+  .v5-title::before {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:40%;
+    background:linear-gradient(transparent,rgba(0,180,216,0.04));
+  }
+  .v5-title .eyebrow {
+    color:#48CAE4; font-size:0.5rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:2px; position:relative;
+  }
+  .v5-title .topic {
+    color:#E0F4FF; font-size:1.15rem; font-weight:800; margin-top:8px;
+    text-align:center; position:relative;
+  }
+  .v5-title .wave-bar {
+    display:flex; gap:3px; margin-top:10px; position:relative;
+  }
+  .v5-title .wave-dot {
+    width:4px; height:4px; border-radius:50%;
+  }
+
+  .v5-card {
+    background:#132D4A; padding:10px;
+  }
+  .v5-card .panel {
+    background:#1A3A5C; border:1px solid #2A5A7E; border-radius:10px;
+    padding:9px 12px; margin-bottom:5px;
+  }
+  .v5-card .panel .hdr {
+    font-size:0.5rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+    margin-bottom:4px;
+  }
+  .v5-card .line { height:3px; background:#2A5A7E; border-radius:2px; margin:3px 0; }
+
+  .v5-split {
+    background:#0B1D33; display:flex;
+  }
+  .v5-split .visual {
+    width:50%; background:linear-gradient(135deg,rgba(0,180,216,0.08),rgba(6,214,160,0.06));
+    display:flex; align-items:center; justify-content:center;
+    color:#48CAE4; font-size:0.6rem; font-weight:700;
+  }
+  .v5-split .content { width:50%; padding:12px; }
+  .v5-split .content .hdr { color:#48CAE4; font-size:0.5rem; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+  .v5-split .content .line { height:3px; background:#2A5A7E; border-radius:2px; margin:4px 0; }
+
+  .v5-exit {
+    background:linear-gradient(135deg,#0B1D33,#132D4A); padding:16px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .v5-exit .tag {
+    font-size:0.55rem; font-weight:700; padding:4px 14px; border-radius:8px;
+    background:rgba(6,214,160,0.1); color:#06D6A0; border:1px solid rgba(6,214,160,0.2);
+    font-family:'JetBrains Mono',monospace;
+  }
+  .v5-exit .box {
+    width:80%; height:48px; border:1px dashed #2A5A7E; border-radius:8px;
+    margin-top:10px; display:flex; align-items:center; justify-content:center;
+    color:#5E8BA0; font-size:0.45rem;
+  }
+
+  /* ── Comparison Table ── */
+  .compare-section { max-width:1100px; margin:40px auto; padding:0 24px; }
+  .compare-table {
+    width:100%; border-collapse:collapse; font-size:0.72rem;
+  }
+  .compare-table th {
+    text-align:left; padding:10px 12px; background:#111827;
+    border-bottom:2px solid #2a3654; color:#8b9cc0;
+    font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  }
+  .compare-table td {
+    padding:8px 12px; border-bottom:1px solid #1a2236; color:#8b9cc0;
+    vertical-align:top;
+  }
+  .compare-table tr:hover td { background:rgba(0,212,255,0.03); }
+  .compare-table .name { color:#e8edf5; font-weight:700; white-space:nowrap; }
+  .compare-table .score {
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:0.7rem;
+  }
+
+  .footer {
+    text-align:center; padding:36px; color:#2a3654; font-size:0.65rem;
+    border-top:1px solid #1a2236; margin-top:40px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="hero">
+  <h1>10 Lesson Layout Styles</h1>
+  <div class="sub">VINCULUM DESIGN SYSTEM EVALUATION</div>
+  <div class="desc">
+    5 original layouts evaluated against the Vinculum design language, plus 5 new
+    Vinculum-inspired styles built on the same CSS variable system, glassmorphism,
+    gradient text, and CRA mode structure used across all Vinculum tools.
+  </div>
+</div>
+
+<!-- Nav -->
+<div class="nav-bar">
+  <button class="nav-btn active" onclick="document.getElementById('original').scrollIntoView({behavior:'smooth'})">Original 5</button>
+  <button class="nav-btn new" onclick="document.getElementById('vinculum').scrollIntoView({behavior:'smooth'})">New Vinculum 5</button>
+  <button class="nav-btn" onclick="document.getElementById('compare').scrollIntoView({behavior:'smooth'})">Comparison</button>
+</div>
+
+<!-- Timing bar -->
+<div class="timing-bar">
+  <div class="timing-seg" style="background:#1a2236;width:3%"><span style="font-size:0.45rem">1m</span></div>
+  <div class="timing-seg" style="background:#00d4ff22;width:5%;color:#00d4ff;border-left:1px solid #2a3654"><span>2m</span></div>
+  <div class="timing-seg" style="background:#00e67622;width:10%;color:#00e676;border-left:1px solid #2a3654"><span>5m</span></div>
+  <div class="timing-seg" style="background:#b388ff22;width:6%;color:#b388ff;border-left:1px solid #2a3654"><span>3m</span></div>
+  <div class="timing-seg" style="background:#ff910022;width:22%;color:#ff9100;border-left:1px solid #2a3654"><span>12m</span></div>
+  <div class="timing-seg" style="background:#00d4ff22;width:20%;color:#00d4ff;border-left:1px solid #2a3654"><span>10m</span></div>
+  <div class="timing-seg" style="background:#00e67622;width:18%;color:#00e676;border-left:1px solid #2a3654"><span>9m</span></div>
+  <div class="timing-seg" style="background:#ff3b8b22;width:6%;color:#ff3b8b;border-left:1px solid #2a3654"><span>3m</span></div>
+  <div class="timing-seg" style="background:#ffc10722;width:10%;color:#ffc107;border-left:1px solid #2a3654"><span>5m</span></div>
+</div>
+<div class="timing-legend">
+  Title → Target → Warm-Up → Vocab → Direct Instruction → Guided → Independent → Check → Exit = <strong style="color:#ff9100;">~50 min</strong>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- ORIGINAL 5 — EVALUATED -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="original" class="section-divider">
+  <h2 style="color:#8b9cc0;">Original 5 — Evaluation</h2>
+  <div class="line" style="background:linear-gradient(90deg,#00d4ff,#5a6b8f);"></div>
+  <p>How each existing layout scores against the Vinculum design language: dark themes, glassmorphism, gradient accents, JetBrains Mono, CRA modes, and animated feedback.</p>
+</div>
+
+<!-- 1. Classic Academic -->
+<div class="style-section" style="margin-top:28px;">
+  <div class="style-header">
+    <div class="style-num" style="background:#1E2761;">1</div>
+    <div>
+      <div class="style-name">Classic Academic</div>
+      <div class="style-tag">structured · professional · teacher-led · familiar</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(255,59,139,0.1);color:#ff3b8b;border:1px solid rgba(255,59,139,0.2);">VINCULUM SCORE: 2/10</span>
+    <span class="eval-badge" style="background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">KEEP: ✓ structure</span>
+    <span class="eval-badge" style="background:rgba(255,145,0,0.1);color:#ff9100;border:1px solid rgba(255,145,0,0.2);">UPGRADE: theme · typography · effects</span>
+  </div>
+  <div class="style-desc">
+    White backgrounds, serif-adjacent feel, no glassmorphism, no gradient text, no CSS variables.
+    Solid pedagogical structure but visually static. The numbered-problem layout is effective —
+    worth preserving as the content skeleton while upgrading the visual wrapper.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock s1-title">
+      <div class="grade">GRADE 7 · MATHEMATICS</div>
+      <div class="topic">Proportional Relationships</div>
+      <div class="bar"></div>
+      <div class="codes">7.RP.A.1 · 7.RP.A.2 · 7.4A</div>
+      <div class="slide-label"><span>Title Slide</span><span class="time">~1 min</span></div>
+    </div>
+    <div class="slide-mock s1-content">
+      <div class="hdr">Direct Instruction</div>
+      <div class="right-box">📐 Model</div>
+      <div class="line" style="width:50%"></div>
+      <div class="line" style="width:45%"></div>
+      <div class="line" style="width:40%"></div>
+      <div class="line" style="width:48%"></div>
+      <div style="clear:both"></div>
+      <div class="slide-label"><span>Content</span><span class="time">~12 min</span></div>
+    </div>
+    <div class="slide-mock s1-exit">
+      <div class="icon">🎫</div>
+      <div class="t">Exit Ticket</div>
+      <div class="box">Student response area</div>
+      <div class="slide-label"><span>Exit Ticket</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Warm Workshop -->
+<div class="style-section">
+  <div class="style-header">
+    <div class="style-num" style="background:#92400E;">2</div>
+    <div>
+      <div class="style-name">Warm Workshop</div>
+      <div class="style-tag">collaborative · inviting · card-based · earth tones</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(255,59,139,0.1);color:#ff3b8b;border:1px solid rgba(255,59,139,0.2);">VINCULUM SCORE: 3/10</span>
+    <span class="eval-badge" style="background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">KEEP: ✓ card layout · ✓ stations concept</span>
+    <span class="eval-badge" style="background:rgba(255,145,0,0.1);color:#ff9100;border:1px solid rgba(255,145,0,0.2);">UPGRADE: dark option · blur · accent colors</span>
+  </div>
+  <div class="style-desc">
+    Card-based structure is actually Vinculum-adjacent — the card/panel pattern maps well to glassmorphism.
+    Cream backgrounds limit projector readability. The collaborative station grid (①②③④) is a strong
+    pedagogical pattern worth porting to the Vinculum card system. Needs: dark bg, glass cards, glow accents.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock s2-title">
+      <div class="badge">TODAY'S ADVENTURE</div>
+      <div class="topic">Fractions Are Our Friends!</div>
+      <div class="slide-label"><span>Title</span><span class="time">~1 min</span></div>
+    </div>
+    <div class="slide-mock s2-card">
+      <div class="crd" style="border-color:#0D9488;">
+        <div style="color:#0D9488;font-size:0.5rem;font-weight:700;">🎯 OUR GOAL</div>
+        <div style="height:3px;background:#CCFBF1;border-radius:2px;margin:3px 0;width:85%"></div>
+        <div style="height:3px;background:#CCFBF1;border-radius:2px;margin:3px 0;width:70%"></div>
+      </div>
+      <div class="crd" style="border-color:#D4870F;">
+        <div style="color:#D4870F;font-size:0.5rem;font-weight:700;">📖 KEY WORDS</div>
+        <div style="height:3px;background:#FEF3C7;border-radius:2px;margin:3px 0;width:60%"></div>
+      </div>
+      <div class="slide-label"><span>Target + Vocab</span><span class="time">~5 min</span></div>
+    </div>
+    <div class="slide-mock" style="background:#FFFBEB;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;">
+      <div style="font-size:1.2rem;">⭐</div>
+      <div style="color:#92400E;font-size:0.65rem;font-weight:700;margin-top:4px;">How did you do?</div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:0.8rem;">😊</div>
+        <div style="width:30px;height:30px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:0.8rem;">🤔</div>
+        <div style="width:30px;height:30px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:0.8rem;">😵</div>
+      </div>
+      <div class="slide-label"><span>Exit Ticket</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Bold Modern -->
+<div class="style-section">
+  <div class="style-header">
+    <div class="style-num" style="background:#3B82F6;">3</div>
+    <div>
+      <div class="style-name">Bold Modern</div>
+      <div class="style-tag">high contrast · minimal text · impact · focus</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(255,193,7,0.1);color:#ffc107;border:1px solid rgba(255,193,7,0.2);">VINCULUM SCORE: 6/10</span>
+    <span class="eval-badge" style="background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">KEEP: ✓ dark bg · ✓ large type · ✓ split layout</span>
+    <span class="eval-badge" style="background:rgba(255,145,0,0.1);color:#ff9100;border:1px solid rgba(255,145,0,0.2);">UPGRADE: gradient text · glass · variable system</span>
+  </div>
+  <div class="style-desc">
+    Closest to Vinculum aesthetic — dark backgrounds, high contrast, bold typography.
+    The split-screen layout mirrors Vinculum's sidebar+main pattern. Needs: swap flat black
+    for Vinculum navy (#0a0e1a), add gradient text, glassmorphism cards, and the glow/shadow system.
+    This is the strongest foundation for a Vinculum upgrade.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock s3-title">
+      <div class="big">LINEAR<br>EQUATIONS</div>
+      <div class="accent"></div>
+      <div style="color:#60A5FA;font-size:0.55rem;margin-top:6px;font-weight:600;">GRADE 8 · y = mx + b</div>
+      <div class="slide-label"><span>Title</span><span class="time">~1 min</span></div>
+    </div>
+    <div class="slide-mock s3-split">
+      <div class="left">SLOPE<br>is the<br>RATE OF<br>CHANGE</div>
+      <div class="right">
+        <div style="color:#60A5FA;font-size:0.5rem;font-weight:700;margin-bottom:4px;">KEY IDEA</div>
+        <div class="line" style="width:90%"></div>
+        <div class="line" style="width:75%"></div>
+        <div class="line" style="width:85%;background:#3B82F6;height:3px;"></div>
+        <div class="line" style="width:60%"></div>
+      </div>
+      <div class="slide-label"><span>Concept</span><span class="time">~12 min</span></div>
+    </div>
+    <div class="slide-mock" style="background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="color:#3B82F6;font-size:1.8rem;font-weight:900;">EXIT</div>
+      <div style="color:#fff;font-size:0.55rem;margin-top:6px;text-align:center;padding:0 16px;">Write the equation of a line...</div>
+      <div class="slide-label"><span>Exit Ticket</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Visual Story -->
+<div class="style-section">
+  <div class="style-header">
+    <div class="style-num" style="background:#0D9488;">4</div>
+    <div>
+      <div class="style-name">Visual Story</div>
+      <div class="style-tag">image-led · narrative · real-world · contextual</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(0,212,255,0.1);color:#00d4ff;border:1px solid rgba(0,212,255,0.2);">VINCULUM SCORE: 5/10</span>
+    <span class="eval-badge" style="background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">KEEP: ✓ narrative flow · ✓ image emphasis · ✓ teal palette</span>
+    <span class="eval-badge" style="background:rgba(255,145,0,0.1);color:#ff9100;border:1px solid rgba(255,145,0,0.2);">UPGRADE: dark variant · gradient · glass overlays</span>
+  </div>
+  <div class="style-desc">
+    Teal palette overlaps with Vinculum's green. The narrative structure (hook → explore → discover → apply)
+    maps perfectly to the CRA framework (Explore → Practice → Play). Image-heavy areas could use
+    Vinculum's radial-gradient overlays. Strongest candidate for ELL/culturally responsive integration.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock s4-title">
+      <div class="eyebrow">GRADE 6 · REAL-WORLD MATH</div>
+      <div class="big">How Fast Is Fast Enough?</div>
+      <div class="img"></div>
+      <div class="slide-label"><span>Hook</span><span class="time">~2 min</span></div>
+    </div>
+    <div class="slide-mock" style="background:#F0FDFA;padding:12px;">
+      <div style="background:linear-gradient(90deg,#0D9488,#14B8A6);border-radius:8px;padding:7px 10px;color:#fff;font-size:0.5rem;font-weight:700;margin-bottom:6px;">🌍 Today's Context: Road Trip</div>
+      <div style="background:#fff;border-radius:8px;padding:6px 8px;border:1px solid #99F6E4;margin-bottom:4px;">
+        <div style="height:3px;background:#CCFBF1;border-radius:2px;margin:3px 0;width:90%"></div>
+        <div style="height:3px;background:#CCFBF1;border-radius:2px;margin:3px 0;width:65%"></div>
+      </div>
+      <div class="slide-label"><span>Context</span><span class="time">~3 min</span></div>
+    </div>
+    <div class="slide-mock s4-title" style="background:linear-gradient(135deg,#115E59,#0F766E);">
+      <div class="eyebrow">REFLECTION</div>
+      <div class="big" style="font-size:0.8rem;">What did you discover?</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;margin-top:6px;">
+        <div style="border:2px dashed rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;color:rgba(255,255,255,0.4);font-size:0.45rem;">Write 2 sentences</div>
+      </div>
+      <div class="slide-label"><span>Exit</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Interactive Notebook -->
+<div class="style-section">
+  <div class="style-header">
+    <div class="style-num" style="background:#D4870F;">5</div>
+    <div>
+      <div class="style-name">Interactive Notebook</div>
+      <div class="style-tag">sketch-style · student-owned · handwritten · warm</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(255,59,139,0.1);color:#ff3b8b;border:1px solid rgba(255,59,139,0.2);">VINCULUM SCORE: 1/10</span>
+    <span class="eval-badge" style="background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">KEEP: ✓ workspace zones · ✓ self-assessment</span>
+    <span class="eval-badge" style="background:rgba(255,145,0,0.1);color:#ff9100;border:1px solid rgba(255,145,0,0.2);">NICHE: best for print, not screen</span>
+  </div>
+  <div class="style-desc">
+    Most divergent from Vinculum — opposite aesthetic entirely. Paper textures, Comic Sans, warm cream
+    fight against the digital-first Vinculum identity. However, the "workspace zone" concept (dashed
+    borders, write-here areas) translates beautifully to Vinculum's interactive canvas pattern.
+    The self-assessment scale is a pattern worth stealing for all themes.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock s5-title">
+      <div class="tape"></div>
+      <div class="topic">Perimeter & Area</div>
+      <div style="color:#A8A29E;font-size:0.45rem;font-family:'Comic Sans MS',cursive;margin-top:4px;">Grade 3 · Lesson 4.2</div>
+      <div class="slide-label"><span>Title</span><span class="time">~1 min</span></div>
+    </div>
+    <div class="slide-mock s5-notes">
+      <div class="hdr">📖 Key Words</div>
+      <div style="background:rgba(212,135,15,0.08);border-left:3px solid #D4870F;padding:4px 8px;border-radius:0 4px 4px 0;margin:4px 0;">
+        <div style="font-size:0.45rem;color:#92400E;font-weight:700;font-family:'Comic Sans MS',cursive;">Perimeter = distance around</div>
+      </div>
+      <div style="background:rgba(212,135,15,0.08);border-left:3px solid #D4870F;padding:4px 8px;border-radius:0 4px 4px 0;margin:4px 0;">
+        <div style="font-size:0.45rem;color:#92400E;font-weight:700;font-family:'Comic Sans MS',cursive;">Area = space inside</div>
+      </div>
+      <div class="slide-label"><span>Vocabulary</span><span class="time">~3 min</span></div>
+    </div>
+    <div class="slide-mock" style="background:#FEF9EF;padding:14px;border:2px solid #D6C9A6;display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:1rem;">⭐</div>
+      <div style="color:#44403C;font-size:0.6rem;font-weight:700;font-family:'Comic Sans MS',cursive;">Rate your understanding:</div>
+      <div style="display:flex;gap:4px;margin-top:6px;">
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid #D6C9A6;display:flex;align-items:center;justify-content:center;font-size:0.45rem;color:#A8A29E;">1</div>
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid #D6C9A6;display:flex;align-items:center;justify-content:center;font-size:0.45rem;color:#A8A29E;">2</div>
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid #D6C9A6;display:flex;align-items:center;justify-content:center;font-size:0.45rem;color:#A8A29E;">3</div>
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid #D6C9A6;display:flex;align-items:center;justify-content:center;font-size:0.45rem;color:#A8A29E;">4</div>
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid #D6C9A6;display:flex;align-items:center;justify-content:center;font-size:0.45rem;color:#A8A29E;">5</div>
+      </div>
+      <div class="slide-label"><span>Reflection</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- NEW 5 — VINCULUM-INSPIRED -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="vinculum" class="section-divider" style="margin-top:56px;">
+  <h2 style="background:linear-gradient(135deg,#00d4ff,#b388ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">New Vinculum 5</h2>
+  <div class="line" style="background:linear-gradient(135deg,#00d4ff,#b388ff);"></div>
+  <p>Built from vinculum-core.css — same variable system, glassmorphism, gradient text, animations, and component patterns used across 45+ Vinculum tools.</p>
+</div>
+
+<!-- ═══ 6. Vinculum Dark Core ═══ -->
+<div class="style-section" style="margin-top:28px;">
+  <div class="style-header">
+    <div class="style-num" style="background:linear-gradient(135deg,#00d4ff,#b388ff);">6</div>
+    <div>
+      <div class="style-name" style="background:linear-gradient(135deg,#00d4ff,#b388ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Vinculum Dark Core</div>
+      <div class="style-tag">glassmorphism · gradient text · dark navy · standard tags</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(0,212,255,0.1);color:#00d4ff;border:1px solid rgba(0,212,255,0.2);">DEFAULT VINCULUM THEME</span>
+    <span class="eval-badge" style="background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">VINCULUM SCORE: 10/10</span>
+  </div>
+  <div class="style-desc">
+    The direct translation of vinculum-core.css default theme to PPTX. Dark navy backgrounds (#0a0e1a),
+    cyan→purple gradient titles, glassmorphism content cards with subtle borders, JetBrains Mono
+    standard tags color-coded by framework (cyan=CCSS, purple=MN, pink=TEKS), and ambient glow orbs.
+    This is the flagship — every other theme is a variation of this foundation.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock v1-title">
+      <div class="grade-tag">GRADE 7 · MATHEMATICS</div>
+      <div class="topic">Proportional Relationships</div>
+      <div class="std-row">
+        <div class="std ccss">7.RP.A.1</div>
+        <div class="std ccss">7.RP.A.2</div>
+        <div class="std mn">7.A.1.1</div>
+        <div class="std teks">7.4A</div>
+      </div>
+      <div class="slide-label"><span>Title Slide</span><span class="time">~1 min</span></div>
+    </div>
+    <div class="slide-mock v1-glass">
+      <div class="card">
+        <div class="hdr"><div class="dot" style="background:#00d4ff;"></div><span style="color:#00d4ff;">Learning Target</span></div>
+        <div class="line" style="width:92%;background:#2a3654;"></div>
+        <div class="line" style="width:78%;background:#2a3654;"></div>
+      </div>
+      <div class="card">
+        <div class="hdr"><div class="dot" style="background:#b388ff;"></div><span style="color:#b388ff;">Vocabulary</span></div>
+        <div class="line" style="width:60%;background:#2a3654;"></div>
+        <div class="line" style="width:75%;background:#2a3654;"></div>
+      </div>
+      <div class="slide-label"><span>Target + Vocab</span><span class="time">~5 min</span></div>
+    </div>
+    <div class="slide-mock v1-glass" style="background:#0a0e1a;">
+      <div style="display:flex;height:100%;">
+        <div style="width:45%;background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(179,136,255,0.05));border-radius:8px;margin:0 8px 24px 0;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#00d4ff;font-size:0.55rem;font-weight:700;">📐 Interactive Model</span>
+        </div>
+        <div style="width:55%;padding:4px 0;">
+          <div style="color:#00d4ff;font-size:0.45rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">KEY CONCEPT</div>
+          <div style="height:3px;background:#1a2236;border-radius:2px;margin:4px 0;width:95%"></div>
+          <div style="height:3px;background:#1a2236;border-radius:2px;margin:4px 0;width:80%"></div>
+          <div style="height:3px;background:linear-gradient(90deg,#00d4ff,#b388ff);border-radius:2px;margin:4px 0;width:40%"></div>
+          <div style="height:3px;background:#1a2236;border-radius:2px;margin:4px 0;width:90%"></div>
+        </div>
+      </div>
+      <div class="slide-label"><span>Direct Instruction</span><span class="time">~12 min</span></div>
+    </div>
+    <div class="slide-mock v1-practice">
+      <div style="color:#00e676;font-size:0.45rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;">GUIDED PRACTICE</div>
+      <div class="prob">
+        <div class="n" style="background:rgba(0,212,255,0.1);color:#00d4ff;">1</div>
+        <div class="q"><div class="line" style="width:90%"></div><div class="line" style="width:70%"></div></div>
+      </div>
+      <div class="prob">
+        <div class="n" style="background:rgba(0,230,118,0.1);color:#00e676;">2</div>
+        <div class="q"><div class="line" style="width:85%"></div><div class="line" style="width:75%"></div></div>
+      </div>
+      <div class="prob">
+        <div class="n" style="background:rgba(179,136,255,0.1);color:#b388ff;">3</div>
+        <div class="q"><div class="line" style="width:80%"></div><div class="line" style="width:60%"></div></div>
+      </div>
+      <div class="slide-label"><span>Guided Practice</span><span class="time">~10 min</span></div>
+    </div>
+    <div class="slide-mock v1-exit">
+      <div class="tag">EXIT TICKET</div>
+      <div class="box">Student response area</div>
+      <div class="slide-label"><span>Exit Ticket</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 7. Neon Forge ═══ -->
+<div class="style-section">
+  <div class="style-header">
+    <div class="style-num" style="background:linear-gradient(135deg,#e040fb,#ff6d00);">7</div>
+    <div>
+      <div class="style-name" style="background:linear-gradient(135deg,#e040fb,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Neon Forge</div>
+      <div class="style-tag">magenta · orange laser · ambient orbs · shimmer borders</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(224,64,251,0.1);color:#e040fb;border:1px solid rgba(224,64,251,0.2);">VINCULUM THEME: neonforge</span>
+    <span class="eval-badge" style="background:rgba(255,109,0,0.1);color:#ff6d00;border:1px solid rgba(255,109,0,0.2);">HIGH ENERGY · ENGAGEMENT BOOST</span>
+  </div>
+  <div class="style-desc">
+    Based on the Neon Forge PRO theme — the most energetic in the Vinculum system. Magenta→orange
+    gradient text, animated shimmer borders that cycle through purple/orange, floating ambient orbs,
+    and a deep indigo-black background. Designed for maximum student engagement in digital-first
+    classrooms. The forge glow animation creates subtle visual interest without distraction.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock v2-title">
+      <div style="font-size:0.5rem;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(224,64,251,0.1);color:#e040fb;border:1px solid rgba(224,64,251,0.2);font-family:'JetBrains Mono',monospace;position:relative;">GRADE 8</div>
+      <div class="topic">Pythagorean Theorem</div>
+      <div class="sub">a² + b² = c²</div>
+      <div class="slide-label"><span>Title Slide</span><span class="time">~1 min</span></div>
+    </div>
+    <div class="slide-mock v2-card">
+      <div class="panel">
+        <div class="hdr" style="color:#e040fb;">🎯 LEARNING TARGET</div>
+        <div class="line" style="width:90%"></div>
+        <div class="line" style="width:75%"></div>
+      </div>
+      <div class="panel">
+        <div class="hdr" style="color:#ff6d00;">📖 VOCABULARY</div>
+        <div class="line" style="width:65%"></div>
+        <div class="line" style="width:80%"></div>
+      </div>
+      <div class="slide-label"><span>Target + Vocab</span><span class="time">~5 min</span></div>
+    </div>
+    <div class="slide-mock v2-split">
+      <div class="left">
+        <div class="text" style="color:#f0e4ff;">THE<br>HYPOTENUSE<br>IS ALWAYS<br>LONGEST</div>
+      </div>
+      <div class="right" style="padding:12px;">
+        <div style="color:#ea80fc;font-size:0.45rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">KEY THEOREM</div>
+        <div class="line" style="width:90%"></div>
+        <div class="line" style="width:75%;background:linear-gradient(90deg,#e040fb,#ff6d00);height:3px;border-radius:2px;"></div>
+        <div class="line" style="width:85%"></div>
+        <div class="line" style="width:60%"></div>
+      </div>
+      <div class="slide-label"><span>Direct Instruction</span><span class="time">~12 min</span></div>
+    </div>
+    <div class="slide-mock v2-card" style="background:#08060e;">
+      <div style="color:#ea80fc;font-size:0.45rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;">PRACTICE · FORGE YOUR SKILLS</div>
+      <div class="panel" style="display:flex;align-items:center;gap:8px;">
+        <div style="width:20px;height:20px;border-radius:6px;background:rgba(224,64,251,0.15);color:#e040fb;display:flex;align-items:center;justify-content:center;font-size:0.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;">1</div>
+        <div style="flex:1;"><div class="line" style="width:90%"></div><div class="line" style="width:70%"></div></div>
+      </div>
+      <div class="panel" style="display:flex;align-items:center;gap:8px;">
+        <div style="width:20px;height:20px;border-radius:6px;background:rgba(255,109,0,0.15);color:#ff6d00;display:flex;align-items:center;justify-content:center;font-size:0.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;">2</div>
+        <div style="flex:1;"><div class="line" style="width:85%"></div><div class="line" style="width:65%"></div></div>
+      </div>
+      <div class="slide-label"><span>Practice</span><span class="time">~10 min</span></div>
+    </div>
+    <div class="slide-mock" style="background:#08060e;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-40px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(224,64,251,0.08),transparent 70%);"></div>
+      <div style="font-size:0.55rem;font-weight:700;padding:4px 14px;border-radius:8px;background:rgba(118,255,3,0.1);color:#76ff03;border:1px solid rgba(118,255,3,0.2);font-family:'JetBrains Mono',monospace;position:relative;">EXIT TICKET</div>
+      <div style="width:80%;height:45px;border:1px dashed #35294d;border-radius:8px;margin-top:10px;display:flex;align-items:center;justify-content:center;color:#7d60a6;font-size:0.42rem;position:relative;">Show your work</div>
+      <div class="slide-label"><span>Exit Ticket</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 8. Arctic Frost ═══ -->
+<div class="style-section">
+  <div class="style-header">
+    <div class="style-num" style="background:linear-gradient(135deg,#4db8e8,#88ccff);">8</div>
+    <div>
+      <div class="style-name" style="color:#4db8e8;">Arctic Frost</div>
+      <div class="style-tag">frosted glass · ice blue · projector-bright · accessible</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(77,184,232,0.1);color:#4db8e8;border:1px solid rgba(77,184,232,0.2);">VINCULUM THEME: frost</span>
+    <span class="eval-badge" style="background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">LIGHT MODE · PROJECTOR OPTIMIZED</span>
+  </div>
+  <div class="style-desc">
+    The Vinculum "Arctic Frost" theme adapted for presentations — frosted glass cards on pale ice-blue
+    backgrounds with radial gradient overlays creating depth. This is the recommended light-mode Vinculum
+    option for projector-heavy classrooms where dark themes wash out. Uses backdrop-filter blur
+    and semi-transparent whites for that crystalline aesthetic. Maintains Vinculum's typography and
+    component structure while being fully WCAG AA accessible.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock v3-title">
+      <div class="tag">GRADE 5 · MATHEMATICS</div>
+      <div class="topic">Multiplying Fractions</div>
+      <div class="codes">5.NF.B.4 · 5.3I · 5.C.1.1</div>
+      <div class="slide-label" style="background:rgba(12,40,64,0.7);"><span>Title Slide</span><span class="time" style="color:#0077bb;">~1 min</span></div>
+    </div>
+    <div class="slide-mock v3-glass">
+      <div class="card">
+        <div class="hdr">🎯 Learning Target</div>
+        <div class="line" style="width:90%"></div>
+        <div class="line" style="width:75%"></div>
+      </div>
+      <div class="card">
+        <div class="hdr" style="color:#5533bb;">📖 Vocabulary</div>
+        <div class="line" style="width:65%"></div>
+        <div class="line" style="width:80%"></div>
+      </div>
+      <div class="slide-label" style="background:rgba(12,40,64,0.7);"><span>Target + Vocab</span><span class="time" style="color:#0077bb;">~5 min</span></div>
+    </div>
+    <div class="slide-mock" style="background:#e8f2fc;display:flex;">
+      <div style="width:45%;background:rgba(255,255,255,0.45);backdrop-filter:blur(12px);border-right:1px solid rgba(160,200,230,0.4);display:flex;align-items:center;justify-content:center;">
+        <span style="color:#0077bb;font-size:0.55rem;font-weight:700;">📊 Visual Model</span>
+      </div>
+      <div style="width:55%;padding:12px;">
+        <div style="color:#0077bb;font-size:0.45rem;font-weight:700;text-transform:uppercase;margin-bottom:5px;">KEY CONCEPT</div>
+        <div style="height:3px;background:rgba(160,200,230,0.35);border-radius:2px;margin:4px 0;width:92%"></div>
+        <div style="height:3px;background:rgba(160,200,230,0.35);border-radius:2px;margin:4px 0;width:78%"></div>
+        <div style="height:3px;background:linear-gradient(90deg,#4db8e8,#88ccff);border-radius:2px;margin:4px 0;width:35%"></div>
+        <div style="height:3px;background:rgba(160,200,230,0.35);border-radius:2px;margin:4px 0;width:85%"></div>
+      </div>
+      <div class="slide-label" style="background:rgba(12,40,64,0.7);"><span>Instruction</span><span class="time" style="color:#0077bb;">~12 min</span></div>
+    </div>
+    <div class="slide-mock v3-work">
+      <div class="header">✏️ GUIDED PRACTICE</div>
+      <div class="zone">
+        <div class="hint">Work through problems 1-3 together</div>
+      </div>
+      <div class="slide-label" style="background:rgba(12,40,64,0.7);"><span>Practice</span><span class="time" style="color:#0077bb;">~10 min</span></div>
+    </div>
+    <div class="slide-mock" style="background:linear-gradient(135deg,#dce8f4,#e8f2fc);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse 160px 120px at 50% 50%,rgba(170,220,255,0.2),transparent);pointer-events:none;"></div>
+      <div style="font-size:0.55rem;font-weight:700;padding:4px 14px;border-radius:8px;background:rgba(255,255,255,0.6);color:#007755;border:1px solid rgba(160,200,230,0.5);font-family:'JetBrains Mono',monospace;position:relative;">EXIT TICKET</div>
+      <div style="width:80%;height:45px;border:1px dashed rgba(160,200,230,0.5);border-radius:8px;margin-top:10px;display:flex;align-items:center;justify-content:center;color:#5a8ab0;font-size:0.42rem;position:relative;background:rgba(255,255,255,0.3);backdrop-filter:blur(8px);">Show your work</div>
+      <div class="slide-label" style="background:rgba(12,40,64,0.7);"><span>Exit Ticket</span><span class="time" style="color:#0077bb;">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 9. CRA Flow ═══ -->
+<div class="style-section">
+  <div class="style-header">
+    <div class="style-num" style="background:#0a0e1a;border:2px solid #2a3654;">9</div>
+    <div>
+      <div class="style-name">CRA Flow</div>
+      <div class="style-tag">explore · practice · play · mode-driven · pedagogical</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(0,212,255,0.1);color:#00d4ff;border:1px solid rgba(0,212,255,0.2);">EXPLORE</span>
+    <span class="eval-badge" style="background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">PRACTICE</span>
+    <span class="eval-badge" style="background:rgba(255,193,7,0.1);color:#ffc107;border:1px solid rgba(255,193,7,0.2);">PLAY</span>
+    <span class="eval-badge" style="background:rgba(179,136,255,0.1);color:#b388ff;border:1px solid rgba(179,136,255,0.2);">VINCULUM CRA FRAMEWORK</span>
+  </div>
+  <div class="style-desc">
+    The most uniquely Vinculum layout — organized entirely around the CRA (Concrete-Representational-Abstract)
+    framework that structures every Vinculum tool. Each lesson section is tagged with a mode: Explore (cyan)
+    for concept introduction, Practice (green) for guided/independent work, Play (yellow) for application
+    and gamification. The mode tabs at the top mirror the tool interface, creating a consistent experience
+    between the lesson PPTX and the Vinculum digital tools students use alongside it.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock v4-title">
+      <div class="brand">VINCULUM</div>
+      <div class="topic">Ratio Tables</div>
+      <div class="tabs">
+        <div class="tab explore">Explore</div>
+        <div class="tab practice">Practice</div>
+        <div class="tab play">Play</div>
+      </div>
+      <div class="slide-label"><span>Title Slide</span><span class="time">~1 min</span></div>
+    </div>
+    <div class="slide-mock v4-explore">
+      <div class="mode-label">▸ EXPLORE MODE</div>
+      <div class="visual">🔍 Interactive Ratio Table</div>
+      <div style="margin-top:6px;display:flex;gap:4px;">
+        <div style="font-size:0.4rem;padding:2px 6px;border-radius:4px;background:rgba(0,212,255,0.08);color:#00d4ff;font-family:'JetBrains Mono',monospace;">6.RP.A.3</div>
+        <div style="font-size:0.4rem;padding:2px 6px;border-radius:4px;background:rgba(179,136,255,0.08);color:#b388ff;font-family:'JetBrains Mono',monospace;">6.A.1.1</div>
+      </div>
+      <div class="slide-label"><span>Explore: Concept</span><span class="time">~12 min</span></div>
+    </div>
+    <div class="slide-mock v4-practice">
+      <div class="mode-label">▸ PRACTICE MODE</div>
+      <div class="prob-row">
+        <div class="prob-num">1</div>
+        <div class="prob-q"><div class="line" style="width:90%"></div><div class="line" style="width:70%"></div></div>
+      </div>
+      <div class="prob-row">
+        <div class="prob-num">2</div>
+        <div class="prob-q"><div class="line" style="width:85%"></div><div class="line" style="width:75%"></div></div>
+      </div>
+      <div class="prob-row">
+        <div class="prob-num">3</div>
+        <div class="prob-q"><div class="line" style="width:80%"></div><div class="line" style="width:60%"></div></div>
+      </div>
+      <div class="slide-label"><span>Practice: Problems</span><span class="time">~10 min</span></div>
+    </div>
+    <div class="slide-mock v4-play">
+      <div class="mode-label">▸ PLAY MODE</div>
+      <div class="game-area">
+        <div class="title">🎮 Ratio Challenge</div>
+        <div class="desc">Complete 5 ratio problems to earn your badge</div>
+        <div class="score-bar">
+          <div class="score-item"><div class="val" style="color:#00e676;">0</div><div class="lbl">Score</div></div>
+          <div class="score-item"><div class="val" style="color:#ffc107;">5</div><div class="lbl">Goal</div></div>
+          <div class="score-item"><div class="val" style="color:#ff3b8b;">0</div><div class="lbl">Streak</div></div>
+        </div>
+      </div>
+      <div class="slide-label"><span>Play: Challenge</span><span class="time">~9 min</span></div>
+    </div>
+    <div class="slide-mock" style="background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="display:flex;gap:4px;margin-bottom:8px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#00d4ff;"></div>
+        <div style="width:8px;height:8px;border-radius:50%;background:#00e676;"></div>
+        <div style="width:8px;height:8px;border-radius:50%;background:#ffc107;"></div>
+      </div>
+      <div style="font-size:0.55rem;font-weight:700;padding:4px 14px;border-radius:8px;background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);font-family:'JetBrains Mono',monospace;">EXIT TICKET</div>
+      <div style="width:80%;height:40px;border:1px dashed #2a3654;border-radius:8px;margin-top:10px;display:flex;align-items:center;justify-content:center;color:#5a6b8f;font-size:0.42rem;">Demonstrate your understanding</div>
+      <div class="slide-label"><span>Exit Ticket</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 10. Ocean Deep ═══ -->
+<div class="style-section">
+  <div class="style-header">
+    <div class="style-num" style="background:linear-gradient(135deg,#00B4D8,#06D6A0);">10</div>
+    <div>
+      <div class="style-name" style="background:linear-gradient(135deg,#00B4D8,#06D6A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Ocean Deep</div>
+      <div class="style-tag">calming blue-green · research focus · teal depth · immersive</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="eval-badge" style="background:rgba(0,180,216,0.1);color:#00B4D8;border:1px solid rgba(0,180,216,0.2);">VINCULUM THEME: ocean</span>
+    <span class="eval-badge" style="background:rgba(6,214,160,0.1);color:#06D6A0;border:1px solid rgba(6,214,160,0.2);">CALMING · FOCUS-OPTIMIZED</span>
+  </div>
+  <div class="style-desc">
+    The Vinculum "Ocean Explorer" theme — deep navy-blue backgrounds with teal and seafoam accents.
+    Designed for sustained focus and reduced visual fatigue during extended work sessions.
+    The calming palette makes it ideal for math anxiety reduction while maintaining the full
+    Vinculum component system. Pairs the dark-mode readability of Style 6 with warmer, more
+    approachable colors inspired by natural elements.
+  </div>
+  <div class="slides-row">
+    <div class="slide-mock v5-title">
+      <div class="eyebrow">GRADE 4 · NUMBER SENSE</div>
+      <div class="topic">Comparing Decimals</div>
+      <div class="wave-bar">
+        <div class="wave-dot" style="background:#00B4D8;"></div>
+        <div class="wave-dot" style="background:#48CAE4;"></div>
+        <div class="wave-dot" style="background:#06D6A0;"></div>
+        <div class="wave-dot" style="background:#48CAE4;"></div>
+        <div class="wave-dot" style="background:#00B4D8;"></div>
+        <div class="wave-dot" style="background:#06D6A0;"></div>
+        <div class="wave-dot" style="background:#48CAE4;"></div>
+        <div class="wave-dot" style="background:#00B4D8;"></div>
+      </div>
+      <div class="slide-label"><span>Title Slide</span><span class="time">~1 min</span></div>
+    </div>
+    <div class="slide-mock v5-card">
+      <div class="panel">
+        <div class="hdr" style="color:#48CAE4;">🎯 LEARNING TARGET</div>
+        <div class="line" style="width:90%"></div>
+        <div class="line" style="width:72%"></div>
+      </div>
+      <div class="panel">
+        <div class="hdr" style="color:#06D6A0;">📖 VOCABULARY</div>
+        <div class="line" style="width:60%"></div>
+        <div class="line" style="width:78%"></div>
+      </div>
+      <div class="slide-label"><span>Target + Vocab</span><span class="time">~5 min</span></div>
+    </div>
+    <div class="slide-mock v5-split">
+      <div class="visual">📊 Place Value Chart</div>
+      <div class="content">
+        <div class="hdr">KEY CONCEPT</div>
+        <div class="line" style="width:92%"></div>
+        <div class="line" style="width:78%"></div>
+        <div class="line" style="width:35%;background:linear-gradient(90deg,#00B4D8,#06D6A0);"></div>
+        <div class="line" style="width:88%"></div>
+      </div>
+      <div class="slide-label"><span>Direct Instruction</span><span class="time">~12 min</span></div>
+    </div>
+    <div class="slide-mock v5-card" style="background:#0B1D33;">
+      <div style="color:#06D6A0;font-size:0.45rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;">PRACTICE</div>
+      <div class="panel" style="display:flex;align-items:center;gap:8px;">
+        <div style="width:20px;height:20px;border-radius:6px;background:rgba(0,180,216,0.12);color:#48CAE4;display:flex;align-items:center;justify-content:center;font-size:0.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;">1</div>
+        <div style="flex:1;"><div class="line" style="width:90%"></div><div class="line" style="width:68%"></div></div>
+      </div>
+      <div class="panel" style="display:flex;align-items:center;gap:8px;">
+        <div style="width:20px;height:20px;border-radius:6px;background:rgba(6,214,160,0.12);color:#06D6A0;display:flex;align-items:center;justify-content:center;font-size:0.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;">2</div>
+        <div style="flex:1;"><div class="line" style="width:85%"></div><div class="line" style="width:72%"></div></div>
+      </div>
+      <div class="slide-label"><span>Practice</span><span class="time">~10 min</span></div>
+    </div>
+    <div class="slide-mock v5-exit">
+      <div class="tag">EXIT TICKET</div>
+      <div class="box">Compare and order three decimals</div>
+      <div class="slide-label"><span>Exit Ticket</span><span class="time">~5 min</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- COMPARISON TABLE -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="compare" class="section-divider" style="margin-top:56px;">
+  <h2 style="color:#e8edf5;">Side-by-Side Comparison</h2>
+  <div class="line" style="background:linear-gradient(90deg,#00d4ff,#ff9100);"></div>
+</div>
+
+<div class="compare-section" style="margin-top:24px;">
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Vinculum Score</th>
+        <th>Best For</th>
+        <th>Dark Mode</th>
+        <th>Glass</th>
+        <th>Gradient</th>
+        <th>CRA</th>
+        <th>Projector</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color:#5a6b8f;">1</td>
+        <td class="name">Classic Academic</td>
+        <td><span class="score" style="color:#ff3b8b;">2/10</span></td>
+        <td>Formal, observations, print</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#00e676;">✓</td>
+      </tr>
+      <tr>
+        <td style="color:#5a6b8f;">2</td>
+        <td class="name">Warm Workshop</td>
+        <td><span class="score" style="color:#ff3b8b;">3/10</span></td>
+        <td>K-5, collaboration, stations</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ffc107;">~</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#00e676;">✓</td>
+      </tr>
+      <tr>
+        <td style="color:#5a6b8f;">3</td>
+        <td class="name">Bold Modern</td>
+        <td><span class="score" style="color:#ffc107;">6/10</span></td>
+        <td>6-8, focus, flipped class</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ffc107;">~</td>
+      </tr>
+      <tr>
+        <td style="color:#5a6b8f;">4</td>
+        <td class="name">Visual Story</td>
+        <td><span class="score" style="color:#ffc107;">5/10</span></td>
+        <td>ELL, visual learners, CRT</td>
+        <td style="color:#ffc107;">~</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ffc107;">~</td>
+        <td style="color:#00e676;">✓</td>
+      </tr>
+      <tr>
+        <td style="color:#5a6b8f;">5</td>
+        <td class="name">Interactive Notebook</td>
+        <td><span class="score" style="color:#ff3b8b;">1/10</span></td>
+        <td>Print, self-paced, K-3</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#00e676;">✓</td>
+      </tr>
+      <tr style="border-top:2px solid #2a3654;">
+        <td style="color:#00d4ff;">6</td>
+        <td class="name" style="background:linear-gradient(135deg,#00d4ff,#b388ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Vinculum Dark Core</td>
+        <td><span class="score" style="color:#00e676;">10/10</span></td>
+        <td>Default, all grades, digital</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#ffc107;">~</td>
+      </tr>
+      <tr>
+        <td style="color:#e040fb;">7</td>
+        <td class="name" style="background:linear-gradient(135deg,#e040fb,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Neon Forge</td>
+        <td><span class="score" style="color:#00e676;">9/10</span></td>
+        <td>High energy, engagement, 6-8</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#ffc107;">~</td>
+      </tr>
+      <tr>
+        <td style="color:#4db8e8;">8</td>
+        <td class="name" style="color:#4db8e8;">Arctic Frost</td>
+        <td><span class="score" style="color:#00e676;">8/10</span></td>
+        <td>Projector rooms, light pref, K-5</td>
+        <td style="color:#ff3b8b;">✗</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+      </tr>
+      <tr>
+        <td style="color:#8b9cc0;">9</td>
+        <td class="name">CRA Flow</td>
+        <td><span class="score" style="color:#00e676;">10/10</span></td>
+        <td>Tool integration, CRA pedagogy</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓✓</td>
+        <td style="color:#ffc107;">~</td>
+      </tr>
+      <tr>
+        <td style="color:#00B4D8;">10</td>
+        <td class="name" style="background:linear-gradient(135deg,#00B4D8,#06D6A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Ocean Deep</td>
+        <td><span class="score" style="color:#00e676;">8/10</span></td>
+        <td>Calm focus, anxiety reduction</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#ffc107;">~</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#00e676;">✓</td>
+        <td style="color:#ffc107;">~</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Recommendation -->
+<div style="max-width:1100px;margin:36px auto;padding:0 24px;">
+  <div style="background:rgba(26,34,54,0.8);border:1px solid #2a3654;border-radius:14px;padding:24px;backdrop-filter:blur(8px);">
+    <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px;background:linear-gradient(135deg,#00d4ff,#b388ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Recommendation</div>
+    <div style="color:#8b9cc0;font-size:0.82rem;line-height:1.7;">
+      <strong style="color:#e8edf5;">Primary default:</strong> Style 6 (Vinculum Dark Core) — the flagship that matches every Vinculum tool.
+      <strong style="color:#e8edf5;">Teacher choice:</strong> Offer Style 8 (Arctic Frost) as the light-mode alternative for projector classrooms.
+      <strong style="color:#e8edf5;">CRA integration:</strong> Style 9 (CRA Flow) when lessons pair with Vinculum digital tools — it creates
+      a seamless visual bridge between the presentation and the interactive practice.
+      <strong style="color:#e8edf5;">Keep from originals:</strong> Styles 1 and 5 serve important niches (formal observations and print notebooks)
+      that the Vinculum aesthetic can't replace. Style 3 (Bold Modern) becomes redundant once Style 6 exists.
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Drummond Math Solutions · Lesson Digester · Vinculum Layout Evaluation v1.0 · March 2026
+</div>
+
+</body>
+</html>

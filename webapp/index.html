@@ -787,6 +787,47 @@
             transform: translateY(0);
         }
 
+        /* ── Style Selector ── */
+        .style-selector {
+            margin-bottom: 18px;
+        }
+        .style-selector-label {
+            font-size: 0.82rem; font-weight: 700; color: var(--amber);
+            text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px;
+        }
+        .style-selector-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+        }
+        @media (max-width: 900px) {
+            .style-selector-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 550px) {
+            .style-selector-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .style-card {
+            background: var(--card); border: 2px solid var(--border); border-radius: 10px;
+            padding: 10px; cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+        .style-card:hover { border-color: var(--amber); transform: translateY(-2px); }
+        .style-card.active { border-color: var(--amber); background: rgba(212,135,15,0.08);
+            box-shadow: 0 0 12px rgba(212,135,15,0.15); }
+        .style-card-top { margin-bottom: 6px; }
+        .style-badge {
+            font-size: 0.55rem; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+            letter-spacing: 0.5px; text-transform: uppercase;
+        }
+        .style-badge.original { background: rgba(30,39,97,0.3); color: #60A5FA; }
+        .style-badge.vinculum { background: rgba(0,212,255,0.1); color: #00D4FF; }
+        .style-swatch { display: flex; justify-content: center; gap: 3px; margin: 6px 0; }
+        .swatch-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+        .style-card-name { font-size: 0.75rem; font-weight: 700; color: var(--text); margin-top: 4px; }
+        .style-card-tag { font-size: 0.58rem; color: var(--text-dim); margin-top: 2px; }
+        .style-selector-desc {
+            margin-top: 10px; font-size: 0.78rem; color: var(--text-dim);
+            padding: 8px 12px; background: rgba(0,0,0,0.2); border-radius: 8px;
+            border-left: 3px solid var(--amber); line-height: 1.5;
+        }
+
         .script-panel {
             background: rgba(0, 0, 0, 0.3);
             padding: 20px;
@@ -1010,8 +1051,9 @@
                 </div>
             </div>
 
-            <!-- Download Rebuilt Lesson -->
+            <!-- Style Selector + Download -->
             <div class="results-section delay-8" id="downloadSection">
+                <div id="styleSelectorMount"></div>
                 <button class="download-btn" id="downloadBtn">⬇️ Download Rebuilt Lesson (.pptx)</button>
                 <button class="download-btn" id="notesBtn" style="background: var(--teal); margin-left: 12px;">📝 Download Student Notes</button>
                 <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
@@ -1038,6 +1080,7 @@
     <script src="js/math-models.js"></script>
     <script src="js/standards-db.js"></script>
     <script src="js/benchmark-descriptors.js"></script>
+    <script src="js/pptx-themes.js"></script>
     <script src="js/digester-core.js"></script>
     <script src="js/teaching-insights-data.js"></script>
     <script src="js/rubric-descriptors.js"></script>
@@ -2066,6 +2109,12 @@
                 .map(line => `<div class="script-line">${escapeHTML(line)}</div>`)
                 .join('');
 
+            // Mount style selector
+            const selectorMount = document.getElementById('styleSelectorMount');
+            if (selectorMount && typeof PptxThemes !== 'undefined') {
+                selectorMount.innerHTML = PptxThemes.buildSelectorHTML(PptxThemes.getSelectedId());
+            }
+
             // Show results panel
             document.getElementById('resultsPanel').classList.add('visible');
         }
@@ -2309,32 +2358,57 @@
             const pres = new PptxGenJS();
             pres.defineLayout({ name: 'LAYOUT_16x9', width: 10, height: 5.625 });
 
-            // Minimal color palette — clean, not techy
+            // ── Theme-aware color palette ──
+            const theme = (typeof PptxThemes !== 'undefined') ? PptxThemes.getSelected() : null;
+            const TC = theme ? theme.colors : {};
             const C = {
-                navy: "1E2761", amber: "D4870F", teal: "0D9488",
-                blue: "3B82F6", pink: "E8436D", white: "FFFFFF",
-                lightBg: "F8FAFC", textDark: "1E293B", textMid: "475569",
-                border: "E2E8F0"
+                navy:     TC.primary   || "1E2761",
+                amber:    TC.secondary || "D4870F",
+                teal:     TC.accent2   || "0D9488",
+                blue:     TC.accent    || "3B82F6",
+                pink:     TC.accent3   || "E8436D",
+                white:    TC.white     || "FFFFFF",
+                lightBg:  TC.bg2       || "F8FAFC",
+                textDark: TC.text      || "1E293B",
+                textMid:  TC.text2     || "475569",
+                border:   TC.border    || "E2E8F0",
+                // Extended theme colors
+                bg:       TC.bg        || "FFFFFF",
+                card:     TC.card      || "FFFFFF",
+                headerBg: TC.headerBg  || "1E2761",
+                headerText: TC.headerText || "FFFFFF",
+                targetBg:   TC.targetBg   || "EFF6FF",
+                targetBorder: TC.targetBorder || "3B82F6",
+                questionBg:   TC.questionBg   || "FFFBEB",
+                questionBorder: TC.questionBorder || "D4870F",
+                exitBg:   TC.exitBg    || "1E2761",
+                exitText: TC.exitText  || "FFFFFF"
             };
+            const isDark = theme ? theme.dark : false;
+            const themeName = theme ? theme.id : 'classic-academic';
 
             let slide, yPos;
 
             // ── Helpers ──
             function header(sl, title, accent) {
                 const ac = accent || C.navy;
-                sl.background = { color: C.white };
+                sl.background = { color: isDark ? C.bg : C.white };
                 // Top accent bar
                 sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.06, fill: { color: ac } });
                 // Left accent stripe
                 sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 0.08, h: 0.85, fill: { color: ac } });
-                sl.addText(title, { x: 0.35, y: 0.12, w: 9.2, h: 0.5, fontSize: 24, bold: true, color: ac, fontFace: 'Calibri' });
+                sl.addText(title, {
+                    x: 0.35, y: 0.12, w: 9.2, h: 0.5, fontSize: 24, bold: true,
+                    color: isDark ? C.headerText : ac,
+                    fontFace: theme ? theme.fonts.heading : 'Calibri'
+                });
                 sl.addShape(pres.shapes.RECTANGLE, { x: 0.35, y: 0.64, w: 1.6, h: 0.035, fill: { color: C.amber } });
             }
 
             function footer(sl, text, accent) {
                 const ac = accent || C.navy;
                 sl.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.35, w: 10, h: 0.275, fill: { color: ac } });
-                sl.addText(text, { x: 0.4, y: 5.36, w: 9.2, h: 0.25, fontSize: 7, color: C.white, align: "left", fontFace: 'Calibri' });
+                sl.addText(text, { x: 0.4, y: 5.36, w: 9.2, h: 0.25, fontSize: 7, color: C.white, align: "left", fontFace: theme ? theme.fonts.body : 'Calibri' });
             }
 
             function findRisaTopic(topics) {
@@ -2441,36 +2515,36 @@
                         curY += h + 0.06;
 
                     } else if (line.role === 'learning_target') {
-                        // "I can" pill — light blue card
+                        // "I can" pill — themed card
                         const h = Math.min(0.58, rem - 0.08);
                         if (h < 0.3) break;
                         sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                             x, y: curY, w, h,
-                            fill: { color: 'EFF6FF' },
-                            line: { color: '3B82F6', width: 1 },
+                            fill: { color: C.targetBg },
+                            line: { color: C.targetBorder, width: 1 },
                             rectRadius: 0.08
                         });
                         sl.addText('🎯  ' + line.text, {
                             x: x + 0.12, y: curY + 0.04, w: w - 0.24, h: h - 0.08,
-                            fontSize: 13, bold: true, color: C.navy,
-                            wrap: true, valign: 'middle', fontFace: 'Calibri'
+                            fontSize: 13, bold: true, color: isDark ? C.text : C.navy,
+                            wrap: true, valign: 'middle', fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                         curY += h + 0.10;
 
                     } else if (line.role === 'question') {
-                        // Warm amber question card
+                        // Question card — themed
                         const h = Math.min(0.68, rem - 0.08);
                         if (h < 0.28) break;
                         sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                             x, y: curY, w, h,
-                            fill: { color: 'FFFBEB' },
-                            line: { color: C.amber, width: 1.5 },
+                            fill: { color: C.questionBg },
+                            line: { color: C.questionBorder, width: 1.5 },
                             rectRadius: 0.10
                         });
                         sl.addText(line.text, {
                             x: x + 0.15, y: curY + 0.05, w: w - 0.30, h: h - 0.10,
-                            fontSize: 14, bold: true, color: C.navy,
-                            wrap: true, valign: 'middle', fontFace: 'Calibri'
+                            fontSize: 14, bold: true, color: isDark ? C.text : C.navy,
+                            wrap: true, valign: 'middle', fontFace: theme ? theme.fonts.body : 'Calibri'
                         });
                         curY += h + 0.10;
 
@@ -2480,7 +2554,7 @@
                         sl.addText(line.text, {
                             x: x + 0.08, y: curY, w: w - 0.08, h,
                             fontSize: 13, color: C.textDark,
-                            wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.15
+                            wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15
                         });
                         curY += h;
 
@@ -2490,7 +2564,7 @@
                         sl.addText(line.text.replace(/^[•◦▸►▶\-\*]\s*/, ''), {
                             x: x + 0.08, y: curY, w: w - 0.08, h,
                             fontSize: 13, color: C.textDark,
-                            wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.15,
+                            wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15,
                             bullet: { type: 'bullet', characterCode: '25BA', color: ac, size: 80 }
                         });
                         curY += h;
@@ -2501,7 +2575,7 @@
                         sl.addText(line.text, {
                             x, y: curY, w, h,
                             fontSize: 12, color: C.textMid, italic: true,
-                            wrap: true, fontFace: 'Calibri', lineSpacingMultiple: 1.15
+                            wrap: true, fontFace: theme ? theme.fonts.body : 'Calibri', lineSpacingMultiple: 1.15
                         });
                         curY += h;
 
@@ -2551,7 +2625,7 @@
                     // ── Two-Column: image/visual LEFT, parsed content RIGHT ──
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.3, y: 0.9, w: 4.4, h: 4.15,
-                        fill: { color: 'F8FAFC' },
+                        fill: { color: isDark ? C.card : C.lightBg },
                         line: { color: C.border, width: 0.5 },
                         rectRadius: 0.08
                     });
@@ -2577,7 +2651,7 @@
                     // ── Centered: short/motivational text — render with smart parsing ──
                     sl.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                         x: 0.8, y: 1.0, w: 8.4, h: 3.5,
-                        fill: { color: 'F8FAFC' },
+                        fill: { color: isDark ? C.card : C.lightBg },
                         line: { color: ac, width: 1.2 },
                         rectRadius: 0.12
                     });
@@ -2657,32 +2731,34 @@
 
             // ─── Title ───
             slide = pres.addSlide();
-            slide.background = { color: C.navy };
+            slide.background = { color: C.headerBg };
             // Decorative top accent
             slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.08, fill: { color: C.amber } });
             const topicList = analysis.topics.join(", ");
+            const hFont = theme ? theme.fonts.heading : 'Calibri';
             slide.addText("GRADE " + selectedGrade, {
                 x: 0.5, y: 1.0, w: 9, h: 0.5,
-                fontSize: 16, color: C.amber, align: "center", fontFace: 'Calibri', bold: true, charSpacing: 4
+                fontSize: 16, color: C.amber, align: "center", fontFace: hFont, bold: true, charSpacing: 4
             });
             slide.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 1.5, w: 3, h: 0.03, fill: { color: C.amber } });
             slide.addText(topicList, {
                 x: 0.5, y: 1.7, w: 9, h: 1.5,
-                fontSize: 32, bold: true, color: C.white,
-                align: "center", valign: "middle", wrap: true, fontFace: 'Calibri'
+                fontSize: 32, bold: true, color: isDark ? C.text : C.white,
+                align: "center", valign: "middle", wrap: true, fontFace: hFont
             });
             if (analysis.standards.length > 0) {
                 const ccssCodes = analysis.standards.map(s => s.code).join("  •  ");
                 // Primary standards box (CCSS / MN07 detected codes)
+                const stdBoxBg = isDark ? C.card : '1A3070';
                 slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
                     x: 0.5, y: 3.45, w: 9, h: 0.45,
-                    fill: { color: '1A3070' },
+                    fill: { color: stdBoxBg },
                     line: { color: C.amber, width: 0.8 },
                     rectRadius: 0.08
                 });
                 slide.addText(ccssCodes, {
                     x: 0.5, y: 3.45, w: 9, h: 0.45,
-                    fontSize: 10, color: C.amber, align: "center", wrap: true, fontFace: 'Calibri'
+                    fontSize: 10, color: C.amber, align: "center", wrap: true, fontFace: hFont
                 });
 
                 // Cross-framework row if StandardsDB available
@@ -2714,9 +2790,9 @@
             }
             // Bottom accent bar
             slide.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.1, w: 10, h: 0.525, fill: { color: C.teal } });
-            slide.addText("The Lesson Digester", {
+            slide.addText("The Lesson Digester  •  " + (theme ? theme.name : 'Classic') + " Theme", {
                 x: 0.5, y: 5.15, w: 9, h: 0.4,
-                fontSize: 9, color: C.white, align: "center", fontFace: 'Calibri'
+                fontSize: 9, color: C.white, align: "center", fontFace: hFont
             });
 
             // ─── FOCUS SKILL (opening slide students see when they walk in) ───
@@ -2726,7 +2802,7 @@
                 if (prereqData.length > 0) {
                     const focusData = prereqData[0].data;
                     slide = pres.addSlide();
-                    slide.background = { color: C.white };
+                    slide.background = { color: isDark ? C.bg : C.white };
                     header(slide, "Focus Skill — Start Here!", C.amber);
 
                     // Left column: Scaffold reminders in styled cards
