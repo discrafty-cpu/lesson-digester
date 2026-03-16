@@ -1,0 +1,527 @@
+{
+  "_meta": {
+    "source": "teaching-insights-data.js",
+    "version": "2.0.0",
+    "migratedAt": "2026-03-16T02:47:27.514Z",
+    "topicCount": 43,
+    "description": "Differentiation strategies (emergent/ell/extending), keyed by topic name with benchmark cross-ref"
+  },
+  "topics": {
+    "locate and compare numbers": {
+      "grade": 6,
+      "slug": "611a-locate-compare-numbers",
+      "title": "6.1.1A Locate & Compare Numbers",
+      "clusterKey": "fraction_6",
+      "primaryBenchmark": "6.1.1.1",
+      "differentiation": {
+        "emergent": "Provide constant use of number lines for comparisons. Create fraction tool-kits with candy bar strips for folding into common denominators. Use geoboards, 100 grids, base-ten blocks for representing rational numbers.",
+        "ell": "Include decimal and percent equivalencies for benchmarks on number lines. Provide rich supply of manipulatives. Review fraction equivalency concepts before connecting to decimals or percents.",
+        "extending": "Connect fractions, decimals, and percents through multiple representations. Challenge students with non-standard comparison contexts."
+      }
+    },
+    "equivalence and representations": {
+      "grade": 6,
+      "slug": "611b-equivalence-representations",
+      "title": "6.1.1B Equivalence & Representations",
+      "clusterKey": "fraction_6",
+      "primaryBenchmark": "6.1.1.2",
+      "differentiation": {
+        "emergent": "Use fraction bars, fraction circles, area models, 10x10 grids, number lines, and Cuisenaire rods. Provide fraction-stick charts showing common equivalent fractions. Use percent circles and 100 grids.",
+        "ell": "Have students provide fraction, decimal, and percent forms of the same number. Given partially completed charts for students to complete as reference tools.",
+        "extending": "Challenge students to find multiple representations and choose the best one for solving problems in context."
+      }
+    },
+    "factors primes gcf lcm": {
+      "grade": 6,
+      "slug": "611c-factors-primes-gcf-lcm",
+      "title": "6.1.1C Factors & Primes / GCF & LCM",
+      "clusterKey": "integer_6",
+      "primaryBenchmark": "6.1.3.1",
+      "differentiation": {
+        "emergent": "Provide chart of divisibility tests. Use multiplication charts and calculators for multiples. Use Venn diagrams for common factors/multiples. Use laminated hundreds charts for marking multiples.",
+        "ell": "Be aware of acronyms (GCF, LCM) and ensure understanding. Words with multiple meanings need attention (base, power, prime). Post examples showing factors, factorization, and multiples.",
+        "extending": "Explore prime factorization of larger numbers. Apply GCF and LCM to real-world problem-solving contexts."
+      }
+    },
+    "ratios and rates": {
+      "grade": 6,
+      "slug": "612-ratios-rates",
+      "title": "6.1.2 Ratios & Rates",
+      "clusterKey": "ratio_6",
+      "primaryBenchmark": "6.1.2.1",
+      "differentiation": {
+        "emergent": "Use language \"for every...\" when describing ratios. Use pictorial representations. Use multiplication tables to show equivalent ratios. Cut apart table rows to reposition for comparison.",
+        "ell": "Create visual glossary including ratios in different forms, rates, unit rates, and proportions. Use Venn diagrams to show relationships between concepts.",
+        "extending": "Explore complex ratio problems involving multiple steps. Connect ratios to proportional reasoning in real-world contexts."
+      }
+    },
+    "multiplication and division of fractions": {
+      "grade": 6,
+      "slug": "613a-multiplication-division",
+      "title": "6.1.3A Multiplication & Division",
+      "clusterKey": "fraction_6",
+      "primaryBenchmark": "6.1.1.3",
+      "differentiation": {
+        "emergent": "Use number lines and rectangular area models to explore multiplication and division of fractions. Virtual manipulatives can bridge physical to abstract. Limit manipulative pieces to avoid confusion.",
+        "ell": "Connect previous experiences with whole number operations to fraction operations. Model a variety of strategies.",
+        "extending": "Derive why procedures work. Solve multi-step word problems requiring both multiplication and division of fractions."
+      }
+    },
+    "percent": {
+      "grade": 6,
+      "slug": "613b-percent",
+      "title": "6.1.3B Percent",
+      "clusterKey": "percent_6",
+      "primaryBenchmark": "6.1.1.4",
+      "differentiation": {
+        "emergent": "Use interactive percent applets. Have students create graphic organizers for translating among fractions, decimals, and percents. Percent bars help estimate answers.",
+        "ell": "Connect visual representations of percent problems to abstract representations. Use everyday shopping contexts.",
+        "extending": "Explore percents greater than 100% and less than 1%. Solve multi-step percent problems in real-world contexts."
+      }
+    },
+    "problem solving and estimation": {
+      "grade": 6,
+      "slug": "613c-problem-solving-estimation",
+      "title": "6.1.3C Problem Solving & Estimation",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Use bar models and visual approaches to problem-solving (Singapore Math). Provide multiplication charts for students struggling with basic facts.",
+        "ell": "Use visual problem-solving approaches. Students benefit from bar models that represent relationships and unknowns clearly.",
+        "extending": "Solve multi-step problems requiring multiple operations. Develop estimation strategies for complex contexts."
+      }
+    },
+    "variables and representations": {
+      "grade": 6,
+      "slug": "621-variables-representations-relationships",
+      "title": "6.2.1 Variables & Representations of Relationships",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Use manipulatives and pictorial representations to extend patterns. Provide graphic organizers (input/output charts, tables, coordinate grids with labeled axes).",
+        "ell": "The word \"table\" has multiple meanings requiring explicit instruction. Use analogies (like teacher substitute replacing a teacher, a number substitutes for a variable).",
+        "extending": "Explore multiple representations of the same relationship. Translate patterns between tables, graphs, and rules."
+      }
+    },
+    "properties and equivalent expressions": {
+      "grade": 6,
+      "slug": "622-properties-equivalent-expressions",
+      "title": "6.2.2 Properties & Equivalent Expressions",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Always provide algebra tiles or manipulatives. Provide graphic organizers showing properties and how they simplify expressions. Use interactive order of operations games.",
+        "ell": "Help students understand that properties describe predictable number behavior. Use color-coding for like terms. Post property cards with examples.",
+        "extending": "Generate equivalent expressions using multiple properties. Evaluate complex expressions with multiple variables."
+      }
+    },
+    "represent and solve equations": {
+      "grade": 6,
+      "slug": "623-represent-solve-equations",
+      "title": "6.2.3 Represent & Solve Equations",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Ensure students understand equal sign means \"the same as.\" Use pan balance tools. Have students generalize relationships in words before symbols. Provide graphic organizers with pan balances.",
+        "ell": "Use concrete materials and pictorial representations when solving equations. Write verbal models before using symbols. Pair ELL students with strong English speakers.",
+        "extending": "Solve equations with variables on both sides. Explore solution sets and multi-step equations."
+      }
+    },
+    "measurement of polygons and prisms": {
+      "grade": 6,
+      "slug": "631-measurement-polygons-prisms",
+      "title": "6.3.1 Measurement of Polygons & Prisms",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Give students color tiles to make rectangles and discover that same area can have different perimeters. Go on shape walks. Provide nets to fold. Fill objects with cubes for volume.",
+        "ell": "Post and label pictures of shapes and prisms. Discuss that prisms are named by their base shape. Place 3D prisms inside boxes to explore volume.",
+        "extending": "Decompose complex shapes. Find area with coordinates. Apply measurement to real-world contexts."
+      }
+    },
+    "angles and intersecting lines": {
+      "grade": 6,
+      "slug": "632a-angles-intersecting-lines",
+      "title": "6.3.2A Angles & Intersecting Lines",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Check basic vocabulary (vertex, rays, degrees). Review angle notation symbols. Ask students to predict angle measures before using protractors. Use Frayer models for vocabulary.",
+        "ell": "Explain that \"right angle\" does not come from orientation opening to the right. Color-code angle pairs. Provide definitions with diagrams.",
+        "extending": "Use angle relationships to find unknown angles in complex figures. Explore cause and effect relationships."
+      }
+    },
+    "angles in geometric figures": {
+      "grade": 6,
+      "slug": "632b-angles-geometric-figures",
+      "title": "6.3.2B Angles in Geometric Figures",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Post pictures of polygons with diagonals drawn showing triangle decomposition. Provide tables for recording sides and angle sums. Use calculators to assist.",
+        "ell": "Post and label pictures of polygons (quadrilaterals, pentagons, hexagons). Post pictures with labeled diagonals. Use Frayer model for vocabulary.",
+        "extending": "Explore exterior angles of polygons (sum is always 360°). Find measure of one exterior angle of regular polygon (360/n)."
+      }
+    },
+    "converting and estimating measurements": {
+      "grade": 6,
+      "slug": "633-converting-estimating-measurements",
+      "title": "6.3.3 Converting & Estimating Measurements",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Provide graphic organizers showing units for length, capacity, weight. Post benchmark relationships and \"rules of thumb.\" Have students compare capacities of different containers.",
+        "ell": "Students new to the US will likely be unfamiliar with customary system. Provide hands-on experiences measuring with both systems.",
+        "extending": "Develop personal references for estimation. Solve problems requiring multiple unit conversions."
+      }
+    },
+    "sample space": {
+      "grade": 6,
+      "slug": "641a-sample-space",
+      "title": "6.4.1A Sample Space",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Provide vocabulary support with graphic organizers. Use manipulatives (spinners, dice, coins, tiles). Use templates for data collection. Scaffold development of tree diagrams.",
+        "ell": "Vocabulary with multiple meanings is problematic (heads, tails, tree, die, space). Post labeled pictures. Use Frayer model for vocabulary development.",
+        "extending": "Explore complex sample spaces. Develop efficient counting strategies for larger experiments."
+      }
+    },
+    "probability and experiments": {
+      "grade": 6,
+      "slug": "641b-probability-experiments",
+      "title": "6.4.1B Probability & Experiments",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Review ratio as part-to-whole relationship. Emphasize probability is part-to-whole, not part-to-part. Set up experiments concrete to abstract. Provide graphic organizers.",
+        "ell": "Use number line from 0 to 1 with quantitative and qualitative descriptions. Create visual glossary. Use graphic organizers to compare theoretical and experimental probability.",
+        "extending": "Compare experimental and theoretical probability. Explore compound probability situations."
+      }
+    },
+    "rational numbers": {
+      "grade": 7,
+      "slug": "711a-rational-numbers",
+      "title": "7.1.1A Rational Numbers",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Provide calculators for division. Provide number lines. Start warm-ups writing different numbers in tables, including square roots. Use scientific/graphing calculators.",
+        "ell": "Review non-mathematical meaning of \"rational.\" Connect to everyday language. Use visual tables for comparing different number representations.",
+        "extending": "Explore the nature of irrational numbers. Investigate which square roots are rational vs irrational."
+      }
+    },
+    "representing and comparing rational numbers": {
+      "grade": 7,
+      "slug": "711b-representing-comparing-rational-numbers",
+      "title": "7.1.1B Representing & Comparing Rational Numbers",
+      "clusterKey": "rational number_7",
+      "primaryBenchmark": "7.1.2.1",
+      "differentiation": {
+        "emergent": "Have students write all steps. Use number line with values increasing to the right. Start by comparing same-representation numbers before mixing representations.",
+        "ell": "Use introduction to negative numbers websites. Include decimal and percent equivalency benchmarks on number lines.",
+        "extending": "Compare rational numbers in complex real-world contexts. Explore ordering with mixed representations."
+      }
+    },
+    "applying rational numbers": {
+      "grade": 7,
+      "slug": "712a-applying-making-sense-rational-numbers",
+      "title": "7.1.2A Applying & Making Sense of Rational Numbers",
+      "clusterKey": "rational number_7",
+      "primaryBenchmark": "7.1.2.2",
+      "differentiation": {
+        "emergent": "Provide number lines and red/black chips for positive/negative numbers. Remind students absolute value bars mean distance from 0. Use fraction division models.",
+        "ell": "Absolute value bars are often mistaken for brackets. Use visual manipulatives. Use videos explaining absolute value.",
+        "extending": "Solve complex expressions combining absolute value with other operations. Explore patterns in positive/negative operations."
+      }
+    },
+    "problem solving with rational numbers": {
+      "grade": 7,
+      "slug": "712b-problem-solving-rational-numbers",
+      "title": "7.1.2B Problem Solving with Rational Numbers",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Provide multiplication tables. Use place value charts for rounding. Use pictures/tables to show patterns. Always label values being scaled.",
+        "ell": "Clarify \"ratio\" vs \"radios\" pronunciation. Use graphic organizers for integer operation rules.",
+        "extending": "Introduce square roots on number lines. Do multi-step conversion problems showing proportional reasoning."
+      }
+    },
+    "proportional relationships": {
+      "grade": 7,
+      "slug": "721-proportional-relationships",
+      "title": "7.2.1 Proportional Relationships",
+      "clusterKey": "proportion_7",
+      "primaryBenchmark": "7.2.1.1",
+      "differentiation": {
+        "emergent": "Allow calculators. Partner with more fluent students. Provide step-by-step procedures. Provide graphing calculator instructions. Use math dictionaries and graph paper.",
+        "ell": "Use concept maps and graphic organizers. Clarify vocabulary. Translate word problems into visual representations first.",
+        "extending": "Explore non-proportional relationships and compare to proportional ones. Analyze complex real-world proportional situations."
+      }
+    },
+    "represent proportional relationships": {
+      "grade": 7,
+      "slug": "722a-represent-proportional-relationships",
+      "title": "7.2.2A Represent Proportional Relationships",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Limit assessment choices to 2-3. Provide calculators. Ensure graphs being compared have same scales. Work with partners for support. Use concept maps.",
+        "ell": "Clarify definition of \"table\" in math context. Use concept maps and graphic organizers.",
+        "extending": "Explore non-proportional relationships and compare to proportional. Calculate unit rates from all representations."
+      }
+    },
+    "problem solving with proportions": {
+      "grade": 7,
+      "slug": "722b-problem-solving-proportions",
+      "title": "7.2.2B Problem Solving with Proportions",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Provide calculators. Simplify word problems to only include relevant information.",
+        "ell": "Rewrite word problems using fewer and easier words. Keep sentences short and remove extra detail.",
+        "extending": "Solve complex real-world proportion problems. Explore percent change in financial contexts."
+      }
+    },
+    "equations and inequalities": {
+      "grade": 7,
+      "slug": "722c-represent-equations-inequalities",
+      "title": "7.2.2C Represent: Equations & Inequalities",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Help with symbols: big OPEN end goes to big number, small closed end to smaller. Look for key words indicating operations (increased by = addition, decreased by = subtraction, etc.).",
+        "ell": "Provide operation keyword lists. Practice translating word sentences to number sentences.",
+        "extending": "Write and solve complex inequalities from real-world contexts involving positive and negative rational numbers."
+      }
+    },
+    "numerical and algebraic expressions": {
+      "grade": 7,
+      "slug": "723-numerical-and-algebraic-expressions",
+      "title": "7.2.3 Numerical and Algebraic Expressions",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Equip classroom with ample manipulatives. Provide calculators to check work. Model alternative ways to solve problems more than once.",
+        "ell": "Encourage manipulative use. Model alternative solutions multiple times. Homework should reinforce understanding of objectives.",
+        "extending": "Evaluate complex expressions with multiple variables and operations. Apply properties to simplify advanced expressions."
+      }
+    },
+    "represent and solve equations grade 7": {
+      "grade": 7,
+      "slug": "724-represent-and-solve-equations",
+      "title": "7.2.4 Represent and Solve Equations",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Use see-saw/teeter-totter analogy for balancing equations. Whatever you do to one side, do to the other. Use pan balance tools and interactive lessons.",
+        "ell": "Provide visual balance models. Write verbal models before using symbols. Pair with strong English speakers.",
+        "extending": "Solve proportional relationships in real-world contexts. Explore multiple solution methods."
+      }
+    },
+    "circumference and area of circles": {
+      "grade": 7,
+      "slug": "731a-circumference-area-circles-sectors",
+      "title": "7.3.1A Circumference & Area of Circles & Sectors",
+      "clusterKey": "circle_7",
+      "primaryBenchmark": "7.3.2.1",
+      "differentiation": {
+        "emergent": "Have students touch and trace circumference, radius, diameter. Trace circumference onto paper. Mnemonic: \"cherry pie delight\" for C = πd. \"Apple pies are square\" for A = πr².",
+        "ell": "Use pictures that visually represent vocabulary terms. Provide labeled diagrams with formulas.",
+        "extending": "Explore area derivation. Solve multi-step circle and sector problems using protractors and angle rulers."
+      }
+    },
+    "volume and surface area of cylinders": {
+      "grade": 7,
+      "slug": "731b-volume-surface-area-cylinders",
+      "title": "7.3.1B Volume & Surface Area of Cylinders",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Provide real cylinders/pictures for every problem. Unroll toilet paper to show rectangle = lateral surface. Have students re-roll and unroll to see circumference = rectangle edge.",
+        "ell": "Clarify \"net\" vocabulary (not a catching net). Make sure students know \"base\" in this context.",
+        "extending": "Explore more complex cylinder problems. Calculate volume and surface area of composite shapes."
+      }
+    },
+    "similarity and scaling": {
+      "grade": 7,
+      "slug": "732a-similarity-scaling-2-dimensions",
+      "title": "7.3.2A Similarity & Scaling in 2 Dimensions",
+      "clusterKey": "scale_7",
+      "primaryBenchmark": "7.3.1.1",
+      "differentiation": {
+        "emergent": "Provide calculators and labeled diagrams. Keep diagrams in same orientation. Provide grid paper for measurement.",
+        "ell": "Review and demonstrate definition of scale. Use Knowledge Cards for rehearsing procedures and terms.",
+        "extending": "Scale up real-world objects (like designing a fantasy home). Explore similarity ratios in depth."
+      }
+    },
+    "translations and reflections": {
+      "grade": 7,
+      "slug": "732b-translations-reflections-coordinate-grid",
+      "title": "7.3.2B Translations & Reflections on a Coordinate Grid",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Review coordinate grid and plotting points first. Fold paper to check reflections. Use large grid paper (1/2 inch). Give multiple choice rather than open-ended.",
+        "ell": "Print transformation reference pages. Have students trace and cut out original figures for physical reflection/translation.",
+        "extending": "Perform two transformations on same figure. Predict positions after multiple transformations."
+      }
+    },
+    "mean median and range": {
+      "grade": 7,
+      "slug": "741-mean-median-range",
+      "title": "7.4.1 Mean, Median & Range",
+      "clusterKey": "statistics_7",
+      "primaryBenchmark": "7.4.1.1",
+      "differentiation": {
+        "emergent": "Put numbers in order for students. Use no more than 6 data pieces. Collect data requiring movement (like pulse after jumping jacks). Fold paper strips to find median.",
+        "ell": "Provide essential vocabulary list (mean, median, range) a day or two before lesson. Use simplified English.",
+        "extending": "Analyze effects of outliers on measures. Compare data sets and determine best measure of center."
+      }
+    },
+    "circle graphs and histograms": {
+      "grade": 7,
+      "slug": "742-circle-graphs-and-histograms",
+      "title": "7.4.2 Circle Graphs and Histograms",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Help organize data tables. Trace circular objects instead of using compass. Help determine best histogram intervals. Encourage frequency tables before histograms.",
+        "ell": "Have students make tables comparing bar graphs and histograms. Write step-by-step instructions for creating pie charts.",
+        "extending": "Find real-world examples of histograms and circle graphs. Compare and analyze data from multiple graph types."
+      }
+    },
+    "probability and proportionality": {
+      "grade": 7,
+      "slug": "743-probability-proportionality",
+      "title": "7.4.3 Probability & Proportionality",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Provide visual aids. Use concise processes. Help students learn concepts: certain, probable, unlikely, impossible. Use online probability practice and games.",
+        "ell": "Create visual glossaries. Use think/pair/share to increase participation. Partner with strong English speakers.",
+        "extending": "Explore compound probability. Use graphing calculators for simulations. Design and analyze probability experiments."
+      }
+    },
+    "rational irrational and real numbers": {
+      "grade": 8,
+      "slug": "811a-rational-irrational-real-numbers",
+      "title": "8.1.1A Rational, Irrational & Real Numbers",
+      "clusterKey": "irrational_8",
+      "primaryBenchmark": "8.1.1.1",
+      "differentiation": {
+        "emergent": "Make a list of perfect squares to reference. On number line, label integers above and equivalent square roots below. Write out steps for estimating square root values.",
+        "ell": "Connect to concrete examples. Use labeled number lines with both integer and square root representations.",
+        "extending": "Explore relationships between rational and irrational numbers. Investigate patterns in square roots."
+      }
+    },
+    "integer exponents and scientific notation": {
+      "grade": 8,
+      "slug": "811b-integer-exponents-scientific-notation",
+      "title": "8.1.1B Integer Exponents & Scientific Notation",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Use resources for multiplying and dividing in scientific notation. Provide graphic organizers.",
+        "ell": "Differentiate by size of numbers used and number of problems. Students research when scientific notation is helpful.",
+        "extending": "Research real-world situations using scientific notation. Evaluate when scientific notation makes sense vs standard form."
+      }
+    },
+    "linear and nonlinear functions": {
+      "grade": 8,
+      "slug": "821-linear-nonlinear-functions",
+      "title": "8.2.1 Linear & Nonlinear Functions",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Use function machines to investigate input/output relationships. Develop graphic organizers with examples and non-examples. Practice pattern-finding before function notation.",
+        "ell": "Use visual aids and function machine websites. Develop Frayer Models for vocabulary.",
+        "extending": "Compare arithmetic and geometric sequences. Write functions for various real-world situations."
+      }
+    },
+    "sequences and linear functions": {
+      "grade": 8,
+      "slug": "822-sequences-linear-functions",
+      "title": "8.2.2 Sequences & Linear Functions",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Give multiple opportunities for translation between graph, table, equation, and situation. Do matching activities for representations. Use partners to describe process.",
+        "ell": "Use videos to remind students of translation steps. Look through magazines for real-world slope examples.",
+        "extending": "Look at families of functions. Compare groups of functions with something in common. Explore effects of changing parameters."
+      }
+    },
+    "algebraic expressions": {
+      "grade": 8,
+      "slug": "823-algebraic-expressions",
+      "title": "8.2.3 Algebraic Expressions",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Use algebra tiles for distributive property (5(x+2)). Use real-world items: 5(2 apples + 6 oranges) = 10 apples + 30 oranges. Provide step-by-step procedure sheets.",
+        "ell": "Use area models for distributive property. Provide visual step-by-step instructions for evaluating expressions.",
+        "extending": "Apply properties to simplify complex multi-step expressions. Connect algebraic properties to real-life meanings."
+      }
+    },
+    "representations of linear equations": {
+      "grade": 8,
+      "slug": "824a-representations-linear-equations",
+      "title": "8.2.4A Representations of Linear Equations",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Do matching activities for different representations of linear functions. Use graphic organizers like \"How to Find the Equation of a Line.\"",
+        "ell": "Use vocabulary games like Vocabulary Toss. Graphic organizers provide a place to start for problem-solving.",
+        "extending": "Work with variety of starting information (slope + y-intercept, slope + point, two points). Convert between forms."
+      }
+    },
+    "solve equations inequalities and systems": {
+      "grade": 8,
+      "slug": "824b-solve-represent-equations-inequalities-systems",
+      "title": "8.2.4B Solve & Represent Equations, Inequalities, & Systems",
+      "clusterKey": "linear_8",
+      "primaryBenchmark": "8.2.3.1",
+      "differentiation": {
+        "emergent": "Introduce with manipulatives (blocks, chips) so students understand maintaining equality. Then connect to solving without manipulatives. Use graphic organizers for step-by-step processes.",
+        "ell": "Use graphic organizers for solving systems by substitution and linear combination. Provide finding slope organizers.",
+        "extending": "Solve complex systems and explore systems with no or infinite solutions."
+      }
+    },
+    "pythagorean theorem": {
+      "grade": 8,
+      "slug": "831pythagorean-theorem",
+      "title": "8.3.1 Pythagorean Theorem",
+      "clusterKey": "pythagorean_8",
+      "primaryBenchmark": "8.3.1.1",
+      "differentiation": {
+        "emergent": "Encourage drawing squares off side lengths to reinforce the concrete (good for ALL students). Keep using visual representations.",
+        "ell": "Use hands-on activities with math manipulatives (multiple learning modalities). Rewrite word problems with fewer and easier words.",
+        "extending": "Derive the theorem. Solve 3D problems using Pythagorean theorem. Explore non-right triangles to confirm it does not work."
+      }
+    },
+    "slope parallel and perpendicular lines": {
+      "grade": 8,
+      "slug": "832-slope-parallel-perpendicular-lines",
+      "title": "8.3.2 Slope of Parallel & Perpendicular Lines",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Use step-by-step lesson plans for parallel and perpendicular. Students can count slope \"up and over.\" Draw on transparencies and rotate to help with oblique orientations.",
+        "ell": "Use Knowledge Cards for procedures and terms. Review and demonstrate definition of scale.",
+        "extending": "Graph three equations with same slope and find another. Graph perpendicular pairs and find the pattern. Apply to quadrilateral identification."
+      }
+    },
+    "scatterplots and lines of best fit": {
+      "grade": 8,
+      "slug": "841-scatterplots-lines-best-fit-and-predictions",
+      "title": "8.4.1 Scatterplots, Lines of Best Fit, and Predictions",
+      "clusterKey": null,
+      "primaryBenchmark": null,
+      "differentiation": {
+        "emergent": "Separate skills: creating scatterplot vs drawing line of best fit vs finding equation. Do not require all at once.",
+        "ell": "Use visual aids (transparencies, overhead calculators, projectors). Collect data exploring meaningful relationships. Encourage creating survey questions for speaking practice.",
+        "extending": "Find equations of trend lines. Use trend lines for predictions. Compare estimated lines to actual regression lines."
+      }
+    }
+  }
+}

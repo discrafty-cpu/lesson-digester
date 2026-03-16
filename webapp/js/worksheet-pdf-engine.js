@@ -111,7 +111,7 @@ const WorksheetPDFEngine = (() => {
     //  HEADER & FOOTER
     // ════════════════════════════════════════════════
 
-    function drawHeader(pdf, title, topic, level, levelMeta) {
+    function drawHeader(pdf, title, topic, level, levelMeta, benchmarkInfo) {
         const col = levelMeta.color;
 
         // Color bar at top
@@ -132,12 +132,22 @@ const WorksheetPDFEngine = (() => {
         setColor(pdf, col);
         pdf.text(title || 'Math Practice', MARGIN, 28);
 
-        // Topic subtitle
+        // Topic subtitle — enriched with benchmark cluster label when available
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
         setColor(pdf, [100, 116, 139]);
         const topicText = topic ? topic.charAt(0).toUpperCase() + topic.slice(1) : '';
-        pdf.text(topicText, MARGIN, 40);
+        const clusterLabel = benchmarkInfo && benchmarkInfo.clusterLabel ? ` — ${benchmarkInfo.clusterLabel}` : '';
+        pdf.text(topicText + clusterLabel, MARGIN, 40);
+
+        // Benchmark code (small, right-aligned under the level dot)
+        if (benchmarkInfo && benchmarkInfo.primaryBenchmark) {
+            pdf.setFontSize(7);
+            pdf.setFont('helvetica', 'normal');
+            setColor(pdf, [148, 163, 184]);
+            const bmText = benchmarkInfo.primaryBenchmark;
+            pdf.text(bmText, PAGE_W - MARGIN - pdf.getTextWidth(bmText), 40);
+        }
 
         // Name / Date line
         pdf.setFontSize(9);
@@ -151,7 +161,7 @@ const WorksheetPDFEngine = (() => {
         return 68; // return Y position after header
     }
 
-    function drawFooter(pdf, pageNum, levelMeta, standards) {
+    function drawFooter(pdf, pageNum, levelMeta, standards, benchmarkInfo) {
         const y = PAGE_H - 25;
         drawLine(pdf, MARGIN, y, PAGE_W - MARGIN, y, levelMeta.color, 0.5);
 
@@ -160,8 +170,20 @@ const WorksheetPDFEngine = (() => {
         setColor(pdf, [148, 163, 184]);
         pdf.text('The Lesson Digester  |  Level ' + levelMeta.name, MARGIN, y + 10);
 
-        if (standards && standards.length > 0) {
-            const stdText = standards.slice(0, 3).map(s => s.code).join('  \u2022  ');
+        // v2.0: Show multi-framework benchmark codes when available
+        let stdText = '';
+        if (benchmarkInfo && benchmarkInfo.benchmarkCodes) {
+            const codes = benchmarkInfo.benchmarkCodes;
+            const parts = [];
+            if (codes.MN07 && codes.MN07[0]) parts.push('MN: ' + codes.MN07[0]);
+            if (codes.CCSS && codes.CCSS[0]) parts.push('CC: ' + codes.CCSS[0]);
+            if (codes.TEKS && codes.TEKS[0]) parts.push('TX: ' + codes.TEKS[0]);
+            stdText = parts.join('  \u2022  ');
+        } else if (standards && standards.length > 0) {
+            stdText = standards.slice(0, 3).map(s => s.code).join('  \u2022  ');
+        }
+
+        if (stdText) {
             pdf.text(stdText, PAGE_W - MARGIN - pdf.getTextWidth(stdText), y + 10);
         }
     }
@@ -591,11 +613,17 @@ const WorksheetPDFEngine = (() => {
         const topic = (analysis.topics && analysis.topics[0]) || 'Math Practice';
         const title = opts.title || analysis.filename?.replace(/\.pptx$/i, '').replace(/_/g, ' ') || 'Math Practice';
 
-        // Get problems
+        // ── Resolve benchmark metadata (v2.0 — from JSON database) ──
+        let benchmarkInfo = null;
+        if (typeof ProblemGenerator !== 'undefined' && ProblemGenerator.getBenchmarkInfo) {
+            benchmarkInfo = ProblemGenerator.getBenchmarkInfo(topic, analysis.grade);
+        }
+
+        // Get problems (v2.0: pass gradeHint for JSON database lookup)
         const count = opts.problemCount || meta.problemCount;
         let problems = [];
         if (typeof ProblemGenerator !== 'undefined') {
-            problems = ProblemGenerator.forLevel(topic, level, count + 1); // +1 for worked example
+            problems = ProblemGenerator.forLevel(topic, level, count + 1, analysis.grade); // +1 for worked example
         } else if (typeof DOK_PROBLEMS !== 'undefined') {
             // Fallback: pull directly from DOK_PROBLEMS
             const data = DOK_PROBLEMS[topic];
@@ -611,8 +639,8 @@ const WorksheetPDFEngine = (() => {
 
         // ── BUILD THE PAGE ──
 
-        // Header
-        let y = drawHeader(pdf, title, topic, level, meta);
+        // Header (v2.0: pass benchmark info for richer subtitle)
+        let y = drawHeader(pdf, title, topic, level, meta, benchmarkInfo);
 
         // Visual model (L1-L3)
         y = drawVisualHint(pdf, y, topic, level);
@@ -634,8 +662,8 @@ const WorksheetPDFEngine = (() => {
         // Scaffold bar (L1-L3, at page bottom)
         drawScaffoldBar(pdf, topic, level);
 
-        // Footer
-        drawFooter(pdf, 1, meta, analysis.standards);
+        // Footer (v2.0: pass benchmark info for standards alignment display)
+        drawFooter(pdf, 1, meta, analysis.standards, benchmarkInfo);
 
         return pdf;
     }

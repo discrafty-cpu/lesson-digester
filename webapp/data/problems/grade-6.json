@@ -1,0 +1,383 @@
+{
+  "_meta": {
+    "source": "leveled-problems-data.js",
+    "version": "2.0.0",
+    "migratedAt": "2026-03-16T02:47:27.449Z",
+    "grade": 6,
+    "topicCount": 6,
+    "totalProblems": 34,
+    "keyStrategy": "dual — topic name (primary runtime key) + benchmarkCodes (secondary query index)"
+  },
+  "topics": {
+    "locate and compare numbers": {
+      "clusterKey": "fraction_6",
+      "primaryBenchmark": "6.1.1.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.NS.A.1",
+          "6.NS.B.2",
+          "6.NS.B.3"
+        ],
+        "MN07": [
+          "6.1.1.1",
+          "6.1.1.2",
+          "6.1.1.3"
+        ],
+        "MN22": [
+          "6.N.2.2",
+          "6.N.3.2"
+        ],
+        "TEKS": [
+          "6.2E",
+          "6.3A",
+          "6.3E",
+          "6.7A"
+        ]
+      },
+      "clusterLabel": "Fractions, Decimals & Percents",
+      "dok1": [
+        {
+          "stem": "Place 3/4 on a number line from 0 to 1.",
+          "answer": "Between 1/2 and 1, closer to 1",
+          "hint": "Divide the line into 4 equal parts."
+        },
+        {
+          "stem": "Which is greater: 0.6 or 0.58?",
+          "answer": "0.6 > 0.58",
+          "hint": "Compare the tenths place first."
+        },
+        {
+          "stem": "Order from least to greatest: 1/2, 0.3, 75%",
+          "answer": "0.3, 1/2, 75%",
+          "hint": "Convert all to decimals first."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "Marcus says 3/8 > 3/4 because 8 > 4. Explain why Marcus is incorrect.",
+          "answer": "With equal numerators, larger denominator means smaller pieces. 3/4 > 3/8.",
+          "hint": "Think about what the denominator tells you about the size of each piece."
+        },
+        {
+          "stem": "Place -2.5, 1/3, and 0.75 on the same number line. Which is closest to zero?",
+          "answer": "1/3 is closest to zero (about 0.33)",
+          "hint": "Convert all to decimals, then place them."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "Create three different fractions between 2/5 and 3/5. Explain your strategy.",
+          "answer": "E.g., 9/20, 1/2, 11/20. Strategy: find equivalent fractions with common denominator.",
+          "hint": "Convert to twentieths: 8/20 and 12/20. What goes between?"
+        }
+      ]
+    },
+    "equivalence and representations": {
+      "clusterKey": "fraction_6",
+      "primaryBenchmark": "6.1.1.2",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.NS.A.1",
+          "6.NS.B.2",
+          "6.NS.B.3"
+        ],
+        "MN07": [
+          "6.1.1.1",
+          "6.1.1.2",
+          "6.1.1.3"
+        ],
+        "MN22": [
+          "6.N.2.2",
+          "6.N.3.2"
+        ],
+        "TEKS": [
+          "6.2E",
+          "6.3A",
+          "6.3E",
+          "6.7A"
+        ]
+      },
+      "clusterLabel": "Fractions, Decimals & Percents",
+      "dok1": [
+        {
+          "stem": "Convert 3/4 to a decimal.",
+          "answer": "0.75",
+          "hint": "Divide 3 by 4."
+        },
+        {
+          "stem": "Write 45% as a fraction in simplest form.",
+          "answer": "9/20",
+          "hint": "45/100 simplifies by dividing by 5."
+        },
+        {
+          "stem": "Convert 0.125 to a fraction.",
+          "answer": "1/8",
+          "hint": "125/1000 simplifies."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "Which is the best deal: 1/3 off, 30% off, or 0.35 off the price?",
+          "answer": "0.35 off (35%) is the best deal.",
+          "hint": "Convert all to the same form to compare."
+        },
+        {
+          "stem": "A recipe calls for 0.6 cups of sugar. Express this as a fraction and a percent.",
+          "answer": "3/5 cup = 60%",
+          "hint": "0.6 = 6/10 = 3/5"
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A store advertises \"Buy 2, get 1 free.\" What percent discount is this per item? Explain.",
+          "answer": "You pay for 2 out of 3 items, so 1/3 off = about 33.3% discount per item.",
+          "hint": "Think about total cost vs. total items."
+        }
+      ]
+    },
+    "factors primes gcf lcm": {
+      "clusterKey": "integer_6",
+      "primaryBenchmark": "6.1.3.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.NS.C.5",
+          "6.NS.C.6",
+          "6.NS.C.7"
+        ],
+        "MN07": [
+          "6.1.3.1",
+          "6.1.3.2",
+          "6.1.3.3"
+        ],
+        "MN22": [
+          "6.N.1.1",
+          "6.N.1.2",
+          "6.N.3.1"
+        ],
+        "TEKS": [
+          "6.2A",
+          "6.2B",
+          "6.2C",
+          "6.2D",
+          "6.3C",
+          "6.3D"
+        ]
+      },
+      "clusterLabel": "Integers & Rational Numbers",
+      "dok1": [
+        {
+          "stem": "List all factors of 36.",
+          "answer": "1, 2, 3, 4, 6, 9, 12, 18, 36",
+          "hint": "Check each number 1 through 36."
+        },
+        {
+          "stem": "Is 17 prime or composite?",
+          "answer": "Prime (only factors are 1 and 17)",
+          "hint": "Try dividing by 2, 3, 4..."
+        },
+        {
+          "stem": "Find the GCF of 24 and 36.",
+          "answer": "12",
+          "hint": "List factors of each, find the largest shared one."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "Use prime factorization to find the LCM of 12 and 18.",
+          "answer": "LCM = 36 (2^2 x 3^2)",
+          "hint": "12 = 2^2 x 3, 18 = 2 x 3^2"
+        },
+        {
+          "stem": "Two runners lap a track every 6 and 8 minutes. When will they meet at the start together?",
+          "answer": "After 24 minutes (LCM of 6 and 8)",
+          "hint": "Find the LCM."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "The GCF of two numbers is 6 and their LCM is 72. If one number is 24, what is the other?",
+          "answer": "18 (because GCF x LCM = product of the two numbers: 6 x 72 = 432, 432/24 = 18)",
+          "hint": "Use: GCF x LCM = a x b"
+        }
+      ]
+    },
+    "ratios and rates": {
+      "clusterKey": "ratio_6",
+      "primaryBenchmark": "6.1.2.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.RP.A.1",
+          "6.RP.A.2",
+          "6.RP.A.3"
+        ],
+        "MN07": [
+          "6.1.2.1",
+          "6.1.2.2",
+          "6.1.2.3"
+        ],
+        "MN22": [
+          "6.N.2.2",
+          "6.N.2.3"
+        ],
+        "TEKS": [
+          "6.4A",
+          "6.4B",
+          "6.4C",
+          "6.4D",
+          "6.4H",
+          "6.5A"
+        ]
+      },
+      "clusterLabel": "Ratios & Rates",
+      "dok1": [
+        {
+          "stem": "Write the ratio of 3 cats to 5 dogs in three ways.",
+          "answer": "3:5, 3/5, 3 to 5",
+          "hint": "Ratios can be written with a colon, fraction, or words."
+        },
+        {
+          "stem": "Find the unit rate: 240 miles in 4 hours.",
+          "answer": "60 miles per hour",
+          "hint": "Divide 240 by 4."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A recipe uses 2 cups flour for 3 dozen cookies. How much flour for 9 dozen?",
+          "answer": "6 cups flour",
+          "hint": "Set up a proportion: 2/3 = x/9"
+        },
+        {
+          "stem": "Store A: 5 apples for $3. Store B: 8 apples for $5. Which is the better buy?",
+          "answer": "Store A ($0.60/apple) vs Store B ($0.625/apple). Store A is better.",
+          "hint": "Calculate the unit price at each store."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A map scale is 1 inch = 25 miles. Two cities are 3.5 inches apart on the map. Your car gets 30 mpg and gas costs $3.50/gallon. How much will the trip cost in gas?",
+          "answer": "87.5 miles / 30 mpg = 2.917 gal x $3.50 = $10.21",
+          "hint": "First find actual distance, then gallons needed, then cost."
+        }
+      ]
+    },
+    "multiplication and division of fractions": {
+      "clusterKey": "fraction_6",
+      "primaryBenchmark": "6.1.1.3",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.NS.A.1",
+          "6.NS.B.2",
+          "6.NS.B.3"
+        ],
+        "MN07": [
+          "6.1.1.1",
+          "6.1.1.2",
+          "6.1.1.3"
+        ],
+        "MN22": [
+          "6.N.2.2",
+          "6.N.3.2"
+        ],
+        "TEKS": [
+          "6.2E",
+          "6.3A",
+          "6.3E",
+          "6.7A"
+        ]
+      },
+      "clusterLabel": "Fractions, Decimals & Percents",
+      "dok1": [
+        {
+          "stem": "Multiply: 2/3 x 4/5",
+          "answer": "8/15",
+          "hint": "Multiply numerators, multiply denominators."
+        },
+        {
+          "stem": "Divide: 3/4 / 1/2",
+          "answer": "3/2 or 1 1/2",
+          "hint": "Invert the second fraction and multiply."
+        },
+        {
+          "stem": "What is 1/3 of 24?",
+          "answer": "8",
+          "hint": "Multiply 24 by 1/3."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A board is 5/6 foot long. You cut it into pieces that are 1/12 foot each. How many pieces?",
+          "answer": "10 pieces (5/6 / 1/12 = 10)",
+          "hint": "Divide the total length by the piece length."
+        },
+        {
+          "stem": "Draw an area model showing 2/3 x 3/4. What fraction of the whole is shaded?",
+          "answer": "6/12 = 1/2 of the whole is shaded.",
+          "hint": "Draw a rectangle, divide into thirds one way and fourths the other."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A recipe calls for 3/4 cup sugar. You want to make 2/3 of the recipe. Your only measuring cup is 1/8 cup. How many scoops?",
+          "answer": "3/4 x 2/3 = 1/2 cup. Then 1/2 / 1/8 = 4 scoops.",
+          "hint": "First find how much sugar, then figure out scoops."
+        }
+      ]
+    },
+    "percent": {
+      "clusterKey": "percent_6",
+      "primaryBenchmark": "6.1.1.4",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.RP.A.3c"
+        ],
+        "MN07": [
+          "6.1.1.4",
+          "6.1.2.3"
+        ],
+        "MN22": [
+          "6.N.3.3"
+        ],
+        "TEKS": [
+          "6.4E",
+          "6.4F",
+          "6.4G",
+          "6.5B",
+          "6.5C"
+        ]
+      },
+      "clusterLabel": "Percents",
+      "dok1": [
+        {
+          "stem": "What is 25% of 80?",
+          "answer": "20",
+          "hint": "0.25 x 80"
+        },
+        {
+          "stem": "Convert 3/5 to a percent.",
+          "answer": "60%",
+          "hint": "3 / 5 = 0.6 = 60%"
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A shirt costs $40 and is 15% off. What is the sale price?",
+          "answer": "$34 (discount = $6)",
+          "hint": "15% of 40 = 6"
+        },
+        {
+          "stem": "You scored 18 out of 24. What percent did you get?",
+          "answer": "75%",
+          "hint": "18/24 = 3/4 = 0.75"
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A store marks up items 40%, then puts them on sale for 25% off. Is the final price more or less than the original cost? By how much percent?",
+          "answer": "Final = 1.40 x 0.75 = 1.05 = 5% more than original cost.",
+          "hint": "Apply markup first, then discount."
+        }
+      ]
+    }
+  }
+}

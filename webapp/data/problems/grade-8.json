@@ -1,0 +1,190 @@
+{
+  "_meta": {
+    "source": "leveled-problems-data.js",
+    "version": "2.0.0",
+    "migratedAt": "2026-03-16T02:47:27.475Z",
+    "grade": 8,
+    "topicCount": 3,
+    "totalProblems": 15,
+    "keyStrategy": "dual — topic name (primary runtime key) + benchmarkCodes (secondary query index)"
+  },
+  "topics": {
+    "rational irrational and real numbers": {
+      "clusterKey": "irrational_8",
+      "primaryBenchmark": "8.1.1.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "8.NS.A.1",
+          "8.NS.A.2"
+        ],
+        "MN07": [
+          "8.1.1.1",
+          "8.1.1.2"
+        ],
+        "MN22": [
+          "8.N.1.1",
+          "8.N.1.2"
+        ],
+        "TEKS": [
+          "8.2A",
+          "8.2B"
+        ]
+      },
+      "clusterLabel": "Real Numbers & Irrational Numbers",
+      "dok1": [
+        {
+          "stem": "Classify as rational or irrational: √16",
+          "answer": "Rational (√16 = 4)",
+          "hint": "Is it a perfect square?"
+        },
+        {
+          "stem": "Estimate √50 to the nearest whole number.",
+          "answer": "7 (since 7² = 49)",
+          "hint": "7² = 49, 8² = 64"
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "Place √20 on a number line between two consecutive integers. Justify your placement.",
+          "answer": "Between 4 and 5 (4² = 16, 5² = 25), closer to 4 since 20 is closer to 16.",
+          "hint": "Find which perfect squares √20 falls between."
+        },
+        {
+          "stem": "Is 0.121121112... rational or irrational? Explain.",
+          "answer": "Irrational. The pattern grows (not repeating) so it cannot be expressed as a fraction.",
+          "hint": "Rational decimals either terminate or repeat."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "Prove that √2 is irrational by explaining why it cannot be written as a/b in simplest form.",
+          "answer": "If √2 = a/b, then 2 = a²/b², so a² = 2b². This means a² is even, so a is even (a=2k). Then 4k² = 2b², so b² = 2k², making b even too. But both can't be even if a/b is in simplest form. Contradiction.",
+          "hint": "Assume it IS rational and find a contradiction."
+        }
+      ]
+    },
+    "pythagorean theorem": {
+      "clusterKey": "pythagorean_8",
+      "primaryBenchmark": "8.3.1.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "8.G.B.7",
+          "8.G.B.8"
+        ],
+        "MN07": [
+          "8.3.1.1",
+          "8.3.1.2"
+        ],
+        "MN22": [
+          "8.GM.2.1",
+          "8.GM.2.2",
+          "8.GM.2.3"
+        ],
+        "TEKS": [
+          "8.6C",
+          "8.7A",
+          "8.7C",
+          "8.11A"
+        ]
+      },
+      "clusterLabel": "Pythagorean Theorem",
+      "dok1": [
+        {
+          "stem": "Find c if a = 3 and b = 4.",
+          "answer": "c = 5 (3² + 4² = 9 + 16 = 25, √25 = 5)",
+          "hint": "a² + b² = c²"
+        },
+        {
+          "stem": "Is a triangle with sides 5, 12, 13 a right triangle?",
+          "answer": "Yes (5² + 12² = 25 + 144 = 169 = 13²)",
+          "hint": "Check if a² + b² = c²"
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A ladder leans against a wall, 12 ft from the base. The ladder is 15 ft long. How high up the wall does it reach?",
+          "answer": "15² - 12² = 225 - 144 = 81, √81 = 9 ft",
+          "hint": "The ladder is the hypotenuse."
+        },
+        {
+          "stem": "Find the distance between points (1, 2) and (4, 6).",
+          "answer": "d = √((4-1)² + (6-2)²) = √(9+16) = √25 = 5",
+          "hint": "Use the distance formula (derived from Pythagorean theorem)."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A rectangular park is 300m by 400m. A path goes diagonally. If you walk the diagonal vs. two sides, how much shorter is the diagonal? What percent shorter?",
+          "answer": "Diagonal = 500m. Two sides = 700m. Savings = 200m = 28.6% shorter.",
+          "hint": "300² + 400² = c²"
+        }
+      ]
+    },
+    "solve equations inequalities and systems": {
+      "clusterKey": "linear_8",
+      "primaryBenchmark": "8.2.3.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "8.EE.B.5",
+          "8.EE.B.6",
+          "8.EE.C.7",
+          "8.F.A.3",
+          "8.F.B.4"
+        ],
+        "MN07": [
+          "8.2.1.1",
+          "8.2.1.2",
+          "8.2.3.1"
+        ],
+        "MN22": [
+          "8.A.1.1",
+          "8.A.1.2",
+          "8.A.1.3",
+          "8.A.2.1"
+        ],
+        "TEKS": [
+          "8.4A",
+          "8.4B",
+          "8.4C",
+          "8.5A",
+          "8.5B",
+          "8.5F",
+          "8.8A",
+          "8.8C"
+        ]
+      },
+      "clusterLabel": "Linear Equations & Slope",
+      "dok1": [
+        {
+          "stem": "Solve: 3x + 7 = 22",
+          "answer": "x = 5",
+          "hint": "Subtract 7, then divide by 3."
+        },
+        {
+          "stem": "Solve: 2x - 5 > 9",
+          "answer": "x > 7",
+          "hint": "Add 5, then divide by 2."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "Solve the system: y = 2x + 1 and y = -x + 7",
+          "answer": "2x + 1 = -x + 7 → 3x = 6 → x = 2, y = 5. Solution: (2, 5)",
+          "hint": "Set the equations equal to each other."
+        },
+        {
+          "stem": "A movie costs $12/adult and $8/child. A group of 15 paid $148. How many adults and children?",
+          "answer": "12a + 8c = 148, a + c = 15 → a = 7, c = 8",
+          "hint": "Set up two equations and solve."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "Create a real-world problem that requires a system of equations where the solution is (3, 5). Write and solve it.",
+          "answer": "E.g., Pencils cost $2 and pens cost $3. You buy some of each, spending $21 on 8 items. 2x + 3y = 21, x + y = 8 → x = 3, y = 5.",
+          "hint": "Work backwards from the solution."
+        }
+      ]
+    }
+  }
+}
