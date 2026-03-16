@@ -243,6 +243,9 @@ const DOK_PROBLEMS = {
     }
 };
 
+// Expose on window so modules using window.DOK_PROBLEMS (e.g. ProblemGenerator) can find it
+if (typeof window !== 'undefined') window.DOK_PROBLEMS = DOK_PROBLEMS;
+
 // ==================== SENTENCE FRAMES DATABASE ====================
 // ELL scaffolding sentence frames organized by math activity type
 // Used for discussion slides and team collaboration prompts
