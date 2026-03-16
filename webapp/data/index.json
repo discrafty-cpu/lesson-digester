@@ -3,8 +3,9 @@
     "description": "Vinculum Standards-Problem Database v2.0 — Option A: Dual-Key Architecture",
     "version": "2.0.0",
     "migratedAt": "2026-03-16T02:47:27.772Z",
-    "totalFiles": 25,
-    "totalSizeBytes": 542659
+    "totalFiles": 26,
+    "totalSizeBytes": 650979,
+    "updatedAt": "2026-03-16T03:01:16.096Z"
   },
   "structure": {
     "problems/": "DOK problems keyed by topic name, enriched with benchmarkCodes[] secondary index",
@@ -17,128 +18,107 @@
   "files": [
     {
       "path": "cross-ref/benchmark-to-topic.json",
-      "size": 90846,
-      "source": "standards-db.js + manual mapping"
+      "size": 95267
     },
     {
       "path": "cross-ref/topic-map.json",
-      "size": 21493,
-      "source": "standards-db.js"
+      "size": 21493
     },
     {
       "path": "frameworks/mn07/grade-6.json",
-      "size": 28598,
-      "source": "rubric-descriptors.js"
+      "size": 28598
     },
     {
       "path": "frameworks/mn07/grade-7.json",
-      "size": 31213,
-      "source": "rubric-descriptors.js"
+      "size": 31213
     },
     {
       "path": "frameworks/mn07/grade-8.json",
-      "size": 29921,
-      "source": "rubric-descriptors.js"
+      "size": 29921
+    },
+    {
+      "path": "problems/grade-5.json",
+      "size": 10176
     },
     {
       "path": "problems/grade-6.json",
-      "size": 11142,
-      "source": "leveled-problems-data.js"
+      "size": 46466
     },
     {
       "path": "problems/grade-7.json",
-      "size": 11417,
-      "source": "leveled-problems-data.js"
+      "size": 45136
     },
     {
       "path": "problems/grade-8.json",
-      "size": 5956,
-      "source": "leveled-problems-data.js"
+      "size": 30636
     },
     {
       "path": "proficiency/benchmark-grade-1.json",
-      "size": 7012,
-      "source": "benchmark-descriptors.js"
+      "size": 7012
     },
     {
       "path": "proficiency/benchmark-grade-2.json",
-      "size": 6871,
-      "source": "benchmark-descriptors.js"
+      "size": 6871
     },
     {
       "path": "proficiency/benchmark-grade-3.json",
-      "size": 7382,
-      "source": "benchmark-descriptors.js"
+      "size": 7382
     },
     {
       "path": "proficiency/benchmark-grade-4.json",
-      "size": 8159,
-      "source": "benchmark-descriptors.js"
+      "size": 8159
     },
     {
       "path": "proficiency/benchmark-grade-5.json",
-      "size": 7528,
-      "source": "benchmark-descriptors.js"
+      "size": 7528
     },
     {
       "path": "proficiency/benchmark-grade-6.json",
-      "size": 11297,
-      "source": "benchmark-descriptors.js"
+      "size": 11297
     },
     {
       "path": "proficiency/benchmark-grade-7.json",
-      "size": 13455,
-      "source": "benchmark-descriptors.js"
+      "size": 13455
     },
     {
       "path": "proficiency/benchmark-grade-8.json",
-      "size": 15494,
-      "source": "benchmark-descriptors.js"
+      "size": 15494
     },
     {
       "path": "proficiency/benchmark-grade-K.json",
-      "size": 6598,
-      "source": "benchmark-descriptors.js"
+      "size": 6598
     },
     {
       "path": "standards/ccss-index.json",
-      "size": 20621,
-      "source": "standards-db.js"
+      "size": 20621
     },
     {
       "path": "standards/mn07-index.json",
-      "size": 13706,
-      "source": "standards-db.js"
+      "size": 13706
     },
     {
       "path": "standards/mn22.json",
-      "size": 24366,
-      "source": "standards-db.js"
+      "size": 24366
     },
     {
       "path": "standards/teks.json",
-      "size": 57226,
-      "source": "standards-db.js"
+      "size": 57226
     },
     {
       "path": "teaching/differentiation.json",
-      "size": 31750,
-      "source": "teaching-insights-data.js"
+      "size": 31750
     },
     {
       "path": "teaching/lesson-components.json",
-      "size": 34234,
-      "source": "lesson-components-data.js"
+      "size": 34234
     },
     {
       "path": "teaching/misconceptions.json",
-      "size": 43333,
-      "source": "teaching-insights-data.js"
+      "size": 43333
     },
     {
       "path": "teaching/scaffolds.json",
-      "size": 3041,
-      "source": "leveled-problems-data.js"
+      "size": 3041
     }
   ]
 }

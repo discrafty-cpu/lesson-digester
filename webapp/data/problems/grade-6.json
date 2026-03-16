@@ -4,9 +4,10 @@
     "version": "2.0.0",
     "migratedAt": "2026-03-16T02:47:27.449Z",
     "grade": 6,
-    "topicCount": 6,
-    "totalProblems": 34,
-    "keyStrategy": "dual — topic name (primary runtime key) + benchmarkCodes (secondary query index)"
+    "topicCount": 16,
+    "totalProblems": 114,
+    "keyStrategy": "dual — topic name (primary runtime key) + benchmarkCodes (secondary query index)",
+    "mergedAt": "2026-03-16T03:01:15.968Z"
   },
   "topics": {
     "locate and compare numbers": {
@@ -376,6 +377,758 @@
           "stem": "A store marks up items 40%, then puts them on sale for 25% off. Is the final price more or less than the original cost? By how much percent?",
           "answer": "Final = 1.40 x 0.75 = 1.05 = 5% more than original cost.",
           "hint": "Apply markup first, then discount."
+        }
+      ]
+    },
+    "problem solving and estimation": {
+      "clusterKey": "fraction_6",
+      "primaryBenchmark": "6.1.1.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.NS.A.1",
+          "6.NS.B.2",
+          "6.NS.B.3"
+        ],
+        "MN07": [
+          "6.1.1.1",
+          "6.1.1.2",
+          "6.1.1.3"
+        ],
+        "MN22": [
+          "6.N.2.2",
+          "6.N.3.2"
+        ],
+        "TEKS": [
+          "6.2E",
+          "6.3A",
+          "6.3E",
+          "6.7A"
+        ]
+      },
+      "clusterLabel": "Fractions, Decimals & Percents",
+      "dok1": [
+        {
+          "stem": "What is 3/4 + 1/4?",
+          "answer": "1",
+          "hint": "When the denominators are the same, add the numerators and keep the denominator."
+        },
+        {
+          "stem": "Convert 0.75 to a fraction in simplest form.",
+          "answer": "3/4",
+          "hint": "0.75 means 75 hundredths. Simplify by dividing both numerator and denominator by 25."
+        },
+        {
+          "stem": "What is 1/2 of 16?",
+          "answer": "8",
+          "hint": "To find a fraction of a number, multiply the fraction by the number."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "Maria bought 2 1/2 pounds of apples at $1.50 per pound. About how much did she spend? Estimate your answer.",
+          "answer": "about $3.75 or $4",
+          "hint": "Round 2 1/2 to 2 or 3. Then multiply by the price per pound to estimate."
+        },
+        {
+          "stem": "A recipe calls for 3/4 cup of flour. You need to make 3 times the recipe. How much flour do you need? Show your work.",
+          "answer": "2 1/4 cups",
+          "hint": "Multiply 3/4 by 3. Convert the improper fraction to a mixed number."
+        },
+        {
+          "stem": "James has 5/6 of a pizza left. His friend eats 1/3 of the whole pizza. How much pizza remains? Explain your steps.",
+          "answer": "1/2 of the pizza",
+          "hint": "First, find a common denominator for 5/6 and 1/3. Then subtract."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A baker estimates that 40% of her daily flour goes to bread and 1/3 goes to pastries. Which uses more flour, and by how much? Justify your reasoning with calculations.",
+          "answer": "Pastries use more; 40% = 2/5, so 1/3 > 2/5 by 1/15 (about 6.7%)",
+          "hint": "Convert both percentages and fractions to decimals or a common denominator to compare. Show which is larger and calculate the difference."
+        },
+        {
+          "stem": "A store sells juice in three sizes: 1/2 liter ($2), 0.75 liter ($2.80), and 1.5 liters ($7.50). Which size offers the best value per liter? Show your calculations and explain your choice.",
+          "answer": "The 1.5 liter size at $5 per liter is the best value",
+          "hint": "Calculate the price per liter for each size by dividing cost by volume. Compare the unit rates."
+        }
+      ]
+    },
+    "variables and representations": {
+      "clusterKey": "equation_6",
+      "primaryBenchmark": "6.2.1.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.EE.A.1",
+          "6.EE.A.2",
+          "6.EE.B.5",
+          "6.EE.B.6",
+          "6.EE.B.7"
+        ],
+        "MN07": [
+          "6.2.1.1",
+          "6.2.2.1",
+          "6.2.2.2"
+        ],
+        "MN22": [
+          "6.A.1.2",
+          "6.A.2.1",
+          "6.A.3.1"
+        ],
+        "TEKS": [
+          "6.6A",
+          "6.6B",
+          "6.6C",
+          "6.7A",
+          "6.7B",
+          "6.9A",
+          "6.10A"
+        ]
+      },
+      "clusterLabel": "Equations & Algebraic Thinking",
+      "dok1": [
+        {
+          "stem": "Write an algebraic expression for 'the sum of x and 8'.",
+          "answer": "x + 8",
+          "hint": "Sum means add. Look for the key word and translate it to symbols."
+        },
+        {
+          "stem": "Evaluate 3x + 5 when x = 2.",
+          "answer": "11",
+          "hint": "Replace x with 2, then follow the order of operations: multiply first, then add."
+        },
+        {
+          "stem": "Write an expression for 'twice a number y'.",
+          "answer": "2y",
+          "hint": "Twice means multiply by 2. The variable y represents the unknown number."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A cell phone plan costs $30 per month plus $0.10 per text message. Write an expression for the total cost if you send t text messages. Then find the cost if you send 200 messages.",
+          "answer": "Expression: 30 + 0.10t; Cost for 200 messages: $50",
+          "hint": "The fixed cost is $30. The variable cost depends on t. Substitute t = 200 into your expression."
+        },
+        {
+          "stem": "A rectangle has a length of (x + 3) and a width of 5. Write an expression for the perimeter. If x = 2, what is the perimeter?",
+          "answer": "Expression: 2(x + 3) + 2(5) or 2x + 16; Perimeter when x = 2 is 20 units",
+          "hint": "Perimeter = 2(length) + 2(width). Simplify the expression, then substitute x = 2."
+        },
+        {
+          "stem": "Sarah earns $12 per hour babysitting. She works h hours each week. Write an expression for her weekly earnings. If she works 8 hours, how much does she earn? Show your work.",
+          "answer": "Expression: 12h; Weekly earnings for 8 hours: $96",
+          "hint": "Multiply the hourly rate by the number of hours. Evaluate when h = 8."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "Two phone plans are offered: Plan A costs $25 + $0.05 per minute, and Plan B costs $40 flat. Write an expression for each plan. For what number of minutes would both plans cost the same? Show your reasoning.",
+          "answer": "Plan A: 25 + 0.05m; Plan B: 40; Both cost the same at 300 minutes",
+          "hint": "Set the expressions equal: 25 + 0.05m = 40. Solve for m by subtracting 25 and dividing by 0.05."
+        },
+        {
+          "stem": "A school club's budget is modeled by the expression 500 + 20n, where n is the number of members. They need at least $800. Write and solve an inequality to find the minimum number of members needed. Interpret your answer in context.",
+          "answer": "500 + 20n ≥ 800; n ≥ 15; They need at least 15 members.",
+          "hint": "Set up the inequality, subtract 500 from both sides, then divide by 20. Think about what the answer means for the club."
+        }
+      ]
+    },
+    "properties and equivalent expressions": {
+      "clusterKey": "equation_6",
+      "primaryBenchmark": "6.2.2.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.EE.A.1",
+          "6.EE.A.2",
+          "6.EE.B.5",
+          "6.EE.B.6",
+          "6.EE.B.7"
+        ],
+        "MN07": [
+          "6.2.1.1",
+          "6.2.2.1",
+          "6.2.2.2"
+        ],
+        "MN22": [
+          "6.A.1.2",
+          "6.A.2.1",
+          "6.A.3.1"
+        ],
+        "TEKS": [
+          "6.6A",
+          "6.6B",
+          "6.6C",
+          "6.7A",
+          "6.7B",
+          "6.9A",
+          "6.10A"
+        ]
+      },
+      "clusterLabel": "Equations & Algebraic Thinking",
+      "dok1": [
+        {
+          "stem": "Use the distributive property to simplify 3(x + 2).",
+          "answer": "3x + 6",
+          "hint": "Multiply 3 by each term inside the parentheses: 3·x and 3·2."
+        },
+        {
+          "stem": "Simplify 2x + 5x.",
+          "answer": "7x",
+          "hint": "Combine like terms. Add the coefficients of x."
+        },
+        {
+          "stem": "Which expression is equivalent to 4(2y)? A) 8y  B) 6y  C) 2y  D) 4y",
+          "answer": "A) 8y",
+          "hint": "Multiply 4 by 2 to get the coefficient of y."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A rectangle has sides of length (2x + 1) and width 3. Write the perimeter in two ways: first using the distributive property, then by combining like terms. Explain why both expressions are equivalent.",
+          "answer": "Method 1: 2(2x + 1) + 2(3) = 4x + 2 + 6; Method 2: 4x + 8; They equal the same value.",
+          "hint": "Use perimeter = 2l + 2w. Apply the distributive property first, then combine like terms."
+        },
+        {
+          "stem": "Simplify the expression 5x + 3y + 2x - y. Group like terms first, then add. Show each step.",
+          "answer": "7x + 2y",
+          "hint": "Group x terms together: (5x + 2x). Group y terms together: (3y - y). Then combine."
+        },
+        {
+          "stem": "A store sells t-shirts for $12 and hoodies for $25. You buy 3 t-shirts and 2 hoodies. Write an expression, then simplify it to find the total cost.",
+          "answer": "Expression: 3(12) + 2(25) = 36 + 50 = $86",
+          "hint": "Multiply the price by the quantity for each item. Then add them together."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "Three different expressions are given: 2(3x + 4), 6x + 8, and 2(3x) + 2(4). Are they all equivalent? Prove your answer by showing your work with the distributive property and simplification.",
+          "answer": "Yes, all three are equivalent to 6x + 8.",
+          "hint": "Apply the distributive property to the first and third expressions. Compare the results."
+        },
+        {
+          "stem": "A garden's perimeter is modeled by 2(l + w). If the length is 3x - 2 and the width is x, write an equivalent simplified expression. Explain what the coefficient of x represents in the context of the problem.",
+          "answer": "Simplified: 8x - 4. The coefficient 8 represents the sum of twice the length and twice the width coefficients.",
+          "hint": "Substitute the expressions for l and w. Distribute the 2, then combine like terms. Think about what the perimeter includes."
+        }
+      ]
+    },
+    "represent and solve equations": {
+      "clusterKey": "equation_6",
+      "primaryBenchmark": "6.2.2.2",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.EE.A.1",
+          "6.EE.A.2",
+          "6.EE.B.5",
+          "6.EE.B.6",
+          "6.EE.B.7"
+        ],
+        "MN07": [
+          "6.2.1.1",
+          "6.2.2.1",
+          "6.2.2.2"
+        ],
+        "MN22": [
+          "6.A.1.2",
+          "6.A.2.1",
+          "6.A.3.1"
+        ],
+        "TEKS": [
+          "6.6A",
+          "6.6B",
+          "6.6C",
+          "6.7A",
+          "6.7B",
+          "6.9A",
+          "6.10A"
+        ]
+      },
+      "clusterLabel": "Equations & Algebraic Thinking",
+      "dok1": [
+        {
+          "stem": "Solve: x + 7 = 15",
+          "answer": "x = 8",
+          "hint": "What number plus 7 equals 15? Subtract 7 from both sides."
+        },
+        {
+          "stem": "Solve: 3x = 18",
+          "answer": "x = 6",
+          "hint": "What number times 3 equals 18? Divide both sides by 3."
+        },
+        {
+          "stem": "Solve: x - 5 = 12",
+          "answer": "x = 17",
+          "hint": "What number minus 5 equals 12? Add 5 to both sides."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A music store is having a sale where all CDs are $4 off the original price. If you pay $8 for a CD on sale, what was the original price? Write and solve an equation.",
+          "answer": "Equation: x - 4 = 8; Original price: $12",
+          "hint": "Let x be the original price. The sale price is $4 less. Set up an equation and solve."
+        },
+        {
+          "stem": "Juan's age is 3 times his sister's age. If Juan is 15 years old, how old is his sister? Write an equation and solve it. Show your work.",
+          "answer": "Equation: 3x = 15; Sister's age: 5 years",
+          "hint": "Let x be the sister's age. Juan's age is 3 times hers. Divide both sides by 3."
+        },
+        {
+          "stem": "A book costs $18. This is $5 more than a pen. Write and solve an equation to find the cost of a pen.",
+          "answer": "Equation: x + 5 = 18; Pen cost: $13",
+          "hint": "Let x be the pen's cost. The book costs $5 more. Subtract 5 from both sides."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A rental company charges $25 per day plus a $50 security deposit. Your total bill is $200. Write an equation and solve it to find how many days you rented. Verify your answer by substituting back into the original situation.",
+          "answer": "Equation: 25d + 50 = 200; d = 6 days. Verification: 25(6) + 50 = 150 + 50 = 200 ✓",
+          "hint": "Let d be the number of days. Set up the total cost equation. Solve by subtracting 50, then dividing by 25."
+        },
+        {
+          "stem": "Two teams are selling candy bars to raise money. Team A has already sold 40 bars and sells 12 more per day. Team B has sold 10 bars and sells 20 per day. After how many days will they have sold the same number of bars? Write two equations and solve them to find when they're equal.",
+          "answer": "Team A: 40 + 12d; Team B: 10 + 20d; Setting equal: 40 + 12d = 10 + 20d; d = 3.75 days (or 3 3/4 days)",
+          "hint": "Write expressions for each team's total. Set them equal and solve for d by moving variable terms and constants to opposite sides."
+        }
+      ]
+    },
+    "measurement of polygons and prisms": {
+      "clusterKey": "area_6",
+      "primaryBenchmark": "6.3.1.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.G.A.1",
+          "6.G.A.2",
+          "6.G.A.4"
+        ],
+        "MN07": [
+          "6.3.1.1",
+          "6.3.1.2"
+        ],
+        "MN22": [
+          "6.GM.1.1",
+          "6.GM.1.2",
+          "6.GM.2.1"
+        ],
+        "TEKS": [
+          "6.8A",
+          "6.8B",
+          "6.8C",
+          "6.8D"
+        ]
+      },
+      "clusterLabel": "Geometry & Measurement",
+      "dok1": [
+        {
+          "stem": "Find the area of a rectangle with length 8 cm and width 5 cm.",
+          "answer": "40 square cm",
+          "hint": "Area of a rectangle = length × width."
+        },
+        {
+          "stem": "Find the area of a triangle with base 10 m and height 6 m.",
+          "answer": "30 square meters",
+          "hint": "Area of a triangle = (base × height) ÷ 2."
+        },
+        {
+          "stem": "What is the volume of a rectangular prism with length 4 in, width 3 in, and height 5 in?",
+          "answer": "60 cubic inches",
+          "hint": "Volume = length × width × height."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A parallelogram has a base of 12 cm and a height of 8 cm. A triangle has the same base and height. Compare their areas. Which is larger and by how much?",
+          "answer": "The parallelogram's area is 96 square cm; the triangle's area is 48 square cm. The parallelogram is larger by 48 square cm.",
+          "hint": "Calculate the area of each shape using the appropriate formula. Then find the difference."
+        },
+        {
+          "stem": "A swimming pool is 25 meters long, 12 meters wide, and 2 meters deep. How much water does it hold (volume)? Show your calculation.",
+          "answer": "600 cubic meters",
+          "hint": "Use the formula V = length × width × depth to find the volume."
+        },
+        {
+          "stem": "A composite figure is made of a rectangle (10 m × 6 m) and a triangle (base 10 m, height 4 m) stacked on top. Find the total area. Explain your steps.",
+          "answer": "Total area = 60 + 20 = 80 square meters",
+          "hint": "Find the area of each shape separately, then add them together."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A contractor is tiling a floor that is 15 feet long and 12 feet wide. If each tile covers 1.5 square feet and costs $8 per tile, how much will it cost to tile the entire floor? Show your work and explain each step.",
+          "answer": "Floor area = 180 square feet; Number of tiles = 120; Total cost = $960",
+          "hint": "First find the total floor area. Divide by the area per tile to find how many tiles are needed. Multiply by the cost per tile."
+        },
+        {
+          "stem": "A rectangular prism has a volume of 240 cubic inches. Its length is 10 inches and its width is 6 inches. Find the height. Then, find the surface area of this prism. Show all work.",
+          "answer": "Height = 4 inches; Surface area = 248 square inches",
+          "hint": "Use V = l × w × h to find h. For surface area, find the area of all 6 faces: 2(lw) + 2(lh) + 2(wh)."
+        }
+      ]
+    },
+    "angles and intersecting lines": {
+      "clusterKey": "area_6",
+      "primaryBenchmark": "6.3.1.2",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.G.A.1",
+          "6.G.A.2",
+          "6.G.A.4"
+        ],
+        "MN07": [
+          "6.3.1.1",
+          "6.3.1.2"
+        ],
+        "MN22": [
+          "6.GM.1.1",
+          "6.GM.1.2",
+          "6.GM.2.1"
+        ],
+        "TEKS": [
+          "6.8A",
+          "6.8B",
+          "6.8C",
+          "6.8D"
+        ]
+      },
+      "clusterLabel": "Geometry & Measurement",
+      "dok1": [
+        {
+          "stem": "If two lines intersect and form a 65° angle, what is the measure of the opposite (vertical) angle?",
+          "answer": "65°",
+          "hint": "Vertical angles are equal in measure."
+        },
+        {
+          "stem": "Two lines intersect forming four angles. One angle measures 120°. What is the measure of an adjacent angle?",
+          "answer": "60°",
+          "hint": "Adjacent angles on a line are supplementary, meaning they add up to 180°."
+        },
+        {
+          "stem": "Name the relationship between these two angles formed by intersecting lines: one measuring 45° and one measuring 45°. Are they vertical, adjacent, or supplementary?",
+          "answer": "They are vertical angles (opposite each other)",
+          "hint": "Vertical angles are formed across from each other when two lines intersect. They are always equal."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "Two intersecting lines form four angles. If one angle is 3 times another, what are the measures of all four angles? Show your work.",
+          "answer": "The four angles are 45°, 135°, 45°, and 135°",
+          "hint": "Adjacent angles are supplementary (add to 180°). Set up an equation: x + 3x = 180. Vertical angles are equal."
+        },
+        {
+          "stem": "Line AB intersects line CD. The angle between them is 110°. A third line EF also intersects at the same point, creating a 30° angle with line AB. Draw this situation and find all angles formed. Explain your reasoning.",
+          "answer": "Multiple angles are formed; key angles include 110°, 70°, 30°, 150°, 80°, and 100° (depending on positioning)",
+          "hint": "Remember that angles on a straight line sum to 180°, and vertical angles are equal. Draw carefully and label each angle."
+        },
+        {
+          "stem": "Two parallel lines are cut by a transversal. If one of the angles formed is 75°, find the measures of the other 7 angles. Identify which angles are corresponding, alternate interior, and co-interior.",
+          "answer": "Four angles of 75° and four angles of 105°",
+          "hint": "Use properties of parallel lines: corresponding angles are equal, alternate interior angles are equal, and co-interior angles are supplementary."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "At an intersection of two roads, traffic engineers need to verify angle measurements. One angle is twice another. The two angles are adjacent. Set up an equation and solve. Then verify your answer makes sense for intersecting lines.",
+          "answer": "The angles are 60° and 120°. Verification: 60° + 120° = 180° (supplementary) ✓",
+          "hint": "Let x be one angle. The other is 2x. Adjacent angles sum to 180°. Solve: x + 2x = 180."
+        },
+        {
+          "stem": "Three lines intersect at a single point, creating six angles. One angle is 40°, another is 75°. Find all six angles and explain which are equal, supplementary, or neither. Justify each angle measure.",
+          "answer": "Angles are 40°, 75°, 65°, 140°, 105°, and 115° (with various relationships)",
+          "hint": "The angles around a point sum to 360°. Use supplementary angle relationships (angles on a line sum to 180°) and vertical angle properties."
+        }
+      ]
+    },
+    "angles in geometric figures": {
+      "clusterKey": "area_6",
+      "primaryBenchmark": "6.3.1.2",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.G.A.1",
+          "6.G.A.2",
+          "6.G.A.4"
+        ],
+        "MN07": [
+          "6.3.1.1",
+          "6.3.1.2"
+        ],
+        "MN22": [
+          "6.GM.1.1",
+          "6.GM.1.2",
+          "6.GM.2.1"
+        ],
+        "TEKS": [
+          "6.8A",
+          "6.8B",
+          "6.8C",
+          "6.8D"
+        ]
+      },
+      "clusterLabel": "Geometry & Measurement",
+      "dok1": [
+        {
+          "stem": "What is the sum of all interior angles in a triangle?",
+          "answer": "180°",
+          "hint": "This is a fundamental property of all triangles."
+        },
+        {
+          "stem": "Find the missing angle in a triangle if two angles measure 45° and 60°.",
+          "answer": "75°",
+          "hint": "The sum of all angles in a triangle is 180°. Add the two given angles and subtract from 180."
+        },
+        {
+          "stem": "What is the sum of all interior angles in a quadrilateral (4-sided polygon)?",
+          "answer": "360°",
+          "hint": "A quadrilateral can be divided into 2 triangles, each with angles summing to 180°."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "In a triangle, one angle is 50°, another is 2 times the first angle. Find the third angle. Show your work and verify that all angles sum to 180°.",
+          "answer": "Second angle = 100°; Third angle = 30°; Verification: 50° + 100° + 30° = 180° ✓",
+          "hint": "Let the first angle be 50°. The second is 2 × 50° = 100°. Find the third by subtracting from 180°."
+        },
+        {
+          "stem": "A quadrilateral has angles of 85°, 95°, and 120°. Find the fourth angle. Verify that your answer is correct.",
+          "answer": "Fourth angle = 60°; Verification: 85° + 95° + 120° + 60° = 360° ✓",
+          "hint": "The sum of angles in a quadrilateral is 360°. Add the three given angles and subtract from 360°."
+        },
+        {
+          "stem": "In a pentagon (5-sided polygon), one exterior angle is 40°. Find the corresponding interior angle. Then find the sum of all interior angles in the pentagon.",
+          "answer": "Interior angle = 140°; Sum of interior angles = 540°",
+          "hint": "Interior and exterior angles at the same vertex are supplementary (sum to 180°). A pentagon can be divided into 3 triangles."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "In a triangle, the three angles are in the ratio 2:3:4. Find the measure of each angle. Explain how you set up and solved the equation.",
+          "answer": "The angles are 40°, 60°, and 80°",
+          "hint": "Let the angles be 2x, 3x, and 4x. They sum to 180°, so 2x + 3x + 4x = 180°. Solve for x, then find each angle."
+        },
+        {
+          "stem": "A regular hexagon has all equal interior angles. Find the measure of each interior angle. Then explain how you can verify this using the properties of triangles or the angle sum formula.",
+          "answer": "Each angle = 120°. Verification: A hexagon has 6 sides, so sum of interior angles = (6-2) × 180° = 720°. Each of 6 equal angles = 720° ÷ 6 = 120°",
+          "hint": "Use the formula: sum of interior angles = (n - 2) × 180°, where n is the number of sides. For equal angles, divide the sum by the number of angles."
+        }
+      ]
+    },
+    "converting and estimating measurements": {
+      "clusterKey": "ratio_6",
+      "primaryBenchmark": "6.1.2.3",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.RP.A.1",
+          "6.RP.A.2",
+          "6.RP.A.3"
+        ],
+        "MN07": [
+          "6.1.2.1",
+          "6.1.2.2",
+          "6.1.2.3"
+        ],
+        "MN22": [
+          "6.N.2.2",
+          "6.N.2.3"
+        ],
+        "TEKS": [
+          "6.4A",
+          "6.4B",
+          "6.4C",
+          "6.4D",
+          "6.4H",
+          "6.5A"
+        ]
+      },
+      "clusterLabel": "Ratios & Proportional Relationships",
+      "dok1": [
+        {
+          "stem": "Convert 5 meters to centimeters.",
+          "answer": "500 centimeters",
+          "hint": "1 meter = 100 centimeters. Multiply 5 by 100."
+        },
+        {
+          "stem": "Convert 3 pounds to ounces. (Use 1 pound = 16 ounces)",
+          "answer": "48 ounces",
+          "hint": "Multiply the number of pounds by 16."
+        },
+        {
+          "stem": "Convert 2 hours to minutes.",
+          "answer": "120 minutes",
+          "hint": "1 hour = 60 minutes. Multiply 2 by 60."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A recipe calls for 2 cups of flour. You only have a tablespoon measure (1 cup = 16 tablespoons). How many tablespoons of flour do you need? Show your work.",
+          "answer": "32 tablespoons",
+          "hint": "Multiply the number of cups by 16 tablespoons per cup."
+        },
+        {
+          "stem": "A runner wants to estimate how far she ran. She ran for 45 minutes at about 6 miles per hour. About how many miles did she run? Estimate and show your reasoning.",
+          "answer": "About 4.5 miles (or approximately 4-5 miles)",
+          "hint": "45 minutes is 3/4 of an hour. At 6 miles per hour, multiply 6 × 3/4."
+        },
+        {
+          "stem": "A garden is 12 feet long and 8 feet wide. Convert these measurements to yards (1 yard = 3 feet). Then calculate the area in square yards. Show each step.",
+          "answer": "Length = 4 yards; Width = 8/3 yards or 2⅔ yards; Area = 10⅔ square yards",
+          "hint": "Divide feet by 3 to convert to yards. Then multiply the converted dimensions to find area in square yards."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A shipping company charges by weight. They charge $0.50 per pound. A customer wants to ship a package that weighs 2 tons. What will it cost? Show the conversion from tons to pounds and calculate the total cost.",
+          "answer": "2 tons = 4,000 pounds; Cost = 4,000 × $0.50 = $2,000",
+          "hint": "Convert tons to pounds (1 ton = 2,000 pounds), then multiply by the rate per pound."
+        },
+        {
+          "stem": "A pool holds 5,000 gallons of water. A hose fills it at 8 gallons per minute. Estimate how long it will take to fill the pool in hours and minutes. Show your estimation strategy and actual calculation.",
+          "answer": "Time = 5,000 ÷ 8 = 625 minutes = 10 hours and 25 minutes (or about 10.4 hours)",
+          "hint": "Divide total gallons by gallons per minute to find minutes needed. Convert to hours by dividing by 60."
+        }
+      ]
+    },
+    "sample space": {
+      "clusterKey": "statistics_6",
+      "primaryBenchmark": "6.4.1.1",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.SP.A.1",
+          "6.SP.A.2",
+          "6.SP.B.4",
+          "6.SP.B.5"
+        ],
+        "MN07": [
+          "6.4.1.1",
+          "6.4.1.2"
+        ],
+        "MN22": [
+          "6.DP.1.1",
+          "6.DP.1.2",
+          "6.DP.1.3"
+        ],
+        "TEKS": [
+          "6.12A",
+          "6.12B",
+          "6.12C",
+          "6.13A"
+        ]
+      },
+      "clusterLabel": "Statistics & Probability",
+      "dok1": [
+        {
+          "stem": "A coin is flipped. List all possible outcomes in the sample space.",
+          "answer": "Heads, Tails",
+          "hint": "A sample space is the list of all possible results of an experiment."
+        },
+        {
+          "stem": "A single die (6-sided) is rolled. What is the size of the sample space?",
+          "answer": "6",
+          "hint": "Count all possible outcomes (1, 2, 3, 4, 5, 6)."
+        },
+        {
+          "stem": "A spinner has 4 equal sections colored red, blue, green, and yellow. List the sample space.",
+          "answer": "Red, Blue, Green, Yellow",
+          "hint": "The sample space includes each possible outcome when you spin the spinner."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "You flip a coin and roll a die. Create a sample space showing all possible outcomes (use pairs like H1, H2, etc.). How many total outcomes are there?",
+          "answer": "12 outcomes: H1, H2, H3, H4, H5, H6, T1, T2, T3, T4, T5, T6",
+          "hint": "For each of 2 coin outcomes, there are 6 die outcomes. Multiply 2 × 6 = 12."
+        },
+        {
+          "stem": "A restaurant offers 3 appetizers and 5 main courses. Create a sample space showing all possible meal combinations (appetizer + main course). How many different meals can be ordered?",
+          "answer": "15 possible meals. The sample space contains all 15 combinations: A1-M1, A1-M2, ..., A3-M5",
+          "hint": "Use the multiplication principle: 3 appetizers × 5 main courses = 15 combinations."
+        },
+        {
+          "stem": "A survey asks students to choose their favorite color (Red, Blue, Green) and favorite sport (Soccer, Basketball). Draw a tree diagram showing the sample space and find the total number of possible outcomes.",
+          "answer": "6 outcomes; Sample space: (Red, Soccer), (Red, Basketball), (Blue, Soccer), (Blue, Basketball), (Green, Soccer), (Green, Basketball)",
+          "hint": "A tree diagram branches for each choice. Count the endpoints or multiply: 3 colors × 2 sports = 6."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A game involves rolling two dice (each showing 1-6). Find the size of the sample space. Then determine how many ways you can roll a sum of 7. Finally, find the probability of rolling a sum of 7. Show your work and explain your reasoning.",
+          "answer": "Sample space size = 36; Ways to roll 7 = 6 (1+6, 2+5, 3+4, 4+3, 5+2, 6+1); Probability = 6/36 = 1/6",
+          "hint": "First die has 6 outcomes, second die has 6 outcomes: 6 × 6 = 36. List all ways to make 7. Probability = favorable outcomes ÷ total outcomes."
+        },
+        {
+          "stem": "At a store, customers can buy items in 3 colors, 2 sizes, and 4 styles. A manager wants to understand all possible product variations. Find the total size of the sample space. If one variation is selected at random, what is the probability of selecting a blue item in size medium? (Assume blue and medium each represent 1/3 and 1/2 of options respectively.)",
+          "answer": "Total sample space = 24; Probability of blue and medium = (1/3) × (1/2) = 1/6, which equals 4/24 outcomes",
+          "hint": "Use the multiplication principle: 3 colors × 2 sizes × 4 styles = 24 outcomes. For probability, multiply the individual probabilities."
+        }
+      ]
+    },
+    "probability and experiments": {
+      "clusterKey": "statistics_6",
+      "primaryBenchmark": "6.4.1.2",
+      "benchmarkCodes": {
+        "CCSS": [
+          "6.SP.A.1",
+          "6.SP.A.2",
+          "6.SP.B.4",
+          "6.SP.B.5"
+        ],
+        "MN07": [
+          "6.4.1.1",
+          "6.4.1.2"
+        ],
+        "MN22": [
+          "6.DP.1.1",
+          "6.DP.1.2",
+          "6.DP.1.3"
+        ],
+        "TEKS": [
+          "6.12A",
+          "6.12B",
+          "6.12C",
+          "6.13A"
+        ]
+      },
+      "clusterLabel": "Statistics & Probability",
+      "dok1": [
+        {
+          "stem": "A bag contains 3 red marbles and 7 blue marbles. What is the probability of drawing a red marble?",
+          "answer": "3/10",
+          "hint": "Probability = favorable outcomes ÷ total outcomes. Count the red marbles and total marbles."
+        },
+        {
+          "stem": "A spinner is divided into 5 equal sections. One section is red. What is the probability of spinning red?",
+          "answer": "1/5",
+          "hint": "Since all sections are equal, probability = number of red sections ÷ total sections."
+        },
+        {
+          "stem": "A deck of cards has 52 cards: 26 red and 26 black. What is the probability of drawing a black card?",
+          "answer": "26/52 or 1/2",
+          "hint": "Probability = black cards ÷ total cards. Simplify the fraction."
+        }
+      ],
+      "dok2": [
+        {
+          "stem": "A box contains 5 orange candies, 3 green candies, and 2 red candies. You draw one candy at random. Find P(orange), P(green), P(red), and P(not green). Show your calculations.",
+          "answer": "P(orange) = 5/10 = 1/2; P(green) = 3/10; P(red) = 2/10 = 1/5; P(not green) = 7/10",
+          "hint": "Total candies = 5 + 3 + 2 = 10. For P(not green), count non-green candies or subtract P(green) from 1."
+        },
+        {
+          "stem": "You conduct an experiment: flip a coin 20 times. You get 12 heads and 8 tails. Compare the experimental probability of heads to the theoretical probability. Why might they differ?",
+          "answer": "Experimental P(heads) = 12/20 = 3/5 = 0.6; Theoretical P(heads) = 1/2 = 0.5; They differ due to random variation in a small sample.",
+          "hint": "Experimental probability comes from actual results. Theoretical is what we expect mathematically. With more trials, they usually get closer."
+        },
+        {
+          "stem": "A student rolls a die 30 times and records the results: 1 appears 4 times, 2 appears 5 times, 3 appears 6 times, 4 appears 4 times, 5 appears 5 times, 6 appears 6 times. Find the experimental probability of rolling a 3. Compare it to the theoretical probability.",
+          "answer": "Experimental P(3) = 6/30 = 1/5 = 0.2; Theoretical P(3) = 1/6 ≈ 0.167; Experimental is slightly higher.",
+          "hint": "Experimental probability = times 3 appears ÷ total rolls. Theoretical = 1 ÷ 6 for a fair die."
+        }
+      ],
+      "dok3": [
+        {
+          "stem": "A game uses two spinners: Spinner A has sections numbered 1, 2, 3 (equally likely), and Spinner B has sections labeled A, B, C, D (equally likely). You spin both and win if you get an odd number and a consonant. Find the theoretical probability of winning. Show the sample space and your reasoning.",
+          "answer": "P(odd and consonant) = P(1 or 3) × P(B or C) = (2/3) × (2/4) = (2/3) × (1/2) = 2/6 = 1/3",
+          "hint": "Find P(odd number on Spinner A). Find P(consonant on Spinner B). Multiply these independent probabilities."
+        },
+        {
+          "stem": "A school runs a raffle with 500 tickets. A student buys 5 tickets. Find the theoretical probability that the student wins the grand prize (assuming only 1 grand prize). Then explain how experimental probability might differ if the raffle is actually held. What factors would cause differences?",
+          "answer": "Theoretical P(win) = 5/500 = 1/100 = 0.01 or 1%; Experimental probability depends on actual outcome (either 0% if they don't win or 100% if they do). Differences occur due to random chance and the small sample size.",
+          "hint": "With only one trial (the actual raffle), experimental probability is 0 or 1. The theoretical 1% is the expected value over many such raffles."
         }
       ]
     }

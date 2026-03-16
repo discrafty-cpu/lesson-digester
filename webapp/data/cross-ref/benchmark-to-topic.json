@@ -5,7 +5,8 @@
     "migratedAt": "2026-03-16T02:47:27.546Z",
     "description": "Reverse map: benchmark code → cluster key. Plus DOK topic name → cluster key.",
     "totalCodes": 622,
-    "topicNameMappings": 15
+    "topicNameMappings": 48,
+    "updatedAt": "2026-03-16T03:01:16.032Z"
   },
   "byCode": {
     "K.CC.A.1": {
@@ -3815,6 +3816,171 @@
     "solve equations inequalities and systems": {
       "cluster": "linear_8",
       "primaryBenchmark": "8.2.3.1",
+      "grade": 8
+    },
+    "adding and subtracting fractions": {
+      "cluster": "fraction_5",
+      "primaryBenchmark": "5.1.2.1",
+      "grade": 5
+    },
+    "multiplying fractions": {
+      "cluster": "fraction_5",
+      "primaryBenchmark": "5.1.2.2",
+      "grade": 5
+    },
+    "dividing fractions": {
+      "cluster": "fraction_5",
+      "primaryBenchmark": "5.1.2.3",
+      "grade": 5
+    },
+    "decimals and place value": {
+      "cluster": "decimal_5",
+      "primaryBenchmark": "5.1.1.1",
+      "grade": 5
+    },
+    "order of operations and expressions": {
+      "cluster": "algebraic_thinking_5",
+      "primaryBenchmark": "5.2.1.1",
+      "grade": 5
+    },
+    "problem solving and estimation": {
+      "cluster": "fraction_6",
+      "primaryBenchmark": "6.1.1.1",
+      "grade": 6
+    },
+    "variables and representations": {
+      "cluster": "equation_6",
+      "primaryBenchmark": "6.2.1.1",
+      "grade": 6
+    },
+    "properties and equivalent expressions": {
+      "cluster": "equation_6",
+      "primaryBenchmark": "6.2.2.1",
+      "grade": 6
+    },
+    "represent and solve equations": {
+      "cluster": "equation_6",
+      "primaryBenchmark": "6.2.2.2",
+      "grade": 6
+    },
+    "measurement of polygons and prisms": {
+      "cluster": "area_6",
+      "primaryBenchmark": "6.3.1.1",
+      "grade": 6
+    },
+    "angles and intersecting lines": {
+      "cluster": "area_6",
+      "primaryBenchmark": "6.3.1.2",
+      "grade": 6
+    },
+    "angles in geometric figures": {
+      "cluster": "area_6",
+      "primaryBenchmark": "6.3.1.2",
+      "grade": 6
+    },
+    "converting and estimating measurements": {
+      "cluster": "ratio_6",
+      "primaryBenchmark": "6.1.2.3",
+      "grade": 6
+    },
+    "sample space": {
+      "cluster": "statistics_6",
+      "primaryBenchmark": "6.4.1.1",
+      "grade": 6
+    },
+    "probability and experiments": {
+      "cluster": "statistics_6",
+      "primaryBenchmark": "6.4.1.2",
+      "grade": 6
+    },
+    "rational numbers": {
+      "cluster": "rational number_7",
+      "primaryBenchmark": "7.1.2.1",
+      "grade": 7
+    },
+    "problem solving with rational numbers": {
+      "cluster": "rational number_7",
+      "primaryBenchmark": "7.1.2.2",
+      "grade": 7
+    },
+    "represent proportional relationships": {
+      "cluster": "proportion_7",
+      "primaryBenchmark": "7.2.1.1",
+      "grade": 7
+    },
+    "problem solving with proportions": {
+      "cluster": "proportion_7",
+      "primaryBenchmark": "7.2.2.1",
+      "grade": 7
+    },
+    "equations and inequalities": {
+      "cluster": "equation_7",
+      "primaryBenchmark": "7.2.3.1",
+      "grade": 7
+    },
+    "numerical and algebraic expressions": {
+      "cluster": "equation_7",
+      "primaryBenchmark": "7.2.3.1",
+      "grade": 7
+    },
+    "represent and solve equations grade 7": {
+      "cluster": "equation_7",
+      "primaryBenchmark": "7.2.3.2",
+      "grade": 7
+    },
+    "volume and surface area of cylinders": {
+      "cluster": "area_7",
+      "primaryBenchmark": "7.3.2.2",
+      "grade": 7
+    },
+    "translations and reflections": {
+      "cluster": "scale_7",
+      "primaryBenchmark": "7.3.1.2",
+      "grade": 7
+    },
+    "circle graphs and histograms": {
+      "cluster": "statistics_7",
+      "primaryBenchmark": "7.4.1.1",
+      "grade": 7
+    },
+    "probability and proportionality": {
+      "cluster": "probability_7",
+      "primaryBenchmark": "7.4.3.1",
+      "grade": 7
+    },
+    "integer exponents and scientific notation": {
+      "cluster": "scientific notation_8",
+      "primaryBenchmark": "8.1.2.1",
+      "grade": 8
+    },
+    "linear and nonlinear functions": {
+      "cluster": "function_8",
+      "primaryBenchmark": "8.2.2.1",
+      "grade": 8
+    },
+    "sequences and linear functions": {
+      "cluster": "function_8",
+      "primaryBenchmark": "8.2.2.2",
+      "grade": 8
+    },
+    "algebraic expressions": {
+      "cluster": "linear_8",
+      "primaryBenchmark": "8.2.1.1",
+      "grade": 8
+    },
+    "representations of linear equations": {
+      "cluster": "linear_8",
+      "primaryBenchmark": "8.2.1.2",
+      "grade": 8
+    },
+    "slope parallel and perpendicular lines": {
+      "cluster": "slope_8",
+      "primaryBenchmark": "8.2.2.1",
+      "grade": 8
+    },
+    "scatterplots and lines of best fit": {
+      "cluster": "scatter_8",
+      "primaryBenchmark": "8.4.1.1",
       "grade": 8
     }
   }
